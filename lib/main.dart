@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pim_project/view/screens/land_details_screen.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
       navigatorKey: _rootNavigatorKey,
       initialLocation: '/',
       routes: [
-        GoRoute(path: '/', builder: (context, state) => const LoginScreen())
+        GoRoute(path: '/', builder: (context, state) => const LandDetailsScreen())
       ]);
 
   // This widget is the root of your application.
