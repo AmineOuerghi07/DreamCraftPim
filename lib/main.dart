@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:pim_project/view/screens/home_screen.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
       navigatorKey: _rootNavigatorKey,
       initialLocation: '/',
       routes: [
+
         GoRoute(path: '/', builder: (context, state) => const HomeScreen())
       ]);
 
