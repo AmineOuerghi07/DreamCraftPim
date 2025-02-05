@@ -15,7 +15,6 @@ class PlantsGrid extends StatelessWidget {
       itemCount: 4,
       itemBuilder: (context, index) {
         return SizedBox(
-          height: 104,
           child: Card(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -26,7 +25,7 @@ class PlantsGrid extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Image(
-                    image: AssetImage("../assets/images/cherry.png"),
+                    image: AssetImage("assets/images/cherry.png"),
                     width: 100,
                     height: 100,
                   ),
@@ -37,7 +36,7 @@ class PlantsGrid extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                            horizontal: 12, vertical: 0),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(49, 228, 161, 85),
                           borderRadius: BorderRadius.circular(16),

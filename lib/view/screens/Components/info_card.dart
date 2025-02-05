@@ -18,7 +18,7 @@ class InfoCard extends StatelessWidget {
       child: Column(
         children: [
           Image(
-            image: AssetImage("../assets/images/$imageName"),
+            image: AssetImage("assets/images/$imageName"),
             width: 50,
             height: 50,
           ),

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:pim_project/components/Land_RegionsGrid.dart';
-import 'package:pim_project/components/plants_grid.dart';
-import 'package:pim_project/components/region_info.dart';
+import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
+import '';
+import 'package:pim_project/view/screens/components/plants_grid.dart';
+import 'package:pim_project/view/screens/components/region_info.dart';
 
-import '../../components/info_card.dart';
+import 'components/info_card.dart';
 
 class LandDetailsScreen extends StatelessWidget {
-  const LandDetailsScreen({super.key});
+  final String id;
+  const LandDetailsScreen({required this.id,super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +82,7 @@ class LandDetailsScreen extends StatelessWidget {
               Expanded(
                 child: TabBarView(
                   children: [
-                    LandRegionsgrid(),
+                    LandRegionsGrid(),
                     PlantsGrid(),
                   ],
                 ),
