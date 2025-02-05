@@ -5,6 +5,7 @@ class HomeCart extends StatelessWidget {
   final String location;
   final String description;
   final String imageUrl;
+  final String id;
   final VoidCallback onDetailsTap;
 
   const HomeCart({
@@ -12,6 +13,7 @@ class HomeCart extends StatelessWidget {
     required this.location,
     required this.description,
     required this.imageUrl,
+    required this.id,
     required this.onDetailsTap,
     Key? key,
   }) : super(key: key);
