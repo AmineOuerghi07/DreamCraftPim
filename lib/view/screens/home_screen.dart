@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/search_bar.dart'
 as custom;
@@ -120,13 +121,7 @@ class HomeScreen extends StatelessWidget {
                                           imageUrl: 'assets/images/LandDemo.png',
                                           id: "6952315ald2", // To be changed with the needed one from the database 
                                           onDetailsTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                const LandDetailsScreen(id: "6952315ald2"),
-                                              ),
-                                            );
+                                            GoRouter.of(context).push('/land-details/6952315ald2'); // passing the Static Id for now
                                           },
                                         ),
                                     );

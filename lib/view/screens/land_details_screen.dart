@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
-import '';
 import 'package:pim_project/view/screens/components/plants_grid.dart';
 import 'package:pim_project/view/screens/components/region_info.dart';
 
@@ -20,7 +20,7 @@ class LandDetailsScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => context.pop(),
           ),
           actions: [
             IconButton(
@@ -90,11 +90,7 @@ class LandDetailsScreen extends StatelessWidget {
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.add),
-        ),
+       
       ),
     );
   }
