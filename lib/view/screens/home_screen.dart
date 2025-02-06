@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
-import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
+import 'package:pim_project/view/screens/Components/search_bar.dart'
+as custom;
 import 'package:pim_project/view/screens/Components/home_cart.dart';
+import 'package:pim_project/view/screens/land_details_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {
     // Define the search controller
     final TextEditingController searchController = TextEditingController();
     final FocusNode searchFocusNode = FocusNode();
-        void _unfocus() {
+    void _unfocus() {
       if (searchFocusNode.hasFocus) {
         searchFocusNode.unfocus();
       }
@@ -23,110 +28,110 @@ class HomeScreen extends StatelessWidget {
         body: Column(
           children: [
             const Padding(padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12)),
-            Header(
-              profileImage: "assets/images/profile.png",
-              greetingText: "Haaa! ",
-              username: "Mahamed",
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Use your custom SearchBar
-                    custom.SearchBar(
-                      controller: searchController,
-                      focusNode: searchFocusNode,
-                      onFilterTap: () {
-                        // Handle filter button action
-                        print("Filter button tapped!");
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Need Our Help?",
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text("Feel free to contact our support for any troubles"),
-                                const SizedBox(height: 8),
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  child: const Text(
-                                    "Call Now",
-                                    style: TextStyle(fontSize: 12, color: Colors.white),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
+              Header(
+                profileImage: "assets/images/profile.png",
+                greetingText: "Haaa! ",
+                username: "Mahamed",
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Use your custom SearchBar
+                        custom.SearchBar(
+                          controller: searchController,
+                          focusNode: searchFocusNode,
+                          onFilterTap: () {
+                            // Handle filter button action
+                            print("Filter button tapped!");
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                            "Need Our Help?",
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(height: 8),
+                                            const Text("Feel free to contact our support for any troubles"),
+                                              const SizedBox(height: 8),
+                                                ElevatedButton(
+                                                  onPressed: () {},
+                                                  child: const Text(
+                                                      "Call Now",
+                                                      style: TextStyle(fontSize: 12, color: Colors.white),
+                                                    ),
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: Colors.green,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(4),
+                                                      ),
+                                                    ),
+                                                ),
+                                      ],
                                     ),
                                   ),
+                                  const SizedBox(width: 16),
+                                    Image.asset(
+                                      "assets/images/help.png",
+                                      fit: BoxFit.cover,
+                                    ),
+                                ],
+                              ),
+                          ),
+                          const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                Text(
+                                  "Your Greenhouses",
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  "12 Places",
+                                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Image.asset(
-                            "assets/images/help.png",
-                            fit: BoxFit.cover,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          "Your Greenhouses",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          "12 Places",
-                          style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                        ),
+                            const SizedBox(height: 4),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: 3,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                        child: HomeCart(
+                                          title: "Maze Cultivation",
+                                          location: "Sfax, Chaaleb",
+                                          description:
+                                          "Maze is a tropical plant which prefers warm humid weather.",
+                                          imageUrl: 'assets/images/LandDemo.png',
+                                          id: "6952315ald2", // To be changed with the needed one from the database 
+                                          onDetailsTap: () {
+                                            GoRouter.of(context).push('/land-details/6952315ald2'); // passing the Static Id for now
+                                          },
+                                        ),
+                                    );
+                                  },
+                                ),
+                              ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Expanded(
-                        child: ListView.builder(
-        itemCount: 3,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: HomeCart(
-              title: "Maze Cultivation",
-              location: "Sfax, Chaaleb",
-              description:
-                  "Maze is a tropical plant which prefers warm humid weather.",
-              imageUrl: 'assets/images/LandDemo.png',
-              onDetailsTap: () {
-                // Handle "Read Details" tap
-                print("Details for card $index tapped!");
-              },
-            ),
-          );
-        },
-      ),
-                    ),
-                  ],
                 ),
               ),
-            ),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(

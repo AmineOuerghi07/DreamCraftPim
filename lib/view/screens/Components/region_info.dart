@@ -67,7 +67,7 @@ class RegionInfo extends StatelessWidget {
             ),
             const Image(
               image: AssetImage(
-                  "../assets/images/google_maps_location_picker.png"),
+                  "assets/images/google_maps_location_picker.png"),
               width: 100,
               height: 100,
             ),
