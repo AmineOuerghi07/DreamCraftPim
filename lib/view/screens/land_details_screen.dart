@@ -79,7 +79,7 @@ class LandDetailsScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              Expanded(
+              const Expanded(
                 child: TabBarView(
                   children: [
                     LandRegionsGrid(),
