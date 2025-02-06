@@ -3,12 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/plants_grid.dart';
 import 'package:pim_project/view/screens/components/region_info.dart';
-
 import 'components/info_card.dart';
 
 class LandDetailsScreen extends StatelessWidget {
   final String id;
-  const LandDetailsScreen({required this.id,super.key});
+  const LandDetailsScreen({required this.id, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +33,12 @@ class LandDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             RegionInfo(
-               regionCount: "34",
-               cultivationType: "Maze Cultivation",
-               location: "Sfax, Chaaleb",
-               onAddRegion: () {
+              RegionInfo(
+                regionCount: "34",
+                cultivationType: "Maze Cultivation",
+                location: "Sfax, Chaaleb",
+                onAddRegion: () {
+                  GoRouter.of(context).push('/market_screen');
                 },
               ),
               const SizedBox(height: 16),
@@ -49,7 +49,7 @@ class LandDetailsScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12)),
                   elevation: 4,
                   margin: const EdgeInsets.all(12),
-                  child:const Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InfoCard(
@@ -90,7 +90,6 @@ class LandDetailsScreen extends StatelessWidget {
             ],
           ),
         ),
-       
       ),
     );
   }

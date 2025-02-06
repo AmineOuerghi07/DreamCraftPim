@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/home_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen.dart';
+import 'package:pim_project/view/screens/market_screen.dart';
 import 'package:pim_project/view/screens/region_details_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -13,8 +14,8 @@ final GlobalKey<NavigatorState> shellNavigatorKey =
 class RouteNames {
   static const String home = '/';
   static const String landDetails = '/land-details';
-   static const String RegionDetails = '/region-details';
-
+  static const String RegionDetails = '/region-details';
+  static const String Market = '/market_screen';
 }
 
 // Configure the GoRouter
@@ -28,6 +29,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const HomeScreen(),
     ),
 
+    GoRoute(
+      path: RouteNames.Market,
+      builder: (context, state) => const MarketScreen(),
+    ),
     // here exmple of  Land Details Route (accepting a parameter)
     GoRoute(
       path: '${RouteNames.landDetails}/:id',
