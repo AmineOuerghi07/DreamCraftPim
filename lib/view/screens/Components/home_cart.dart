@@ -81,7 +81,7 @@ class HomeCart extends StatelessWidget {
                   const SizedBox(height: 4),
                   ElevatedButton(
                     onPressed: onDetailsTap,
-                    child: const Text(
+                    child:  Text(
                       "Read Details",
                       style: TextStyle(fontSize: 12, color: Colors.white),
                     ),
