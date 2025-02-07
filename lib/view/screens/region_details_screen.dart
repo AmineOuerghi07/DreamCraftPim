@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pim_project/view/screens/Components/connect_to_bleutooth.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
+import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
 
 class RegionDetailsScreen extends StatelessWidget {
   final String id;
@@ -97,7 +97,7 @@ class RegionDetailsScreen extends StatelessWidget {
                   children: [
                     SmartRegionsGrid(),
                     // PlantsGrid(),
-                    ConnectToBleutooth(),
+                    ConnectToBluetooth(),
                   ],
                 ),
               ),
