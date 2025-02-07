@@ -38,7 +38,7 @@ class LandDetailsScreen extends StatelessWidget {
                 cultivationType: "Maze Cultivation",
                 location: "Sfax, Chaaleb",
                 onAddRegion: () {
-                  GoRouter.of(context).push('/market_screen');
+                  
                 },
               ),
               const SizedBox(height: 16),

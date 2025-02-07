@@ -21,7 +21,7 @@ class SmartRegionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFF204D4F), // Dark green color
+      color: switchValue ? const Color(0xFF204D4F) : Colors.grey,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

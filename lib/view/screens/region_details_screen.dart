@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/Components/connect_to_bleutooth.dart';
-import 'package:pim_project/view/screens/Components/info_card.dart';
-import 'package:pim_project/view/screens/Components/land_regionsGrid.dart';
-import 'package:pim_project/view/screens/Components/plants_grid.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';

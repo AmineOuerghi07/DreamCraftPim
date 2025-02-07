@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:pim_project/view/screens/Components/bottomNavigationBar.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
-import 'package:pim_project/view/screens/Components/home_cart.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
 
@@ -73,19 +72,7 @@ class MarketScreen extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.store), label: "Magasin"),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Regions"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-          ],
-          selectedItemColor: Colors.green,
-          unselectedItemColor: Colors.grey,
-          onTap: (index) {
-            // Add navigation logic here
-          },
-        ),
+        // bottomNavigationBar:const  BottomNavigationBarWidget(),
       ),
     );
   }
