@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pim_project/view/screens/Components/bottomNavigationBar.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';

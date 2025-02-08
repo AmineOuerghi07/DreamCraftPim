@@ -26,7 +26,7 @@ class RegionDetailInfocard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Image(
-                      image: AssetImage("../assets/images/$imageName"),
+                      image: AssetImage("assets/images/$imageName"),
                       width: 40,
                       height: 40,
                     ),

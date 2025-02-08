@@ -6,13 +6,13 @@ class PlantsForSell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300, // Fixed height for horizontal scrolling
+      height: 250, // Fixed height for horizontal scrolling
       child: ListView.builder(
         scrollDirection: Axis.horizontal, // Makes it scrollable horizontally
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         itemCount: 6, // Example: 6 cards
         itemBuilder: (context, index) => const Padding(
-          padding: EdgeInsets.only(right: 16),
+          padding: EdgeInsets.only(right: 8),
           child: PlantCard(),
         ),
       ),
@@ -28,10 +28,10 @@ class PlantCard extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Container(
-        width: 200, // Set a fixed width for each card
+        width: 170, // Set a fixed width for each card
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,8 +52,8 @@ class PlantCard extends StatelessWidget {
             Expanded(
               child: Center(
                 child: Image.asset(
-                  "../assets/images/pngwing.png", // Correct path for the asset
-                  height: 80,
+                  "assets/images/pngwing.png", 
+              
                   fit: BoxFit.contain,
                 ),
               ),
