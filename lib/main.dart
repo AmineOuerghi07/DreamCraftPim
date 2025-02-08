@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
+import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
+import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
@@ -13,7 +15,6 @@ import 'package:pim_project/view_model/signup_view_model.dart';
 import 'package:pim_project/view_model/verification_view_model.dart';
 import 'package:pim_project/view_model/welcome_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:pim_project/view/screens/login_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -25,13 +26,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-
-  final GoRouter _router = GoRouter(
-      navigatorKey: _rootNavigatorKey,
-      initialLocation: '/',
-      routes: [
-        GoRoute(path: '/', builder: (context, state) => const LoginScreen())
-      ]);
 
   // This widget is the root of your application.
   @override
@@ -62,6 +56,9 @@ class MyApp extends StatelessWidget {
               create: (context) => VerificationViewModel()),
           ChangeNotifierProvider<WelcomeViewModel>(
               create: (context) => WelcomeViewModel()),
+          ChangeNotifierProvider<BottomNavigationProvider>(
+              create: (context) => BottomNavigationProvider()),
+          ChangeNotifierProvider(create: (_) => SmartRegionsProvider()),
         ],
         child: Builder(builder: (context) {
           return MaterialApp.router(
@@ -69,7 +66,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
                 colorScheme:
                     ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
-            routerConfig: _router,
+            routerConfig: router,
           );
         }));
   }
