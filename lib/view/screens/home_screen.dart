@@ -168,7 +168,7 @@ class HorizontalCardList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 150, // Adjust height as needed
+      height: 200, // Adjust height as needed
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 5, // Replace with dynamic count if needed
@@ -183,7 +183,7 @@ class HorizontalCardList extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SizedBox(
-                width: 120,
+                width: 150,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -196,7 +196,6 @@ class HorizontalCardList extends StatelessWidget {
                           'assets/images/LandDemo.png', // Replace with your asset
                           fit: BoxFit.cover,
                           width: double.infinity,
-                          height: double.infinity,
                         ),
                       ),
                     ),
