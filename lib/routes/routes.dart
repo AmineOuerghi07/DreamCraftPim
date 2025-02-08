@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/home_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen.dart';
+import 'package:pim_project/view/screens/land_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
 import 'package:pim_project/view/screens/market_screen.dart';
 import 'package:pim_project/view/screens/region_details_screen.dart';
@@ -19,6 +20,7 @@ class RouteNames {
   static const String regionDetails = '/region-details';
   static const String profile = '/profile';
   static const String landDetails = '/land-details';
+  static const String land = '/land';
 }
 
 final GoRouter router = GoRouter(
@@ -43,6 +45,10 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: RouteNames.profile,
           builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: RouteNames.land,
+          builder: (context, state) => const LandScreen(),
         ),
       ],
     ),

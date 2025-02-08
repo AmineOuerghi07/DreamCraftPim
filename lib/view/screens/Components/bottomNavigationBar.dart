@@ -16,7 +16,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
             BottomNavigationBarItem(icon: Icon(Icons.store), label: "Market"),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Regions"),
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Lands"),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
           ],
           selectedItemColor: Colors.green,
@@ -32,7 +32,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                 context.go(RouteNames.market);
                 break;
               case 2:
-                context.go(RouteNames.regionDetails);
+                context.go(RouteNames.land);
                 break;
               case 3:
                 context.go(RouteNames.profile);
