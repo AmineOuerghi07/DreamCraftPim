@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
+import 'package:pim_project/ProviderClasses/market_provider.dart';
+import 'package:pim_project/ProviderClasses/quantity_provider.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
@@ -56,6 +58,8 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider<BottomNavigationProvider>(
               create: (context) => BottomNavigationProvider()),
           ChangeNotifierProvider(create: (_) => SmartRegionsProvider()),
+          ChangeNotifierProvider(create: (_) => QuantityProvider()),
+          ChangeNotifierProvider(create: (_) => MarketProvider()),
         ],
         child: Builder(builder: (context) {
           return MaterialApp.router(

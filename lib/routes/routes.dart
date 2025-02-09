@@ -14,6 +14,7 @@ import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
 import 'package:pim_project/view/screens/market_screen.dart';
 import 'package:pim_project/view/screens/phone_verification_screen.dart';
+import 'package:pim_project/view/screens/product_details_screen.dart';
 import 'package:pim_project/view/screens/region_details_screen.dart';
 import 'package:pim_project/view/screens/profile_screen.dart';
 import 'package:pim_project/view/screens/reset_password_screen.dart';
@@ -42,6 +43,7 @@ class RouteNames {
   static const String phoneNumberScreen = '/phone-number';
   static const String oTPVerification = '/otp-verification';
 
+  static const String productDetails = '/product-details';
 }
 
 final GoRouter router = GoRouter(
@@ -119,6 +121,13 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return RegionDetailsScreen(id: id);
+      },
+    ),
+    GoRoute(
+      path: '${RouteNames.productDetails}/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return ProductDetailsScreen(id: id);
       },
     ),
   ],
