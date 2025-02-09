@@ -3,10 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 
 class EmailVerificationScreen extends StatelessWidget {
-  const EmailVerificationScreen({super.key});
+  const EmailVerificationScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController _emailController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -15,17 +17,14 @@ class EmailVerificationScreen extends StatelessWidget {
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
-        // Ensures content stays within visible screen
         child: SingleChildScrollView(
-          // Prevents overflow when keyboard appears
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(
-                      height: 80), // Adjusted top padding for centering
+                  const SizedBox(height: 80),
                   Text(
                     "Forget Password",
                     style: GoogleFonts.roboto(
@@ -45,6 +44,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       hintText: "Email",
                       hintStyle: GoogleFonts.roboto(
@@ -72,10 +72,22 @@ class EmailVerificationScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
+                        String email = _emailController.text;
+                        /*if (email.isEmpty || !email.contains('@')) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Please enter a valid email address')),
+                          );
+                          return;
+                        }
+*/
+                        // Proceed to OTP screen after email validation
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => OTPVerificationScreen()),
+                            builder: (context) => OTPVerificationScreen(),
+                          ),
                         );
                       },
                       child: Text(
@@ -88,9 +100,7 @@ class EmailVerificationScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  const SizedBox(
-                      height: 80), // Adjusted bottom padding for centering
+                  const SizedBox(height: 80),
                 ],
               ),
             ),

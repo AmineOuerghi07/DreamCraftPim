@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pim_project/view/screens/login_screen.dart';
+import 'package:pim_project/view/screens/phone_verification_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pim_project/routes/routes.dart'; 
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -135,14 +138,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
                 minimumSize: const Size(double.infinity, 50),
               ),
-              onPressed: () {
-                _resetPassword();
-                // Navigate to LoginScreen after saving
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
-              },
+         onPressed: () {
+  _resetPassword(); // Exécute la fonction de réinitialisation du mot de passe
+  context.go(RouteNames.login); // Navigue directement vers l'écran de connexion
+},
+
+              
               child: const Text(
                 "Save",
                 style: TextStyle(color: Colors.white, fontSize: 16),

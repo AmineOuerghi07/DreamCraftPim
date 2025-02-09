@@ -12,7 +12,6 @@ import 'package:pim_project/view_model/profile_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:pim_project/view_model/reset_password_view_model.dart';
 import 'package:pim_project/view_model/signup_view_model.dart';
-import 'package:pim_project/view_model/verification_view_model.dart';
 import 'package:pim_project/view_model/welcome_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -52,8 +51,6 @@ class MyApp extends StatelessWidget {
               create: (context) => ResetPasswordViewModel()),
           ChangeNotifierProvider<SignupViewModel>(
               create: (context) => SignupViewModel()),
-          ChangeNotifierProvider<VerificationViewModel>(
-              create: (context) => VerificationViewModel()),
           ChangeNotifierProvider<WelcomeViewModel>(
               create: (context) => WelcomeViewModel()),
           ChangeNotifierProvider<BottomNavigationProvider>(

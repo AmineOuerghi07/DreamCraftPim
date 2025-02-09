@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:pim_project/view/screens/phone_verification_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pim_project/routes/routes.dart'; 
 
 class PhoneNumberScreen extends StatelessWidget {
   const PhoneNumberScreen({super.key});
@@ -68,13 +70,18 @@ class PhoneNumberScreen extends StatelessWidget {
                 backgroundColor: const Color(0xFF3E754E),
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => PhoneVerificationScreen()),
-                );
-              },
+              
+                 onPressed: () {
+                  /*Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ResetPasswordScreen()),
+                  );
+                  */
+                  context.go(RouteNames.phoneVerification);
+            },
+                
+              
               child: const Center(
                 child: Text(
                   "Send",
