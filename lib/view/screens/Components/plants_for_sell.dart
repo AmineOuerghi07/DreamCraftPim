@@ -58,7 +58,7 @@ class PlantCard extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    "../assets/images/pngwing.png", // Correct path for the asset
+                    "assets/images/pngwing.png", // Correct path for the asset
                     height: 80,
                     fit: BoxFit.contain,
                   ),

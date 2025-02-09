@@ -4,16 +4,16 @@ import 'package:go_router/go_router.dart';
 class CategoryGrid extends StatelessWidget {
   CategoryGrid({super.key});
   final List<String> imageNames = [
-    "../assets/images/Group514.png",
-    "../assets/images/category2.png",
-    "../assets/images/Group514.png",
-    "../assets/images/Group514.png",
-    "../assets/images/Group514.png",
-    "../assets/images/Group514.png",
-    "../assets/images/Group514.png",
-    "../assets/images/Group514.png",
-    "../assets/images/Group514.png",
-    "../assets/images/Group514.png",
+    "assets/images/Group514.png",
+    "assets/images/category2.png",
+    "assets/images/Group514.png",
+    "assets/images/Group514.png",
+    "assets/images/Group514.png",
+    "assets/images/Group514.png",
+    "assets/images/Group514.png",
+    "assets/images/Group514.png",
+    "assets/images/Group514.png",
+    "assets/images/Group514.png",
   ];
   @override
   Widget build(BuildContext context) {
