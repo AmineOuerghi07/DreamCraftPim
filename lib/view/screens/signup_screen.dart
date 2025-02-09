@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pim_project/routes/routes.dart'; 
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -149,8 +151,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
-                    },
+                         context.go(RouteNames.login);                    },
                     child: Text(
                       "Sign in",
                       style: GoogleFonts.roboto(

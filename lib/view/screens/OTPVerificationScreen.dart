@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/view/screens/reset_password_screen.dart';
 import 'package:pinput/pinput.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pim_project/routes/routes.dart'; 
 
 class OTPVerificationScreen extends StatelessWidget {
   const OTPVerificationScreen({super.key});
@@ -65,13 +67,16 @@ class OTPVerificationScreen extends StatelessWidget {
                 backgroundColor: const Color(0xFF3E754E),
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ResetPasswordScreen()),
-                );
-              },
+             onPressed: () {
+                  /*Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ResetPasswordScreen()),
+                  );
+                  */
+                  context.go(RouteNames.resetPassword);
+                                  },
+              
               child: const Center(
                 child: Text(
                   "Next",
