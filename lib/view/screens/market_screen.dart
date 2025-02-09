@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pim_project/ProviderClasses/market_provider.dart';
+import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
+import 'package:provider/provider.dart';
 
 class MarketScreen extends StatelessWidget {
   const MarketScreen({super.key});
@@ -40,6 +43,7 @@ class MarketScreen extends StatelessWidget {
                       controller: searchController,
                       focusNode: searchFocusNode,
                       onFilterTap: () {
+                        context.read<MarketProvider>().toggleFilter();
                         print("Filter button tapped!");
                       },
                     ),
@@ -47,31 +51,40 @@ class MarketScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ListView.builder(
-                    itemCount: 6, // Ensure this is a valid list length
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CategorySeeallbutton(navigateSeeAll: () {}),
-                            const SizedBox(height: 8),
-                            PlantsForSell()
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
+              Consumer<MarketProvider>(
+                builder: (context, provider, _) {
+                  return provider.isFilterActive
+                      ?  CategoryGrid() // Replace with your filter component
+                      : Expanded(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ListView.builder(
+                              itemCount:
+                                  6, // Ensure this is a valid list length
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      CategorySeeallbutton(
+                                          navigateSeeAll: () {}),
+                                      const SizedBox(height: 8),
+                                      PlantsForSell()
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                },
               ),
             ],
           ),
         ),
-        // bottomNavigationBar:const  BottomNavigationBarWidget(),
       ),
     );
   }
