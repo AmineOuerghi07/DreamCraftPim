@@ -74,7 +74,7 @@ class OTPVerificationScreen extends StatelessWidget {
                         builder: (context) => ResetPasswordScreen()),
                   );
                   */
-                  context.go(RouteNames.resetPassword);
+                  context.push(RouteNames.resetPassword);
                                   },
               
               child: const Center(

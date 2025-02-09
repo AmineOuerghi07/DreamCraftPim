@@ -140,7 +140,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
          onPressed: () {
   _resetPassword(); // Exécute la fonction de réinitialisation du mot de passe
-  context.go(RouteNames.login); // Navigue directement vers l'écran de connexion
+  context.push(RouteNames.login); // Navigue directement vers l'écran de connexion
 },
 
               
