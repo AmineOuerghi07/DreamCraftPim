@@ -151,7 +151,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () {
-                         context.go(RouteNames.login);                    },
+                         context.push(RouteNames.login);                    },
                     child: Text(
                       "Sign in",
                       style: GoogleFonts.roboto(

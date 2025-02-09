@@ -93,7 +93,7 @@ class PhoneVerificationScreen extends StatelessWidget {
                         builder: (context) => ResetPasswordScreen()),
                   );
                   */
-                  context.go(RouteNames.resetPassword);
+                  context.push(RouteNames.resetPassword);
                                   },
                 
             

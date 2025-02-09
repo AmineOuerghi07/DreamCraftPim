@@ -32,7 +32,7 @@ class ProductDetailsScreen extends StatelessWidget {
           children: [
             Center(
               child: Image.asset(
-                '../assets/images/limeTree.png',
+                'assets/images/limeTree.png',
                 height: 200,
               ),
             ),
@@ -157,7 +157,7 @@ class ProductDetailsScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.only(right: 8),
-                    child: Image.asset('../assets/images/pepper.png'),
+                    child: Image.asset('assets/images/pepper.png'),
                   );
                 },
               ),
