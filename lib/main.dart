@@ -16,13 +16,21 @@ import 'package:pim_project/view_model/reset_password_view_model.dart';
 import 'package:pim_project/view_model/signup_view_model.dart';
 import 'package:pim_project/view_model/welcome_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
 final GlobalKey<NavigatorState> _shellNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'shell');
 void main() {
-  runApp(MyApp());
+ WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
