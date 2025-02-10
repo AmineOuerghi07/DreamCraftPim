@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pim_project/model/repositories/email_verification_screen.dart';
-import 'package:pim_project/model/services/email_verification_screen.dart';
-import 'package:pim_project/model/services/phone_verification_screen.dart';
+
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
