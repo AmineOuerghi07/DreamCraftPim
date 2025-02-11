@@ -5,10 +5,12 @@ class CameraProvider with ChangeNotifier {
   late CameraController _cameraController;
   bool _isInitialized = false;
   bool _isFlashOn = false;
+  double _zoomLevel = 1.0; // Default zoom level
 
   CameraController get cameraController => _cameraController;
   bool get isInitialized => _isInitialized;
   bool get isFlashOn => _isFlashOn;
+  double get zoomLevel => _zoomLevel;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -56,18 +58,35 @@ class CameraProvider with ChangeNotifier {
     }
   }
 
+  Future<void> setZoomLevel(double zoomLevel) async {
+    if (!_isInitialized) return;
+
+    try {
+      // Ensure the zoom level is within the supported range
+      final minZoom = await _cameraController.getMinZoomLevel();
+      final maxZoom = await _cameraController.getMaxZoomLevel();
+      _zoomLevel = zoomLevel.clamp(minZoom, maxZoom);
+
+      await _cameraController.setZoomLevel(_zoomLevel);
+      notifyListeners();
+    } catch (e) {
+      print("Failed to set zoom level: $e");
+    }
+  }
+
   void reset() {
     if (_isInitialized) {
-      _cameraController.dispose(); // Dispose the controller
+      _cameraController.dispose();
       _isInitialized = false;
       _isFlashOn = false;
+      _zoomLevel = 1.0; // Reset zoom level
       notifyListeners();
     }
   }
 
   @override
   void dispose() {
-    reset(); // Ensure reset is called when provider is disposed
+    reset();
     super.dispose();
   }
 }
