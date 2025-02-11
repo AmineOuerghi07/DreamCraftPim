@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
+import 'package:pim_project/view/screens/camera_screen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
 import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:pim_project/view/screens/home_screen.dart';
@@ -40,9 +41,12 @@ class RouteNames {
   static const String phoneVerification = '/phone-verification';
   static const String phoneNumberScreen = '/phone-number';
   static const String oTPVerification = '/otp-verification';
-
+  static const String camera = '/camera' ;
   static const String productDetails = '/product-details';
 }
+
+
+
 
 final GoRouter router = GoRouter(
   navigatorKey: rootNavigatorKey,
@@ -127,6 +131,11 @@ final GoRouter router = GoRouter(
         final id = state.pathParameters['id']!;
         return ProductDetailsScreen(id: id);
       },
+    ),
+       GoRoute(
+      path: RouteNames.camera,
+      builder: (context, state) => const CameraScreen(),
+      
     ),
   ],
 );

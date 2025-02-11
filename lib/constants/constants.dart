@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const String baseURL = "http://127.0.0.1:3000/api";
+const String plantIllnessBaseURL = "http://127.0.0.1:8000/";
 class AppConstants {
   static const double padding = 16.0;
   static const double margin = 12.0;

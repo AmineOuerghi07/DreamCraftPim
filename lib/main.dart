@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
+import 'package:pim_project/ProviderClasses/camera_provider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/ProviderClasses/quantity_provider.dart';
 import 'package:pim_project/routes/routes.dart';
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => SmartRegionsProvider()),
           ChangeNotifierProvider(create: (_) => QuantityProvider()),
           ChangeNotifierProvider(create: (_) => MarketProvider()),
+          ChangeNotifierProvider(create: (_)=> CameraProvider())
         ],
         child: Builder(builder: (context) {
           return MaterialApp.router(
