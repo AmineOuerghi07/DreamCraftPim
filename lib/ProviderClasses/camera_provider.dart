@@ -5,12 +5,17 @@ class CameraProvider with ChangeNotifier {
   late CameraController _cameraController;
   bool _isInitialized = false;
   bool _isFlashOn = false;
-  double _zoomLevel = 1.0; // Default zoom level
+  double _zoomLevel = 0.0; // Default zoom level
+  double _minZoom = 0.0;
+  double _maxZoom = 1.0;
 
+  // Getters to access private fields
   CameraController get cameraController => _cameraController;
   bool get isInitialized => _isInitialized;
   bool get isFlashOn => _isFlashOn;
   double get zoomLevel => _zoomLevel;
+  double get minZoom => _minZoom;
+  double get maxZoom => _maxZoom;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -26,6 +31,13 @@ class CameraProvider with ChangeNotifier {
         ResolutionPreset.medium,
       );
       await _cameraController.initialize();
+
+      // Cache the min and max zoom levels from the camera controller
+      _minZoom = await _cameraController.getMinZoomLevel();
+      _maxZoom = await _cameraController.getMaxZoomLevel();
+      // Start with the minimum zoom (usually 1.0)
+      _zoomLevel = _minZoom;
+
       _isInitialized = true;
       notifyListeners();
     } catch (e) {
@@ -62,11 +74,8 @@ class CameraProvider with ChangeNotifier {
     if (!_isInitialized) return;
 
     try {
-      // Ensure the zoom level is within the supported range
-      final minZoom = await _cameraController.getMinZoomLevel();
-      final maxZoom = await _cameraController.getMaxZoomLevel();
-      _zoomLevel = zoomLevel.clamp(minZoom, maxZoom);
-
+      // Use cached min and max zoom values
+      _zoomLevel = zoomLevel.clamp(_minZoom, _maxZoom);
       await _cameraController.setZoomLevel(_zoomLevel);
       notifyListeners();
     } catch (e) {
