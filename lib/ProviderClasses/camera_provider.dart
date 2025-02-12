@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:pim_project/view_model/prediction_view_model.dart';
+import 'package:provider/provider.dart';
 
 class CameraProvider with ChangeNotifier {
   late CameraController _cameraController;
@@ -8,6 +12,10 @@ class CameraProvider with ChangeNotifier {
   double _zoomLevel = 0.0; // Default zoom level
   double _minZoom = 0.0;
   double _maxZoom = 1.0;
+  final PredictionViewModel _predictionViewModel;
+  File? _capturedImage; // Store captured image
+
+  CameraProvider({required PredictionViewModel predictionViewModel}) : _predictionViewModel = predictionViewModel;
 
   // Getters to access private fields
   CameraController get cameraController => _cameraController;
@@ -16,6 +24,7 @@ class CameraProvider with ChangeNotifier {
   double get zoomLevel => _zoomLevel;
   double get minZoom => _minZoom;
   double get maxZoom => _maxZoom;
+  File? get capturedImage => _capturedImage; // Getter for the image
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -59,17 +68,25 @@ class CameraProvider with ChangeNotifier {
     }
   }
 
-  Future<void> takePicture() async {
-    if (!_isInitialized) return;
+Future<void> takePicture() async {
+  if (!_isInitialized) return;
 
-    try {
-      final image = await _cameraController.takePicture();
-      print("Picture saved: ${image.path}");
-    } catch (e) {
-      print("Failed to take picture: $e");
+  try {
+    final image = await _cameraController.takePicture();
+    print("Picture saved: ${image.path}");
+    _capturedImage = File(image.path);
+    notifyListeners();
+
+    if (_predictionViewModel != null) {
+      final response = await _predictionViewModel.predictImage(_capturedImage!);
+      print("Prediction Response: $response"); // Log the entire response object
+    } else {
+      print("PredictionViewModel is null");
     }
+  } catch (e) {
+    print("Failed to take picture: $e");
   }
-
+}
   Future<void> setZoomLevel(double zoomLevel) async {
     if (!_isInitialized) return;
 
@@ -84,13 +101,12 @@ class CameraProvider with ChangeNotifier {
   }
 
   void reset() {
-    if (_isInitialized) {
       _cameraController.dispose();
       _isInitialized = false;
       _isFlashOn = false;
       _zoomLevel = 1.0; // Reset zoom level
+      _capturedImage=null;
       notifyListeners();
-    }
   }
 
   @override

@@ -2,29 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
 import 'package:pim_project/ProviderClasses/camera_provider.dart';
+import 'package:pim_project/model/repositories/prediction_repository.dart';
 import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view_model/prediction_view_model.dart';
 import 'package:provider/provider.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
   const BottomNavigationBarWidget({super.key});
 Future<void> _openCamera(BuildContext context) async {
   try {
-    final cameraService = CameraProvider();
+    final cameraService = context.read<CameraProvider>();
+    print("Initializing Camera...");
+
+    // Attempt to initialize the camera
     await cameraService.initialize();
-    // Navigate only after successful initialization
+
+    // Check if the camera is initialized
     if (cameraService.isInitialized) {
+      print("Camera Initialized: ${cameraService.isInitialized}");
+      print("Navigating to Camera Screen...");
       context.push(RouteNames.camera, extra: cameraService);
     } else {
-      throw Exception('Camera initialization failed');
+      // Throw an exception if the camera is not initialized
+      throw Exception('Camera initialization failed: Camera is not initialized.');
     }
   } catch (e) {
+    // Handle the error and display a user-friendly message
     print("Error opening camera: $e");
+
+    // Show a SnackBar with the error message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to initialize the camera.')),
+      SnackBar(
+        content: Text(
+          e.toString().replaceAll('Exception: ', ''), // Remove "Exception: " from the message
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red, // Red background for error messages
+        duration: Duration(seconds: 3), // Display for 3 seconds
+      ),
     );
   }
 }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<BottomNavigationProvider>(
