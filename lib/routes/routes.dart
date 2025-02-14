@@ -9,6 +9,7 @@ import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:pim_project/view/screens/home_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen.dart';
 import 'package:pim_project/view/screens/land_screen.dart';
+import 'package:pim_project/view/screens/loading_screen.dart';
 import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
 import 'package:pim_project/view/screens/market_screen.dart';
@@ -43,6 +44,8 @@ class RouteNames {
   static const String oTPVerification = '/otp-verification';
   static const String camera = '/camera' ;
   static const String productDetails = '/product-details';
+    static const String loading_screen= '/loading_screen';
+
 }
 
 
@@ -91,6 +94,10 @@ final GoRouter router = GoRouter(
           path: RouteNames.forgetPassword,
           builder: (context, state) =>  const ForgotPasswordScreen(),
         ),
+           GoRoute(
+          path: RouteNames.loading_screen,
+          builder: (context, state) =>  const LoadingAnimationScreen(),
+        ),
         GoRoute(
           path: RouteNames.resetPassword,
           builder: (context, state) =>  const ResetPasswordScreen(),
@@ -118,6 +125,7 @@ final GoRouter router = GoRouter(
         return LandDetailsScreen(id: id);
       },
     ),
+    
     GoRoute(
       path: '${RouteNames.regionDetails}/:id',
       builder: (context, state) {

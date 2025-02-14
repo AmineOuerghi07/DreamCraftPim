@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:pim_project/ProviderClasses/camera_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pim_project/routes/routes.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:pim_project/view_model/prediction_view_model.dart';
 import 'package:provider/provider.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -11,254 +15,252 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver {
-  CameraProvider? _cameraProvider;
+  CameraController? _controller;
+  File? _pickedImage;
+  bool _isFlashOn = false;
+  double _currentZoom = 1.0;
+  bool _isInitialized = false;
+  double _minZoom = 1.0;
+  double _maxZoom = 1.0;
+  double _initialScale = 1.0;
+  double _startingZoom = 1.0;
+  String _zoomStatus = ''; // Indicator for zoom status
   final TransformationController _transformationController = TransformationController();
-  double _currentZoomLevel = 1.0; // Current zoom level
-  double _baseScale = 1.0; // Base scale for pinch-to-zoom
-  int _pointers = 0; // Number of active pointers
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _cameraProvider = Provider.of<CameraProvider>(context, listen: false);
-    _cameraProvider?.initialize(); // Initialize camera in provider
+    _initializeCamera();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _cameraProvider?.dispose(); // Dispose of the CameraProvider
+    _controller?.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      // Pause the camera when the app is paused
-      _cameraProvider?.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      // Reinitialize the camera when the app is resumed
-      _cameraProvider?.initialize();
-    }
-  }
-
-  void _handleScaleStart(ScaleStartDetails details) {
-    _baseScale = _currentZoomLevel;
-    debugPrint("Scale start: base scale = $_baseScale");
-  }
-
-  void _handleScaleUpdate(ScaleUpdateDetails details) {
-    double newZoomLevel = _baseScale * details.scale;
-    newZoomLevel = newZoomLevel.clamp(_cameraProvider!.minZoom, _cameraProvider!.maxZoom);
-    debugPrint("Scale update: details.scale = ${details.scale}, newZoomLevel = $newZoomLevel");
-    _setZoomLevel(newZoomLevel);
-  }
-
-  void _setZoomLevel(double zoom) {
-    if (!_cameraProvider!.isInitialized) {
-      debugPrint("Camera not initialized");
-      return;
-    }
-    debugPrint("Camera min zoom: ${_cameraProvider!.minZoom}, max zoom: ${_cameraProvider!.maxZoom}");
-
-    final double clampedZoom = zoom.clamp(_cameraProvider!.minZoom, _cameraProvider!.maxZoom);
-    debugPrint("Clamped zoom level: $clampedZoom");
-
-    if (clampedZoom != _currentZoomLevel) {
-      setState(() {
-        _currentZoomLevel = clampedZoom;
-      });
-      _cameraProvider!.setZoomLevel(_currentZoomLevel); // Apply the zoom level
-      debugPrint("Zoom updated: $_currentZoomLevel");
-      _transformationController.value = Matrix4.identity()..scale(_currentZoomLevel);
-    }
-  }
-
-  // Optional: tap-to-focus using LayoutBuilder constraints
-  void onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
-    final offset = Offset(
-      details.localPosition.dx / constraints.maxWidth,
-      details.localPosition.dy / constraints.maxHeight,
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final backCamera = cameras.firstWhere(
+      (c) => c.lensDirection == CameraLensDirection.back,
     );
-    _cameraProvider!.cameraController.setFocusPoint(offset);
+
+    _controller = CameraController(
+      backCamera,
+      ResolutionPreset.medium,
+    );
+
+    try {
+      await _controller!.initialize();
+      _minZoom = await _controller!.getMinZoomLevel();
+      _maxZoom = await _controller!.getMaxZoomLevel();
+
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+          _currentZoom = _minZoom;
+        });
+      }
+    } catch (e) {
+      debugPrint("Camera error: $e");
+    }
+  }
+
+  // Handle the start of a scale gesture
+  void _handleScaleStart(ScaleStartDetails details) {
+    _initialScale = _currentZoom;  // Save the initial zoom
+    _startingZoom = _currentZoom;  // Save the starting zoom level for reference
+  }
+
+  // Handle the scaling of the pinch gesture
+  void _handleScaleUpdate(ScaleUpdateDetails details) {
+    if (_controller == null || !_isInitialized) return;
+
+    // Calculate the scale factor (how much the user has scaled)
+    final double scaleFactor = details.scale;
+
+    // Compute the new zoom level by multiplying the initial zoom by the scale factor
+    double newZoom = _startingZoom * scaleFactor;
+
+    // Apply zoom constraints to make sure the zoom doesn't go below the minimum or above the maximum
+    newZoom = newZoom.clamp(_minZoom, _maxZoom);
+
+    // Determine whether the user is zooming in or out
+    String zoomStatus = newZoom > _currentZoom ? 'Zooming In' : 'Zooming Out';
+
+    // Only update the zoom if it's different from the current zoom
+    if (newZoom != _currentZoom) {
+      setState(() {
+        _currentZoom = newZoom;
+        _zoomStatus = zoomStatus;  // Update the zoom status
+      });
+
+      // Update the zoom level on the camera
+      _controller!.setZoomLevel(_currentZoom);
+    }
+  }
+
+  // Zoom in by increasing the zoom level
+  void _zoomIn() {
+    final double newZoom = (_currentZoom + 0.5).clamp(_minZoom, _maxZoom);
+    _updateZoom(newZoom);
+  }
+
+  // Zoom out by decreasing the zoom level
+  void _zoomOut() {
+    final double newZoom = (_currentZoom - 0.5).clamp(_minZoom, _maxZoom);
+    _updateZoom(newZoom);
+  }
+
+  // Update the zoom level of the camera
+  void _updateZoom(double newZoom) {
+    if (_controller == null || !_isInitialized) return;
+
+    setState(() {
+      _currentZoom = newZoom;
+    });
+
+    // Update the camera zoom
+    _controller!.setZoomLevel(_currentZoom);
+  }
+
+  Future<void> _toggleFlash() async {
+    if (!_isInitialized) return;
+    setState(() => _isFlashOn = !_isFlashOn);
+    await _controller!.setFlashMode(_isFlashOn ? FlashMode.torch : FlashMode.off);
+  }
+
+  Future<void> _takePhoto() async {
+    if (!_isInitialized) return;
+    try {
+      final image = await _controller!.takePicture();
+      _handleImageProcessing(File(image.path));
+    } catch (e) {
+      debugPrint("Photo error: $e");
+    }
+  }
+
+  Future<void> _pickFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      _handleImageProcessing(File(pickedFile.path));
+    }
+  }
+
+  Future<void> _handleImageProcessing(File image) async {
+    context.push(RouteNames.loading_screen);
+
+    // Simulate image processing
+    await Future.delayed(const Duration(seconds: 2));
+
+    context.pop();
+    final predictionViewModel = Provider.of<PredictionViewModel>(context, listen: false);
+    final response = await predictionViewModel.predictImage(image);
+    _showResultDialog(image , response.data!);
+  }
+
+  void _showResultDialog(File image,String response) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Processing Result'),
+        content: Column(
+          children: [
+            Image.file(image),
+            Text('Prediction: ${response}'),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_cameraProvider == null || !_cameraProvider!.isInitialized) {
+    if (!_isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Scaffold(
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          return Consumer<CameraProvider>(
-            builder: (context, cameraProvider, child) {
-              if (!cameraProvider.isInitialized) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    // Get screen size
+    final screenSize = MediaQuery.of(context).size;
 
-              return Listener(
-                onPointerDown: (_) => _pointers++,
-                onPointerUp: (_) => _pointers--,
-                child: Stack(
-                  children: [
-                    // Square (aspectRatio 1) camera preview with pinch-to-zoom and tap-to-focus
-                    Positioned.fill(
-                      child: LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
-                          return GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onScaleStart: (details) {
-                              debugPrint("Scale started");
-                              _handleScaleStart(details);
-                            },
-                            onScaleUpdate: (details) {
-                              debugPrint("Scale updated: ${details.scale}");
-                              _handleScaleUpdate(details);
-                            },
-                            onTapDown: (details) {
-                              debugPrint("Tap detected");
-                              onViewFinderTap(details, constraints);
-                            },
-                            child: InteractiveViewer(
-                              transformationController: _transformationController,
-                              panEnabled: false, // Disable panning for this use case
-                              minScale: _cameraProvider!.minZoom,
-                              maxScale: _cameraProvider!.maxZoom,
-                              onInteractionStart: (details) {
-                                _baseScale = _currentZoomLevel;
-                              },
-                              onInteractionUpdate: (details) {
-                                final newZoomLevel = _baseScale * details.scale;
-                                _setZoomLevel(newZoomLevel);
-                              },
-                              child: AspectRatio(
-                                aspectRatio: 1.0,
-                                child: ClipRect(
-                                  child: FittedBox(
-                                    fit: BoxFit.cover,
-                                    child: SizedBox(
-                                      width: cameraProvider.cameraController.value.previewSize?.height ?? 0,
-                                      height: cameraProvider.cameraController.value.previewSize?.width ?? 0,
-                                      child: CameraPreview(cameraProvider.cameraController),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                    // Overlay Frame for Scanning (Transparent)
-                    Center(
-                      child: Transform.scale(
-                        scale: _currentZoomLevel,
-                        child: IgnorePointer(
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.green.withOpacity(0.5),
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Instructions (Transparent Background)
-                    Positioned(
-                      bottom: orientation == Orientation.portrait ? 120 : 20,
-                      left: 20,
-                      right: 20,
-                      child: IgnorePointer(
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'Place the infected plant inside the frame for scanning.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Flash Toggle Button (Transparent Background)
-                    Positioned(
-                      top: 40,
-                      right: 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            cameraProvider.isFlashOn ? Icons.flash_on : Icons.flash_off,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                          onPressed: () {
-                            cameraProvider.toggleFlash();
-                          },
-                        ),
-                      ),
-                    ),
-
-                    // Gallery Button (Transparent Background)
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.photo_library,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                          onPressed: () {
-                            // Open gallery to view previously taken pictures
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+   return Scaffold(
+  body: GestureDetector(
+    onScaleStart: _handleScaleStart,
+    onScaleUpdate: _handleScaleUpdate,
+    child: Stack(
+      children: [
+        // AspectRatio widget to enforce 1:1 aspect ratio for the camera preview
+        Positioned.fill(
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: OverflowBox(
+              alignment: Alignment.center,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller!.value.previewSize != null
+                      ? _controller!.value.previewSize!.height
+                      : MediaQuery.of(context).size.width,
+                  height: _controller!.value.previewSize != null
+                      ? _controller!.value.previewSize!.width
+                      : MediaQuery.of(context).size.width,
+                  child: CameraPreview(_controller!),
                 ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Consumer<CameraProvider>(
-        builder: (context, cameraProvider, child) {
-          return FloatingActionButton(
-            onPressed: () async {
-              await cameraProvider.takePicture();
-            },
+              ),
+            ),
+          ),
+        ),
+        Center(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: 200 * _currentZoom,
+            height: 200 * _currentZoom,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.green.withOpacity(0.5)),
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        // Gallery icon at the bottom-left
+        Positioned(
+          bottom: 16,
+          left: 16,
+          child: FloatingActionButton(
+            onPressed: _pickFromGallery,
             backgroundColor: Colors.green,
-            child: const Icon(Icons.camera, color: Colors.white),
-          );
-        },
-      ),
-    );
+            child: const Icon(Icons.photo_library),
+          ),
+        ),
+        // Camera icon at the bottom-center
+        Positioned(
+          bottom: 16,
+          left: MediaQuery.of(context).size.width / 2 - 28, // Center horizontally
+          child: FloatingActionButton(
+            onPressed: _takePhoto,
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.camera),
+          ),
+        ),
+        // Flash icon at the top-right
+        Positioned(
+          top: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: _toggleFlash,
+            backgroundColor: Colors.green,
+            child: Icon(
+              _isFlashOn ? Icons.flash_on : Icons.flash_off,
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+);
+
+
   }
 }

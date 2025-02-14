@@ -9,40 +9,44 @@ import 'package:provider/provider.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
   const BottomNavigationBarWidget({super.key});
-Future<void> _openCamera(BuildContext context) async {
-  try {
-    final cameraService = context.read<CameraProvider>();
-    print("Initializing Camera...");
 
-    // Attempt to initialize the camera
-    await cameraService.initialize();
+  Future<void> _openCamera(BuildContext context) async {
+       context.push(RouteNames.camera);
 
-    // Check if the camera is initialized
-    if (cameraService.isInitialized) {
-      print("Camera Initialized: ${cameraService.isInitialized}");
-      print("Navigating to Camera Screen...");
-      context.push(RouteNames.camera, extra: cameraService);
-    } else {
-      // Throw an exception if the camera is not initialized
-      throw Exception('Camera initialization failed: Camera is not initialized.');
-    }
-  } catch (e) {
-    // Handle the error and display a user-friendly message
-    print("Error opening camera: $e");
-
-    // Show a SnackBar with the error message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          e.toString().replaceAll('Exception: ', ''), // Remove "Exception: " from the message
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.red, // Red background for error messages
-        duration: Duration(seconds: 3), // Display for 3 seconds
-      ),
-    );
   }
-}
+// Future<void> _openCamera() async {
+//   try {
+//     final cameraService = context.read<CameraProvider>();
+//     print("Initializing Camera...");
+
+//     // Attempt to initialize the camera
+//     await cameraService.initialize();
+
+//     // Check if the camera is initialized
+//     if (cameraService.isInitialized) {
+//       print("Camera Initialized: ${cameraService.isInitialized}");
+//       print("Navigating to Camera Screen...");
+//     } else {
+//       // Throw an exception if the camera is not initialized
+//       throw Exception('Camera initialization failed: Camera is not initialized.');
+//     }
+//   } catch (e) {
+//     // Handle the error and display a user-friendly message
+//     print("Error opening camera: $e");
+
+//     // Show a SnackBar with the error message
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(
+//         content: Text(
+//           e.toString().replaceAll('Exception: ', ''), // Remove "Exception: " from the message
+//           style: TextStyle(color: Colors.white),
+//         ),
+//         backgroundColor: Colors.red, // Red background for error messages
+//         duration: Duration(seconds: 3), // Display for 3 seconds
+//       ),
+//     );
+//   }
+// }
   @override
   Widget build(BuildContext context) {
     return Consumer<BottomNavigationProvider>(

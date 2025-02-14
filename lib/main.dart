@@ -61,11 +61,7 @@ class MyApp extends StatelessWidget {
       ),
     ),
   ),
-  ChangeNotifierProvider<CameraProvider>(
-    create: (context) => CameraProvider(
-      predictionViewModel: context.read<PredictionViewModel>(),
-    ),
-  ),
+
 
         // Other Providers
         ChangeNotifierProvider(create: (context) => BottomNavigationProvider()),
