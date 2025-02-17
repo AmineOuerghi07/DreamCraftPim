@@ -9,4 +9,5 @@ class AppConstants {
   static const double appBarHeight = 56.0;
   static const Color primaryColor = Color(0xFF6200EA);
   static const Color backgroundColor = Color(0xFFF5F5F5);
+  static const String  chatBaseUrl = "http://192.168.43.232:8001";
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
 import 'package:pim_project/view/screens/camera_screen.dart';
+import 'package:pim_project/view/screens/chat_screen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
 import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:pim_project/view/screens/home_screen.dart';
@@ -45,6 +46,8 @@ class RouteNames {
   static const String camera = '/camera' ;
   static const String productDetails = '/product-details';
     static const String loading_screen= '/loading_screen';
+  static const String chat_screen= '/chat_screen';
+
 
 }
 
@@ -145,5 +148,11 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const CameraScreen(),
       
     ),
+         GoRoute(
+      path: RouteNames.chat_screen,
+      builder: (context, state) => const ChatScreen(),
+      
+    ),
+    
   ],
 );

@@ -171,7 +171,12 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
           children: [
             Image.file(image),
             Text('Prediction: ${response}'),
-          ],
+ElevatedButton(
+  onPressed: () {
+    context.push(RouteNames.chat_screen);
+  },
+  child: Text("Let's Talk with Hassan"),
+)          ],
         ),
       ),
     );

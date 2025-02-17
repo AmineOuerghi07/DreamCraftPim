@@ -5,9 +5,11 @@ import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class
 import 'package:pim_project/ProviderClasses/camera_provider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/ProviderClasses/quantity_provider.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/repositories/prediction_repository.dart';
 import 'package:pim_project/model/services/predection_service.dart';
 import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view_model/chat_view_model.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
@@ -51,6 +53,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ResetPasswordViewModel()),
         ChangeNotifierProvider(create: (context) => SignupViewModel()),
         ChangeNotifierProvider(create: (context) => WelcomeViewModel()),
+        ChangeNotifierProvider(create: (context) => ChatViewModel(AppConstants.chatBaseUrl)),
+
 
   // Dependency Injection Fix: Inject `PredictionService` into `PredictionRepository`
   Provider(create: (context) => PredictionService()),
