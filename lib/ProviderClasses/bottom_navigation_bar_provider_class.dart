@@ -9,4 +9,5 @@ class BottomNavigationProvider extends ChangeNotifier {
     _selectedIndex = index;
     notifyListeners(); // Notify widgets to rebuild
   }
+  
 }
