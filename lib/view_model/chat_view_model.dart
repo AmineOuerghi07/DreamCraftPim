@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/services/chat_service.dart';
+import 'package:pim_project/view/screens/chat_screen.dart';
 
 class ChatViewModel with ChangeNotifier {
   late final ChatService _chatService;
-  List<String> _messages = [];
+  List<Message> _messages = [];
   bool _isLoading = false;
 
-  List<String> get messages => _messages;
+  List<Message> get messages => _messages;
   bool get isLoading => _isLoading;
 
   ChatViewModel(String chatBaseUrl) {
@@ -20,11 +21,12 @@ class ChatViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
+     _messages.add(Message(text: question, isUser: true));
+
       final response = await _chatService.sendMessage(question, detectedDisease: detectedDisease);
-      _messages.add('You: $question');
-      _messages.add('Assistant: $response');
+      _messages.add(Message(text: response, isUser: false));
     } catch (e) {
-      _messages.add('Error: $e');
+      _messages.add(Message(text: e.toString(), isUser: true));
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -43,9 +45,9 @@ class ChatViewModel with ChangeNotifier {
         audioFile,
         detectedDisease: detectedDisease,
       );
-      _messages.add('Audio sent: $response');
+      _messages.add(Message(text: response, isUser: false));
     } catch (e) {
-      _messages.add('Audio error: $e');
+      _messages.add(Message(text: e.toString(), isUser: false));
     } finally {
       _isLoading = false;
       notifyListeners();

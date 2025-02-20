@@ -19,6 +19,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   final AudioRecorder _audioRecorder = AudioRecorder();
   String? _currentAudioPath;
   bool _isRecording = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -27,63 +28,73 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
   }
+
   @override
   void dispose() {
     _animationController.dispose();
     _audioRecorder.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
-Future<String> _getAudioPath() async {
-  final directory = await getTemporaryDirectory();
-  return '${directory.path}/audio.wav';  // Use WAV extension
-}
 
-Future<void> _toggleRecording(ChatViewModel chatViewModel) async {
-  try {
-    if (_isRecording) {
-      final path = await _audioRecorder.stop();
-      setState(() => _isRecording = false);
-      _animationController.stop();
+  Future<String> _getAudioPath() async {
+    final directory = await getTemporaryDirectory();
+    return '${directory.path}/audio.wav';
+  }
 
-      if (path != null && await File(path).exists()) {
-        // Add validation before sending
-        final audioFile = File(path);
-        if (await audioFile.length() > 1024) { // At least 1KB
-          await chatViewModel.sendAudioFile(
-            audioFile,
-            detectedDisease: "Tomato Blight",
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  Future<void> _toggleRecording(ChatViewModel chatViewModel) async {
+    try {
+      if (_isRecording) {
+        final path = await _audioRecorder.stop();
+        setState(() => _isRecording = false);
+        _animationController.stop();
+
+        if (path != null && await File(path).exists()) {
+          final audioFile = File(path);
+          if (await audioFile.length() > 1024) {
+            await chatViewModel.sendAudioFile(
+              audioFile,
+              detectedDisease: "Tomato Blight",
+            );
+            _scrollToBottom();
+          }
+        }
+      } else {
+        final status = await Permission.microphone.request();
+        if (status.isGranted) {
+          _currentAudioPath = await _getAudioPath();
+          await _audioRecorder.start(
+            const RecordConfig(
+              encoder: AudioEncoder.wav,
+              sampleRate: 16000,
+              bitRate: 256000,
+              numChannels: 1,
+            ),
+            path: _currentAudioPath!,
           );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Recording too short')),
-          );
+          setState(() => _isRecording = true);
+          _animationController.repeat(reverse: true);
         }
       }
-    } else {
-      final status = await Permission.microphone.request();
-      if (status.isGranted) {
-        _currentAudioPath = await _getAudioPath();
-        // Record in WAV format with proper configuration
-        await _audioRecorder.start(
-          const RecordConfig(
-            encoder: AudioEncoder.wav, // Use WAV encoder
-            sampleRate: 16000, // 16kHz sample rate
-            bitRate: 256000,   // 256kbps bitrate
-            numChannels: 1,    // Mono channel
-          ),
-          path: _currentAudioPath!,
-        );
-        setState(() => _isRecording = true);
-        _animationController.repeat(reverse: true);
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Recording error: ${e.toString()}')),
-    );
   }
-}
+
   @override
   Widget build(BuildContext context) {
     final chatViewModel = Provider.of<ChatViewModel>(context);
@@ -96,10 +107,69 @@ Future<void> _toggleRecording(ChatViewModel chatViewModel) async {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
               itemCount: chatViewModel.messages.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(chatViewModel.messages[index]),
-              ),
+              itemBuilder: (context, index) {
+                final message = chatViewModel.messages[index];
+                return Align(
+                  alignment: message.isUser 
+                      ? Alignment.centerRight 
+                      : Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: message.isUser 
+                          ? MainAxisAlignment.end 
+                          : MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (!message.isUser) ...[
+                          const Icon(Icons.spa, color: Colors.green, size: 28),
+                          const SizedBox(width: 8),
+                        ],
+                        Flexible(
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.75,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 10.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: message.isUser 
+                                  ? Colors.blue[600] 
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(20),
+                                topRight: const Radius.circular(20),
+                                bottomLeft: message.isUser 
+                                    ? const Radius.circular(20) 
+                                    : const Radius.circular(4),
+                                bottomRight: message.isUser 
+                                    ? const Radius.circular(4) 
+                                    : const Radius.circular(20),
+                              ),
+                            ),
+                            child: Text(
+                              message.text,
+                              style: TextStyle(
+                                color: message.isUser ? Colors.white : Colors.black,
+                                fontSize: 16
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (message.isUser) ...[
+                          const SizedBox(width: 8),
+                          Icon(Icons.person, color: Colors.blue[600], size: 28),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           if (chatViewModel.isLoading)
@@ -147,6 +217,7 @@ Future<void> _toggleRecording(ChatViewModel chatViewModel) async {
                         detectedDisease: "Tomato Blight",
                       );
                       _controller.clear();
+                      _scrollToBottom();
                     }
                   },
                 ),
@@ -157,4 +228,11 @@ Future<void> _toggleRecording(ChatViewModel chatViewModel) async {
       ),
     );
   }
+}
+
+class Message {
+  final String text;
+  final bool isUser;
+
+  Message({required this.text, required this.isUser});
 }
