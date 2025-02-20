@@ -83,6 +83,20 @@ class ApiClient {
       return ApiResponse.error('Error during PATCH request: $e');
     }
   }
+
+  Future<ApiResponse<dynamic>> sendMultipart(http.MultipartRequest request) async {
+  try {
+    final response = await request.send();
+    final body = await response.stream.bytesToString();
+    
+    if (response.statusCode == 200) {
+      return ApiResponse.completed(json.decode(body));
+    }
+    return ApiResponse.error('Failed: ${response.statusCode}');
+  } catch (e) {
+    return ApiResponse.error('Exception: $e');
+  }
+}
 }
 
 class ApiResponse<T> {

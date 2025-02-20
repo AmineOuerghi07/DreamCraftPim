@@ -180,22 +180,36 @@ Future<void> _takePhoto() async {
 
 // Update the _handleImageProcessing method
 Future<void> _handleImageProcessing(File image) async {
+  // Show loading immediately
   context.push(RouteNames.loading_screen);
-  
-  // Simulate processing
-  await Future.delayed(const Duration(seconds: 2));
-  
-  if (mounted) {
-    context.pop();
-    setState(() {
-      _isCameraFrozen = false;
-      _capturedImageFile = null;
-    });
+
+  try {
+    final predictionViewModel = Provider.of<PredictionViewModel>(
+      context, 
+      listen: false
+    );
     
-    // Show results
-    final predictionViewModel = Provider.of<PredictionViewModel>(context, listen: false);
+    // Get actual prediction without artificial delay
     final response = await predictionViewModel.predictImage(image);
-    _showResultDialog(image, response.data!);
+
+    if (mounted) {
+      // Immediately show result when ready
+      context.pop(); // Remove loading
+      setState(() {
+        _isCameraFrozen = false;
+        _capturedImageFile = null;
+      });
+      
+      // Show bottom sheet in the next frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultDialog(image, response.data!);
+      });
+    }
+  } catch (e) {
+    if (mounted) {
+      context.pop(); // Remove loading on error
+      // Show error message
+    }
   }
 }
   Future<void> _pickFromGallery() async {
@@ -207,25 +221,78 @@ Future<void> _handleImageProcessing(File image) async {
   }
 
 
-  void _showResultDialog(File image,String response) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Processing Result'),
-        content: Column(
-          children: [
-            Image.file(image),
-            Text('Prediction: ${response}'),
-ElevatedButton(
-  onPressed: () {
-    context.push(RouteNames.chat_screen);
-  },
-  child: Text("Let's Talk with Hassan"),
-)          ],
-        ),
+void _showResultDialog(File image, String response) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => Container(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Section
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.file(image, fit: BoxFit.cover),
+              ),
+              SizedBox(width: 16),
+              
+              // Text and Icon Section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        // Text Column
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Processing Result', 
+                                   style: TextStyle(fontWeight: FontWeight.bold)),
+                              SizedBox(height: 4),
+                              Text('Prediction: $response',
+                                   style: TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                        
+                        // Icon
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward_ios, 
+                               size: 20),
+                          onPressed: () {
+                            // Add your arrow action here
+                          },
+                        ),
+                      ],
+                    ),
+                    
+                    // Elevated Button
+                    ElevatedButton(
+                      onPressed: () {
+                        context.push(RouteNames.chat_screen);
+                      },
+                      child: Text("Let's Talk with Hassan"),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
