@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:pim_project/view/screens/phone_verification_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart'; 
 
@@ -78,7 +77,7 @@ class PhoneNumberScreen extends StatelessWidget {
                         builder: (context) => ResetPasswordScreen()),
                   );
                   */
-                  context.go(RouteNames.phoneVerification);
+                  context.push(RouteNames.phoneVerification);
             },
                 
               

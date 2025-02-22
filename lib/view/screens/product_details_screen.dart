@@ -14,6 +14,7 @@ class ProductDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Details'),
+        backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -32,7 +33,7 @@ class ProductDetailsScreen extends StatelessWidget {
           children: [
             Center(
               child: Image.asset(
-                '../assets/images/limeTree.png',
+                'assets/images/limeTree.png',
                 height: 200,
               ),
             ),
@@ -157,7 +158,7 @@ class ProductDetailsScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.only(right: 8),
-                    child: Image.asset('../assets/images/pepper.png'),
+                    child: Image.asset('assets/images/pepper.png'),
                   );
                 },
               ),

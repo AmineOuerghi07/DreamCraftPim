@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pim_project/view/screens/login_screen.dart';
-import 'package:pim_project/view/screens/phone_verification_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart'; 
 
@@ -140,7 +139,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
          onPressed: () {
   _resetPassword(); // Exécute la fonction de réinitialisation du mot de passe
-  context.go(RouteNames.login); // Navigue directement vers l'écran de connexion
+  context.push(RouteNames.login); // Navigue directement vers l'écran de connexion
 },
 
               

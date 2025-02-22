@@ -11,7 +11,7 @@ const Header({ required this.profileImage,
   @override
   Widget build(BuildContext context){
         return Container(
-      color: Colors.white, // Header background color
+      color: Colors.grey[100], // Header background color
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

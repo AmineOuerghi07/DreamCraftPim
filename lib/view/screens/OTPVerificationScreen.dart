@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pim_project/view/screens/reset_password_screen.dart';
 import 'package:pinput/pinput.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart'; 
@@ -74,7 +73,7 @@ class OTPVerificationScreen extends StatelessWidget {
                         builder: (context) => ResetPasswordScreen()),
                   );
                   */
-                  context.go(RouteNames.resetPassword);
+                  context.push(RouteNames.resetPassword);
                                   },
               
               child: const Center(

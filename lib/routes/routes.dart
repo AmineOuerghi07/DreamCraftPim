@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pim_project/model/repositories/email_verification_screen.dart';
-import 'package:pim_project/model/services/email_verification_screen.dart';
-import 'package:pim_project/model/services/phone_verification_screen.dart';
+
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
+import 'package:pim_project/view/screens/camera_screen.dart';
+import 'package:pim_project/view/screens/chat_screen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
 import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:pim_project/view/screens/home_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen.dart';
 import 'package:pim_project/view/screens/land_screen.dart';
+import 'package:pim_project/view/screens/loading_screen.dart';
 import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
 import 'package:pim_project/view/screens/market_screen.dart';
@@ -42,9 +43,16 @@ class RouteNames {
   static const String phoneVerification = '/phone-verification';
   static const String phoneNumberScreen = '/phone-number';
   static const String oTPVerification = '/otp-verification';
-
+  static const String camera = '/camera' ;
   static const String productDetails = '/product-details';
+    static const String loading_screen= '/loading_screen';
+  static const String chat_screen= '/chat_screen';
+
+
 }
+
+
+
 
 final GoRouter router = GoRouter(
   navigatorKey: rootNavigatorKey,
@@ -89,6 +97,10 @@ final GoRouter router = GoRouter(
           path: RouteNames.forgetPassword,
           builder: (context, state) =>  const ForgotPasswordScreen(),
         ),
+           GoRoute(
+          path: RouteNames.loading_screen,
+          builder: (context, state) =>  const LoadingAnimationScreen(),
+        ),
         GoRoute(
           path: RouteNames.resetPassword,
           builder: (context, state) =>  const ResetPasswordScreen(),
@@ -116,6 +128,7 @@ final GoRouter router = GoRouter(
         return LandDetailsScreen(id: id);
       },
     ),
+    
     GoRoute(
       path: '${RouteNames.regionDetails}/:id',
       builder: (context, state) {
@@ -130,5 +143,16 @@ final GoRouter router = GoRouter(
         return ProductDetailsScreen(id: id);
       },
     ),
+       GoRoute(
+      path: RouteNames.camera,
+      builder: (context, state) => const CameraScreen(),
+      
+    ),
+         GoRoute(
+      path: RouteNames.chat_screen,
+      builder: (context, state) => const ChatScreen(),
+      
+    ),
+    
   ],
 );
