@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart'; 
@@ -27,7 +28,7 @@ class ChatService {
     }
   }
 
-Future<String> sendAudioMessage(File audioFile, {required String detectedDisease}) async {
+Future<Map<String, dynamic>> sendAudioMessage(File audioFile, {required String detectedDisease}) async {
   final request = MultipartRequest(
     'POST',
     Uri.parse('${_apiClient.baseUrl}/chat/audio'),
@@ -45,9 +46,11 @@ Future<String> sendAudioMessage(File audioFile, {required String detectedDisease
   final response = await _apiClient.sendMultipart(request);
 
   if (response.status == Status.COMPLETED) {
-    return response.data!['text_response'] as String;
+    return response.data; // No need to decode again
   } else {
     throw Exception(response.message);
   }
 }
+
+
 }
