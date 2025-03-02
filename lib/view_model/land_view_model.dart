@@ -19,41 +19,36 @@ class LandViewModel extends ChangeNotifier {
 
   ApiResponse<Land> _addLandResponse = ApiResponse.initial('');
   ApiResponse<Land> get addLandResponse => _addLandResponse;
-  
+
   LandViewModel() {
     fetchLands();
   }
 
-
-
-Future<ApiResponse> addLand({
-  required Land land,
-  required File image,
-}) async {
-  _addLandResponse = ApiResponse.loading('Adding land...');
-  notifyListeners();
-
-  try {
-    final response = await _landService.addLand(land: land, image: image);
-
-    if (response.status == Status.COMPLETED) {
-      _addLandResponse = ApiResponse.completed(response.data!);
-      await fetchLands();
-      return ApiResponse.completed(response.data!); // return successful response
-    } else {
-      _addLandResponse = ApiResponse.error(response.message ?? 'Failed to add land');
-      return ApiResponse.error(response.message ?? 'Failed to add land'); // return error response
-    }
-  } catch (e) {
-    _addLandResponse = ApiResponse.error('Error adding land: ${e.toString()}');
-    return ApiResponse.error('Error adding land: ${e.toString()}'); // return error response
-  } finally {
+  Future<ApiResponse<List<Land>>> fetchLands() async {
+    _landsResponse = ApiResponse.loading('Fetching lands...');
+     _lands = [];
     notifyListeners();
+
+    try {
+      final response = await _landService.getLands();
+      print('Service Response: ${response.status} - ${response.data}');
+
+      if (response.status == Status.COMPLETED && response.data != null) {
+        _lands = response.data!;
+       return _landsResponse = ApiResponse.completed(_lands);
+      } else {
+        _landsResponse = ApiResponse.error(response.message ?? 'Unknown error');
+      }
+    } catch (e, stack) {
+      print('Fetch Error: $e\n$stack');
+      _landsResponse = ApiResponse.error('Failed to fetch lands: ${e.toString()}');
+    }finally{notifyListeners();}
+
+    
+    return _landsResponse;
   }
-}
 
-
-   Future<void> fetchLandById(String id) async {
+  Future<ApiResponse<Land>> fetchLandById(String id) async {
     _landResponse = ApiResponse.loading('Fetching land details...');
     notifyListeners();
 
@@ -67,72 +62,31 @@ Future<ApiResponse> addLand({
     } catch (e) {
       _landResponse = ApiResponse.error('Failed to fetch land: ${e.toString()}');
     }
-    
-    notifyListeners();
-  }
-  
- Future<void> deleteLand(String id) async {
-  try {
-    _landResponse = ApiResponse.loading('Deleting...');
-    notifyListeners();
-    
-    final response = await _landService.deleteLand(id);
-    if (response.status == Status.COMPLETED) {
-      // Clear cached data
-      _landResponse = ApiResponse.initial('Land deleted');
-      // Remove from lands list
-      _lands.removeWhere((land) => land.id == id);
-      fetchLands();
-    } else {
-      _landResponse = ApiResponse.error(response.message ?? 'Delete failed');
-    }
-  } catch (e) {
-    _landResponse = ApiResponse.error('Delete error: $e');
-  }finally{notifyListeners();
-  }
-  
-}
 
-  Future<ApiResponse> updateLand(String id, Land updatedLand,{File? image}) async {
+    notifyListeners();
+    return _landResponse;
+  }
+
+ 
+
+  Future<ApiResponse> addLand({required Land land, required File image}) async {
+    _addLandResponse = ApiResponse.loading('Adding land...');
+    notifyListeners();
+
     try {
-      _landResponse = ApiResponse.loading('Updating...');
-      notifyListeners();
-      
-      final response = await _landService.updateLand(id, updatedLand,image: image);
+      final response = await _landService.addLand(land: land, image: image);
+
       if (response.status == Status.COMPLETED) {
-       return _landResponse = ApiResponse.completed(response.data);
+        _addLandResponse = ApiResponse.completed(response.data!);
+        await fetchLands();
       } else {
-      return  _landResponse = ApiResponse.error(response.message ?? 'Update failed');
+        _addLandResponse = ApiResponse.error(response.message ?? 'Failed to add land');
       }
     } catch (e) {
-      return _landResponse = ApiResponse.error('Update error: $e');
-    }finally {
-    notifyListeners();
-  }
-   
-  }
-
-
-Future<void> fetchLands() async {
-  _landsResponse = ApiResponse.loading('Fetching lands...');
-  notifyListeners();
-
-  try {
-    final response = await _landService.getLands();
-    print('Service Response: ${response.status} - ${response.data}');
-
-    if (response.status == Status.COMPLETED && response.data != null) {
-      _lands = response.data!;
-      _landsResponse = ApiResponse.completed(_lands);
-    } else {
-      _landsResponse = ApiResponse.error(response.message ?? 'Unknown error');
+      _addLandResponse = ApiResponse.error('Error adding land: ${e.toString()}');
+    } finally {
+      notifyListeners();
     }
-  } catch (e, stack) {
-    print('Fetch Error: $e\n$stack');
-    _landsResponse = ApiResponse.error('Failed to fetch lands: ${e.toString()}');
+    return _addLandResponse;
   }
-
-  notifyListeners();
-}
-
 }

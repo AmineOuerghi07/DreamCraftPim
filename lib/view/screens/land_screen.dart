@@ -24,15 +24,13 @@ class LandScreen extends StatelessWidget  {
 
  void _loadData(BuildContext context) {
     final viewModel = Provider.of<LandViewModel>(context, listen: false);
-    if (viewModel.landsResponse.status != Status.LOADING) {
       viewModel.fetchLands();
-    }
-  }
+}
   @override
   Widget build(BuildContext context) {
     // Define the search controller
-       Future.microtask(() => _loadData(context));
-    final TextEditingController searchController = TextEditingController();
+  Provider.of<LandViewModel>(context, listen: false).fetchLands();
+      final TextEditingController searchController = TextEditingController();
     final FocusNode searchFocusNode = FocusNode();
     void _unfocus() {
       if (searchFocusNode.hasFocus) {
@@ -92,7 +90,7 @@ void _showAddLandPopup(BuildContext context) {
                       alignment: Alignment.topRight,
                       child: IconButton(
                         icon: const Icon(Icons.close, color: Colors.grey),
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.pop(),
                       ),
                     ),
 

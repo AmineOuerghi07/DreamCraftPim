@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
-import 'package:pim_project/ProviderClasses/camera_provider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/ProviderClasses/quantity_provider.dart';
 import 'package:pim_project/constants/constants.dart';
@@ -12,7 +11,6 @@ import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view_model/chat_view_model.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
-import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:pim_project/view_model/login_view_model.dart';
 import 'package:pim_project/view_model/market_view_model.dart';
@@ -47,7 +45,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => LandViewModel()),
         ChangeNotifierProvider(create: (context) => ForgetPasswordViewModel()),
         ChangeNotifierProvider(create: (context) => HomeViewModel()),
-        ChangeNotifierProvider(create: (context) => LandDetailsViewModel()),
+        
+       // ChangeNotifierProvider(create: (context) => LandDetailsViewModel()),
         ChangeNotifierProvider(create: (context) => MarketViewModel()),
         ChangeNotifierProvider(create: (context) => ProductDetailsViewModel()),
         ChangeNotifierProvider(create: (context) => ProfileViewModel()),
