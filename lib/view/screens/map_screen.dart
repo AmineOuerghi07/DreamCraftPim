@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:country_pickers/country_pickers.dart';
@@ -218,18 +219,25 @@ void _showErrorDialog(String message) {
 ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          if (selectedLocation != null) {
-            Navigator.pop(
-              context,
-              "${selectedLocation!.latitude}, ${selectedLocation!.longitude}",
-            );
-          }
-        },
-        label: const Text("Confirm"),
-        icon: const Icon(Icons.check),
-      ),
+     floatingActionButton: FloatingActionButton.extended(
+  onPressed: () async {
+    if (selectedLocation != null) {
+      // Get the address based on the selected location
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        selectedLocation!.latitude, selectedLocation!.longitude);
+      Placemark place = placemarks[0];
+
+      // Return the location text as you did in _getCurrentLocation
+      Navigator.pop(
+        context,
+        "${place.locality}, ${place.country}",
+      );
+    }
+  },
+  label: const Text("Confirm"),
+  icon: const Icon(Icons.check),
+),
+
     );
   }
 

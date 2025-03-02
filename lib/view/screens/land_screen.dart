@@ -22,10 +22,7 @@ class LandScreen extends StatelessWidget  {
   });
 
 
- void _loadData(BuildContext context) {
-    final viewModel = Provider.of<LandViewModel>(context, listen: false);
-      viewModel.fetchLands();
-}
+
   @override
   Widget build(BuildContext context) {
     // Define the search controller
