@@ -25,14 +25,14 @@ class LandService {
   Future<ApiResponse<List<Land>>> getLands() async {
     return await _apiClient.get(
       'lands/all',
-      (json) => (json as List).map((landJson) => Land.fromJson(landJson)).toList(),
+     (json) => (json as List).map((landJson) => Land.fromJson(landJson)).toList(),
     );
   }
   Future<ApiResponse<Land>> getLandById(String id) async {
-  return await _apiClient.get(
-    'lands/land/$id',
-    (json) => Land.fromJson(json),
-  );
+    return await _apiClient.get(
+      'lands/land/$id',
+      (json) => Land.fromJson(json),
+    );
 }
 Future<ApiResponse<void>> deleteLand(String id) async {  // Changed return type
   return await _apiClient.delete('lands/land/$id');

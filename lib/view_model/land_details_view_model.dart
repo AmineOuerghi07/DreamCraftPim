@@ -1,21 +1,19 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/land.dart';
+import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/land_service.dart';
 import 'package:pim_project/model/services/api_client.dart';
+import 'package:pim_project/model/services/region_service.dart';
 
 class LandDetailsViewModel with ChangeNotifier {
   final LandService _landService = LandService();
-
+  final RegionService _regionService = RegionService();
   ApiResponse<Land> _landResponse = ApiResponse.initial('Fetching land details...');
   ApiResponse<Land> get landResponse => _landResponse;
 
   Land? _land;
   Land? get land => _land;
-
-  LandDetailsViewModel(String landId) {
-    fetchLandById(landId);
-  }
 
   Future<ApiResponse<Land>> fetchLandById(String id) async {
     _landResponse = ApiResponse.loading('Fetching land details...');
@@ -77,4 +75,22 @@ class LandDetailsViewModel with ChangeNotifier {
     }
     return _landResponse;
   }
+
+Future<ApiResponse<Region>> addRegion(Region region) async {
+  try {
+    print('Adding region: ${region.toJson()}'); // Add logging
+    final response = await _regionService.addRegion(region);
+    print('Response: ${response.status} - ${response.message}');
+    
+    if (response.status == Status.COMPLETED) {
+      await fetchLandById(region.land);
+    }
+    return response;
+  } catch (e) {
+    print('Error adding region: $e'); // Add error logging
+    return ApiResponse.error('Failed to add region: ${e.toString()}');
+  } finally {
+    notifyListeners();
+  }
+}
 }

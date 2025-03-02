@@ -7,7 +7,7 @@ class Land {
   final bool forRent;
   final double surface;
   final String image;
-  final List<Region> regions;
+  final List<String> regions;
   
 
   Land({
@@ -30,8 +30,8 @@ factory Land.fromJson(Map<String, dynamic> json) {
       surface: (json['surface'] as num?)?.toDouble() ?? 0.0,
       image: json['image'] ?? '',
       regions: (json['regions'] as List<dynamic>? ?? [])
-          .map((r) => Region.fromJson(r))
-          .toList(),
+            .map((r) => r.toString())
+            .toList()
     );
   } catch (e, stack) {
     print('Error parsing Land: $e\n$stack');
@@ -55,7 +55,7 @@ factory Land.fromJson(Map<String, dynamic> json) {
     bool? forRent,
     double? surface,
     String? image,
-    List<Region>? regions,
+    List<String>? regions,
   }) {
     return Land(
       id: id ?? this.id,

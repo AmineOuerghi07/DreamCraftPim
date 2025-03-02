@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/model/domain/land.dart';
+import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
@@ -20,9 +21,7 @@ class LandDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return ChangeNotifierProvider(
-      create: (context) => LandDetailsViewModel(id),
-       child: Consumer<LandDetailsViewModel>(
+     return Consumer<LandDetailsViewModel>(
            builder: (context, viewModel, child) {
         // Reset landResponse when the ID changes to force a fresh fetch
         if (viewModel.landResponse.data?.id != id) {
@@ -30,8 +29,8 @@ class LandDetailsScreen extends StatelessWidget {
         }
         return _buildScaffold(context, viewModel.landResponse);
          },
-         ),
-     );
+         );
+     
   }
 
   Widget _buildScaffold(BuildContext context,ApiResponse<Land> response) {
@@ -68,7 +67,7 @@ class LandDetailsScreen extends StatelessWidget {
   ),
 ],
         ),
-        body: _buildBody(response),
+        body: _buildBody(context,response),
       ),
     );
   }
@@ -339,7 +338,7 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
   );
 }
 
-  Widget _buildBody(ApiResponse<Land> response) {
+  Widget _buildBody(BuildContext context,ApiResponse<Land> response) {
     if (response.status == Status.LOADING) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -353,10 +352,10 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
     }
 
     final land = response.data!;
-    return _buildLandContent(land);
+    return _buildLandContent(context,land);
   }
 
-  Widget _buildLandContent(Land land) {
+  Widget _buildLandContent(BuildContext context, Land land) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -366,7 +365,7 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
             regionCount: "34", 
             cultivationType: land.name,
             location: land.cordonate,
-            onAddRegion: () {},
+            onAddRegion: () => _showAddRegionPopup(context, land.id),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -418,4 +417,141 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
       ),
     );
   }
+}
+
+void _showAddRegionPopup(BuildContext context, String landId) {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController surfaceController = TextEditingController();
+
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        "Add New Region",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: "Region Name",
+                        border: UnderlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: surfaceController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Surface Area (m²)",
+                        border: UnderlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed:  () async {
+                                if (nameController.text.isEmpty ||
+                                    surfaceController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Please fill all fields"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                final surface = double.tryParse(surfaceController.text);
+                                if (surface == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Invalid surface value"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                            
+
+                                final viewModel = Provider.of<LandDetailsViewModel>(
+                                    context,
+                                    listen: false);
+                                
+                                // Create Region object
+                                final newRegion = Region(
+                                  id: "",
+                                  name: nameController.text,
+                                  surface: surface,
+                                  land: landId,
+                                  // Add other required fields as per your Region model
+                                );
+
+                                final response = await viewModel.addRegion(newRegion)
+      .timeout(const Duration(seconds: 15), onTimeout: () {
+        return ApiResponse.error('Request timed out');
+      });
+
+                               
+                                if (response.status == Status.COMPLETED) {
+                                  Navigator.of(dialogContext).pop();
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(response.message ??
+                                          "Failed to add region"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade700,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                        ),
+                        child: 
+                             const Text("Add Region",
+                                style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
 }
