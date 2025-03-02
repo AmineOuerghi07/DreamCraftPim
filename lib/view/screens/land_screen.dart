@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/constants/constants.dart';
@@ -51,20 +50,7 @@ void _showAddLandPopup(BuildContext context) {
     }
   }
 
-  Future<void> _getCurrentLocation(StateSetter setState) async {
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      return;
-    }
 
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-    Placemark place = placemarks[0];
-
-    setState(() {
-      locationController.text = "${place.locality}, ${place.country}";
-    });
-  }
 
   showDialog(
     context: context,
