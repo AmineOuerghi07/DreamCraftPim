@@ -16,7 +16,7 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver , TickerProviderStateMixin  {
   CameraController? _controller;
-  File? _pickedImage;
+ // File? _pickedImage;
   bool _isFlashOn = false;
   double _currentZoom = 1.0;
   bool _isInitialized = false;
@@ -25,7 +25,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   double _initialScale = 1.0;
   double _startingZoom = 1.0;
   String _zoomStatus = ''; // Indicator for zoom status
-  final TransformationController _transformationController = TransformationController();
+  //final TransformationController _transformationController = TransformationController();
   AnimationController? _scanAnimationController;
   final Color _scannerColor = Colors.white;
   bool _isCameraFrozen = false;
@@ -117,28 +117,28 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   }
 
   // Zoom in by increasing the zoom level
-  void _zoomIn() {
-    final double newZoom = (_currentZoom + 0.5).clamp(_minZoom, _maxZoom);
-    _updateZoom(newZoom);
-  }
+  // void _zoomIn() {
+  //   final double newZoom = (_currentZoom + 0.5).clamp(_minZoom, _maxZoom);
+  //   _updateZoom(newZoom);
+  // }
 
-  // Zoom out by decreasing the zoom level
-  void _zoomOut() {
-    final double newZoom = (_currentZoom - 0.5).clamp(_minZoom, _maxZoom);
-    _updateZoom(newZoom);
-  }
+  // // Zoom out by decreasing the zoom level
+  // void _zoomOut() {
+  //   final double newZoom = (_currentZoom - 0.5).clamp(_minZoom, _maxZoom);
+  //   _updateZoom(newZoom);
+  // }
 
   // Update the zoom level of the camera
-  void _updateZoom(double newZoom) {
-    if (_controller == null || !_isInitialized) return;
+  // void _updateZoom(double newZoom) {
+  //   if (_controller == null || !_isInitialized) return;
 
-    setState(() {
-      _currentZoom = newZoom;
-    });
+  //   setState(() {
+  //     _currentZoom = newZoom;
+  //   });
 
-    // Update the camera zoom
-    _controller!.setZoomLevel(_currentZoom);
-  }
+  //   // Update the camera zoom
+  //   _controller!.setZoomLevel(_currentZoom);
+  // }
 
   Future<void> _toggleFlash() async {
     if (!_isInitialized) return;
@@ -301,15 +301,12 @@ void _showResultDialog(File image, String response) {
     }
 
     // Get screen size
-    final screenSize = MediaQuery.of(context).size;
 
    return Scaffold(
   body:
    LayoutBuilder(
      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-        final screenHeight = constraints.maxHeight;
-        final scannerSize = 200 * _currentZoom;
+
      return GestureDetector(
       onScaleStart: _handleScaleStart,
       onScaleUpdate: _handleScaleUpdate,

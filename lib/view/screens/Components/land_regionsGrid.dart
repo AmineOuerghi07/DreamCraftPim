@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class LandRegionsGrid extends StatelessWidget {
-  const LandRegionsGrid({super.key});
+  final String landId; 
+  const LandRegionsGrid({super.key, required this.landId});
 
   @override
   Widget build(BuildContext context) {

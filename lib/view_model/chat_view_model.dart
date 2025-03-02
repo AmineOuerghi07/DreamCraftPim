@@ -48,31 +48,26 @@ Future<void> sendAudioFile(File audioFile, {required String detectedDisease}) as
       detectedDisease: detectedDisease,
     );
 
-    // Ensure response is a Map
-    if (response is Map<String, dynamic>) {
-      final question = response['question'] as String? ?? "No question recognized";
-      final textResponse = response['text_response'] as String? ?? "No response";
-      final audioBase64 = response['audio_base64'] as String?;
+    final question = response['question'] as String? ?? "No question recognized";
+    final textResponse = response['text_response'] as String? ?? "No response";
+    final audioBase64 = response['audio_base64'] as String?;
 
-      // Add the recognized text as a user message
-      _messages.add(Message(text: question, isUser: true));
+    // Add the recognized text as a user message
+    _messages.add(Message(text: question, isUser: true));
 
-      // Add the bot's text response
-      _messages.add(Message(text: textResponse, isUser: false));
+    // Add the bot's text response
+    _messages.add(Message(text: textResponse, isUser: false));
 
-      if (audioBase64 != null) {
-        // Decode the base64 audio and save it to a file
-        final audioBytes = base64.decode(audioBase64);
-        final directory = await getApplicationDocumentsDirectory();
-        final audioPath = '${directory.path}/response.mp3';
-        await File(audioPath).writeAsBytes(audioBytes);
+    if (audioBase64 != null) {
+      // Decode the base64 audio and save it to a file
+      final audioBytes = base64.decode(audioBase64);
+      final directory = await getApplicationDocumentsDirectory();
+      final audioPath = '${directory.path}/response.mp3';
+      await File(audioPath).writeAsBytes(audioBytes);
 
-        // Optional: Play the audio file (use an audio player package)
-      }
-    } else {
-      throw Exception("Unexpected response format");
+      // Optional: Play the audio file (use an audio player package)
     }
-
+  
   } catch (e) {
     _messages.add(Message(text: "Error: ${e.toString()}", isUser: false));
   } finally {

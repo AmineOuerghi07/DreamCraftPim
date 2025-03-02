@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class PlantsGrid extends StatelessWidget {
-  const PlantsGrid({super.key});
+   final String landId;
+  const PlantsGrid({super.key, required this.landId});
 
   @override
   Widget build(BuildContext context) {

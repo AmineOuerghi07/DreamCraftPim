@@ -33,7 +33,7 @@ class HomeCart extends StatelessWidget {
               left: Radius.circular(8),
               right: Radius.circular(8),
             ),
-            child: Image.asset(
+            child: Image.network(
               imageUrl,
               height: 130,
               width: 130,
