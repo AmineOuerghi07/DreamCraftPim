@@ -26,6 +26,7 @@ class LandDetailsScreen extends StatelessWidget {
         // Reset landResponse when the ID changes to force a fresh fetch
         if (viewModel.landResponse.data?.id != id) {
           viewModel.fetchLandById(id);
+          viewModel.fetchRegionsForLand(id);
         }
         return _buildScaffold(context, viewModel.landResponse);
          },
@@ -408,7 +409,21 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
           Expanded(
             child: TabBarView(
               children: [
-                LandRegionsGrid(landId: id),
+               Consumer<LandDetailsViewModel>(
+                  builder: (context, viewModel, _) {
+                    if (viewModel.regionsResponse.status == Status.LOADING) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (viewModel.regionsResponse.status == Status.ERROR) {
+                      return Center(child: Text(viewModel.regionsResponse.message!));
+                    }
+                    print("efezfez${viewModel.regions}");
+                    return LandRegionsGrid(
+                      landId: id,
+                      regions: viewModel.regions,
+                    );
+                  },
+                ),
                 PlantsGrid(landId: id),
               ],
             ),

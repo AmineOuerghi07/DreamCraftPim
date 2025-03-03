@@ -13,17 +13,22 @@ class RegionService {
       (json) => Region.fromJson(json),
     );
   }
-
-  Future<ApiResponse<List<Region>>> getRegionsById(String regionId) async {
+  Future<ApiResponse<List<Region>>> getRegions() async {
     return _apiClient.get(
-      'land/region/$regionId',
+      'lands/region',
       (json) => (json as List).map((r) => Region.fromJson(r)).toList(),
     );
+  }
+  Future<ApiResponse<Region>> getRegionsById(String regionId) async {
+    return _apiClient.get(
+      'lands/region/$regionId',
+ (json) => Region.fromJson(json),
+     );
   }
 
   Future<ApiResponse<Region>> updateRegion(Region region) async {
     return _apiClient.put(
-      'land/region/${region.id}',
+      'lands/region/${region.id}',
       region.toJson(),
       (json) => Region.fromJson(json),
     );
