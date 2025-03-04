@@ -1,12 +1,14 @@
+// model/domain/region.dart
 import 'package:pim_project/model/domain/land.dart';
+import 'package:pim_project/model/domain/plant-with-quantity.dart';
 
 class Region {
   final String id;
   final String name;
-  final Land land; // Changed to Land object
+  final Land land;
   final double surface;
   final List<String> sensors;
-  final List<String> plants;
+  final List<PlantWithQuantity> plants;
 
   Region({
     required this.id,
@@ -14,7 +16,7 @@ class Region {
     required this.land,
     required this.surface,
     List<String>? sensors,
-    List<String>? plants,
+    List<PlantWithQuantity>? plants,
   })  : sensors = sensors ?? [],
         plants = plants ?? [];
 
@@ -26,7 +28,7 @@ class Region {
         land: json['land'] is String
             ? Land(
                 id: json['land'] as String,
-                name: '', // Default values if only ID is provided
+                name: '',
                 cordonate: '',
                 forRent: false,
                 surface: 0.0,
@@ -40,7 +42,7 @@ class Region {
                 .toList() ??
             [],
         plants: (json['plants'] as List<dynamic>?)
-                ?.map((p) => p is String ? p : p['_id'].toString())
+                ?.map((p) => PlantWithQuantity.fromJson(p is String ? {'plant': p} : p))
                 .toList() ??
             [],
       );
@@ -51,20 +53,21 @@ class Region {
   }
 
   Map<String, dynamic> toJson() => {
+        '_id': id,
         'name': name,
-        'land': land.toJson(), // Assuming Land has a toJson method
+        'land': land.toJson(),
         'surface': surface,
         'sensors': sensors,
-        'plants': plants,
+        'plants': plants.map((p) => p.toJson()).toList(),
       };
 
   Region copyWith({
     String? id,
     String? name,
-    Land? land, // Updated to Land type
+    Land? land,
     double? surface,
     List<String>? sensors,
-    List<String>? plants,
+    List<PlantWithQuantity>? plants, // Fixed type
   }) {
     return Region(
       id: id ?? this.id,

@@ -15,6 +15,8 @@ class RegionDetailsViewModel with ChangeNotifier {
   ApiResponse<List<Plant>> _plantResponse = ApiResponse.initial('Fetching land details...');
   ApiResponse<Region>? _regionResponse;
   ApiResponse<Land>? _landResponse; // Added for land data
+  ApiResponse<Region>? get regionResponse => _regionResponse; // Public getter for _regionResponse
+  ApiResponse<Land>? get landResponse => _landResponse;
 
   List<Plant> _plants = [];
   Region? _region;
@@ -135,6 +137,55 @@ class RegionDetailsViewModel with ChangeNotifier {
       await getRegionById(regionId);
     } catch (e) {
       _errorMessage = 'Failed to add plants: ${e.toString()}';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<ApiResponse<Region>> updateRegion(Region updatedRegion) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _regionService.updateRegion(updatedRegion);
+      if (response.status == Status.COMPLETED && response.data != null) {
+        _region = response.data!;
+        _regionResponse = ApiResponse.completed(_region!);
+        return ApiResponse.completed(_region!);
+      } else {
+        _errorMessage = response.message ?? 'Failed to update region';
+        return ApiResponse.error(_errorMessage!);
+      }
+    } catch (e) {
+      _errorMessage = 'Update error: ${e.toString()}';
+      return ApiResponse.error(_errorMessage!);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // New method to delete a region
+  Future<ApiResponse<void>> deleteRegion(String regionId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _regionService.deleteRegion(regionId);
+      if (response.status == Status.COMPLETED) {
+        _region = null;
+        _regionResponse = null; // Clear region data after deletion
+        return ApiResponse.completed(null);
+      } else {
+        _errorMessage = response.message ?? 'Failed to delete region';
+        return ApiResponse.error(_errorMessage!);
+      }
+    } catch (e) {
+      _errorMessage = 'Delete error: ${e.toString()}';
+      return ApiResponse.error(_errorMessage!);
     } finally {
       _isLoading = false;
       notifyListeners();

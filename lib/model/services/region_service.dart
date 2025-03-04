@@ -35,7 +35,7 @@ class RegionService {
   }
 
   Future<ApiResponse<void>> deleteRegion(String regionId) async {
-    return _apiClient.delete('land/region/$regionId');
+    return _apiClient.delete('lands/region/$regionId');
   }
 
 
