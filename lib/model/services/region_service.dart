@@ -37,4 +37,18 @@ class RegionService {
   Future<ApiResponse<void>> deleteRegion(String regionId) async {
     return _apiClient.delete('land/region/$regionId');
   }
+
+
+  Future<ApiResponse<Region>> addPlantToRegion(String regionId, String plantId, int quantity) async {
+  final payload = {
+    "regionId": regionId,
+    "plantId": plantId,
+    "quantity": quantity,
+  };
+  return _apiClient.post(
+    'lands/region/addPlant',
+    payload,
+    (json) => Region.fromJson(json),
+  );
+}
 }

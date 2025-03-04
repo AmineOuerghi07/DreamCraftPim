@@ -80,7 +80,7 @@ class _OSMFlutterMapState extends State<OSMFlutterMap>
       _mapController.move(country.coordinates, 5);
     });
   }
-
+//**************************************************** */
 Future<void> _goToCurrentLocation() async {
   try {
     // Check if location services are enabled
@@ -127,7 +127,7 @@ Future<void> _goToCurrentLocation() async {
     _showErrorDialog('Error: ${e.toString()}');
   }
 }
-
+//********************************************* */
 void _showErrorDialog(String message) {
   showDialog(
     context: context,

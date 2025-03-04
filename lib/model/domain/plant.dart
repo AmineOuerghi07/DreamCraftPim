@@ -16,7 +16,7 @@ class Plant {
   // Factory constructor to create a Plant object from JSON
   factory Plant.fromJson(Map<String, dynamic> json) {
     return Plant(
-      id: json['id'] ?? '',
+      id: json['_id'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
@@ -27,7 +27,7 @@ class Plant {
   // Convert a Plant object to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      '_id': id,
       'imageUrl': imageUrl,
       'name': name,
       'description': description,
@@ -38,7 +38,7 @@ class Plant {
   // Convert a Plant object to a Map (useful for saving to databases)
   Map<String, String> toMap() {
     return {
-      'id': id,
+      '_id': id,
       'imageUrl': imageUrl,
       'name': name,
       'description': description,

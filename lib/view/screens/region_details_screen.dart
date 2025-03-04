@@ -8,27 +8,21 @@ import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
 
-class RegionDetailsScreen extends StatefulWidget {
+class RegionDetailsScreen extends StatelessWidget {
   final String id;
   const RegionDetailsScreen({required this.id, super.key});
 
   @override
-  State<RegionDetailsScreen> createState() => _RegionDetailsScreenState();
-}
-
-class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Fetch region details after the widget is built
-    Future.microtask(() {
-      final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
-      viewModel.getRegionById(widget.id);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
+
+    // Only call `getRegionById` if the region is not already loaded.
+    if (viewModel.region == null) {
+      Future.microtask(() {
+        viewModel.getRegionById(id);
+      });
+    }
+
     return Consumer<RegionDetailsViewModel>(
       builder: (context, viewModel, child) {
         final region = viewModel.region; // Get the region from the ViewModel
@@ -38,7 +32,6 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
           child: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: Colors.white,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
                 onPressed: () => context.pop(),
@@ -47,7 +40,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                 IconButton(
                   icon: const Icon(Icons.more_vert, color: Colors.black),
                   onPressed: () {},
-                )
+                ),
               ],
             ),
             body: Padding(
@@ -59,22 +52,24 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                     regionCount: "34",
                     cultivationType: "Maze Cultivation",
                     location: "Sfax, Chaaleb",
-onAddRegion: () {
-  if (region != null) {
-    _showAddPlantDialog(context, region!);
-  } else {
-    // Handle the case where region is null (e.g., show an error message)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Region data is not available')),
-    );
-  }
-},                  ),
+                    onAddRegion: () {
+                      if (region != null) {
+                        _showAddPlantDialog(context, region);
+                      } else {
+                        // Handle the case where region is null (e.g., show an error message)
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Region data is not available')),
+                        );
+                      }
+                    },
+                  ),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 150,
                     child: Card(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 4,
                       margin: const EdgeInsets.all(12),
                       child: const Column(
@@ -85,26 +80,30 @@ onAddRegion: () {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               RegionDetailInfocard(
-                                  title: "Expanse",
-                                  value: "3000m²",
-                                  imageName: "square_foot.png"),
+                                title: "Expanse",
+                                value: "3000m²",
+                                imageName: "square_foot.png",
+                              ),
                               RegionDetailInfocard(
-                                  title: "Temperature",
-                                  value: "25°C",
-                                  imageName: "thermostat_arrow_up.png"),
+                                title: "Temperature",
+                                value: "25°C",
+                                imageName: "thermostat_arrow_up.png",
+                              ),
                             ],
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               RegionDetailInfocard(
-                                  title: "Humidity",
-                                  value: "20%",
-                                  imageName: "humidity.png"),
+                                title: "Humidity",
+                                value: "20%",
+                                imageName: "humidity.png",
+                              ),
                               RegionDetailInfocard(
-                                  title: "Irrigation",
-                                  value: "50%",
-                                  imageName: "humidity_high.png"),
+                                title: "Irrigation",
+                                value: "50%",
+                                imageName: "humidity_high.png",
+                              ),
                             ],
                           ),
                         ],
@@ -138,13 +137,19 @@ onAddRegion: () {
       },
     );
   }
-}
 
-void _showAddPlantDialog(BuildContext context, Region region) {
+ void _showAddPlantDialog(BuildContext context, Region region) {
   showDialog(
     context: context,
     builder: (context) => Consumer<RegionDetailsViewModel>(
       builder: (context, viewModel, child) {
+        // When dialog opens, load plants if not already loaded.
+        Future.microtask(() {
+          if (viewModel.plants.isEmpty) {
+            viewModel.loadPlants();
+          }
+        });
+
         return AlertDialog(
           title: const Text('Select a Plant'),
           content: SizedBox(
@@ -158,20 +163,45 @@ void _showAddPlantDialog(BuildContext context, Region region) {
                         itemCount: viewModel.plants.length,
                         itemBuilder: (context, index) {
                           final plant = viewModel.plants[index];
-                          return ListTile(
-                            title: Text(plant.name),
-                            onTap: () async {
-                              await viewModel.addPlantToRegion(
-                                   region, plant.id, );
-                              Navigator.pop(context);
-                            },
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(child: Text(plant.name)),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.remove),
+                                      onPressed: () =>
+                                          viewModel.decrementQuantity(plant.id),
+                                    ),
+                                    Text(viewModel.getQuantity(plant.id).toString()),
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      onPressed: () =>
+                                          viewModel.incrementQuantity(plant.id),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await viewModel.addSelectedPlantsToRegion(region.id);
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
         );
       },
     ),
   );
 }
-
+}

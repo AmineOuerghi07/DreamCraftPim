@@ -21,16 +21,18 @@ class LandDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return Consumer<LandDetailsViewModel>(
-           builder: (context, viewModel, child) {
-        // Reset landResponse when the ID changes to force a fresh fetch
-        if (viewModel.landResponse.data?.id != id) {
-          viewModel.fetchLandById(id);
-          viewModel.fetchRegionsForLand(id);
-        }
+   return Consumer<LandDetailsViewModel>(
+      builder: (context, viewModel, child) {
+        // Schedule fetch after the build is complete
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (viewModel.landResponse.data?.id != id) {
+            viewModel.fetchLandById(id);
+            viewModel.fetchRegionsForLand(id);
+          }
+        });
         return _buildScaffold(context, viewModel.landResponse);
-         },
-         );
+      },
+    );
      
   }
 
