@@ -6,7 +6,7 @@ class RegionInfo extends StatelessWidget {
   final String location;
   final VoidCallback onAddRegion;
 
-  const RegionInfo({
+  const RegionInfo( {
     super.key,
     required this.regionCount,
     required this.cultivationType,

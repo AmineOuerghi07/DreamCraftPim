@@ -3,14 +3,12 @@ class Plant {
   final String imageUrl;
   final String name;
   final String description;
-  final int quantity;
 
   Plant({
     required this.id,
     required this.imageUrl,
     required this.name,
     required this.description,
-    required this.quantity,
   });
 
   // Factory constructor to create a Plant object from JSON
@@ -20,7 +18,6 @@ class Plant {
       imageUrl: json['imageUrl'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
-      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -31,7 +28,6 @@ class Plant {
       'imageUrl': imageUrl,
       'name': name,
       'description': description,
-      'quantity': quantity,
     };
   }
 
@@ -42,7 +38,6 @@ class Plant {
       'imageUrl': imageUrl,
       'name': name,
       'description': description,
-      'quantity': quantity.toString(),
     };
   }
 
@@ -59,7 +54,6 @@ class Plant {
       imageUrl: imageUrl ?? this.imageUrl,
       name: name ?? this.name,
       description: description ?? this.description,
-      quantity: quantity ?? this.quantity,
     );
   }
 }

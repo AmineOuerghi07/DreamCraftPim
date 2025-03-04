@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/plant.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
+import 'package:pim_project/model/services/land_service.dart';
 import 'package:pim_project/model/services/plant_service.dart';
 import 'package:pim_project/model/services/region_service.dart';
 
 class RegionDetailsViewModel with ChangeNotifier {
   final PlantService _plantService = PlantService();
   final RegionService _regionService = RegionService();
-  
+  final LandService _landService = LandService();
+
   ApiResponse<List<Plant>> _plantResponse = ApiResponse.initial('Fetching land details...');
   ApiResponse<Region>? _regionResponse;
-  
+  ApiResponse<Land>? _landResponse; // Added for land data
+
   List<Plant> _plants = [];
   Region? _region;
+  Land? _land; // Added to store land data
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -25,6 +30,7 @@ class RegionDetailsViewModel with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   Region? get region => _region;
+  Land? get land => _land; // Added getter for land
 
   // Returns the current quantity for a plant (default 0)
   int getQuantity(String plantId) => _plantQuantities[plantId] ?? 0;
@@ -52,6 +58,8 @@ class RegionDetailsViewModel with ChangeNotifier {
       if (response.status == Status.COMPLETED && response.data != null) {
         _region = response.data!;
         _regionResponse = ApiResponse.completed(response.data!);
+        // Fetch land data after getting the region
+        await getLandById(_region!.land.id);
       } else {
         _regionResponse = ApiResponse.error(response.message ?? 'Failed to fetch region');
       }
@@ -62,29 +70,26 @@ class RegionDetailsViewModel with ChangeNotifier {
     }
   }
 
-  Future<ApiResponse<Region>> addPlantToRegion(Region region, String plant) async {
-    _isLoading = true;
+  Future<void> getLandById(String landId) async {
+    _landResponse = ApiResponse.loading('Fetching land...');
     notifyListeners();
 
     try {
-      region.plants.add(plant); // adds the plant to the region
-
-      final response = await _regionService.updateRegion(region);
-
+      final response = await _landService.getLandById(landId); // Assuming this exists in LandService
       if (response.status == Status.COMPLETED && response.data != null) {
-        return ApiResponse.completed(response.data);
+        _land = response.data!;
+        _landResponse = ApiResponse.completed(response.data!);
       } else {
-        _errorMessage = response.message ?? 'Failed to update region';
-        return ApiResponse.error(_errorMessage!);
+        _landResponse = ApiResponse.error(response.message ?? 'Failed to fetch land');
       }
     } catch (e) {
-      _errorMessage = 'An error occurred: ${e.toString()}';
-      return ApiResponse.error(_errorMessage!);
+      _landResponse = ApiResponse.error('An error occurred: ${e.toString()}');
     } finally {
-      _isLoading = false;
       notifyListeners();
     }
   }
+
+ 
 
   // Load plants and initialize their quantities to 0
   Future<void> loadPlants() async {
@@ -95,7 +100,6 @@ class RegionDetailsViewModel with ChangeNotifier {
 
     try {
       final response = await _plantService.getPlants();
-      
       if (response.status == Status.COMPLETED && response.data != null) {
         _plants = response.data!;
         _plantResponse = ApiResponse.completed(_plants);
@@ -117,23 +121,23 @@ class RegionDetailsViewModel with ChangeNotifier {
   }
 
   Future<void> addSelectedPlantsToRegion(String regionId) async {
-  _isLoading = true;
-  notifyListeners();
-  try {
-    for (var entry in _plantQuantities.entries) {
-      final plantId = entry.key;
-      final qty = entry.value;
-      if (qty > 0) {
-        await _regionService.addPlantToRegion(regionId, plantId, qty);
-      }
-    }
-    // Optionally refresh the region data after adding plants
-    await getRegionById(regionId);
-  } catch (e) {
-    _errorMessage = 'Failed to add plants: ${e.toString()}';
-  } finally {
-    _isLoading = false;
+    _isLoading = true;
     notifyListeners();
+    try {
+      for (var entry in _plantQuantities.entries) {
+        final plantId = entry.key;
+        final qty = entry.value;
+        if (qty > 0) {
+          await _regionService.addPlantToRegion(regionId, plantId, qty);
+        }
+      }
+      // Refresh region data after adding plants
+      await getRegionById(regionId);
+    } catch (e) {
+      _errorMessage = 'Failed to add plants: ${e.toString()}';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
-}
 }

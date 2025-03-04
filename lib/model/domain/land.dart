@@ -67,4 +67,13 @@ factory Land.fromJson(Map<String, dynamic> json) {
       regions: regions ?? this.regions,
     );
   }
+  Map<String, dynamic> toJson() => {
+  '_id': id,
+  'name': name,
+  'cordonate': cordonate,
+  'forRent': forRent,
+  'surface': surface,
+  'image': image,
+  'regions': regions,
+};
 }

@@ -15,7 +15,7 @@ class RegionDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
-
+  
     // Only call `getRegionById` if the region is not already loaded.
     if (viewModel.region == null) {
       Future.microtask(() {
@@ -25,7 +25,14 @@ class RegionDetailsScreen extends StatelessWidget {
 
     return Consumer<RegionDetailsViewModel>(
       builder: (context, viewModel, child) {
-        final region = viewModel.region; // Get the region from the ViewModel
+        final region = viewModel.region;
+
+        // Show a loading indicator or placeholder if region data isn’t loaded yet
+        if (region == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
         return DefaultTabController(
           length: 2,
@@ -49,18 +56,11 @@ class RegionDetailsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RegionInfo(
-                    regionCount: "34",
-                    cultivationType: "Maze Cultivation",
-                    location: "Sfax, Chaaleb",
+                    regionCount: region.plants.length.toString(), // Number of plants in the region
+                    cultivationType: region.name, // Use region name as cultivation type
+                    location:  region.land.cordonate, // Display land ID (or fetch land name if available)
                     onAddRegion: () {
-                      if (region != null) {
-                        _showAddPlantDialog(context, region);
-                      } else {
-                        // Handle the case where region is null (e.g., show an error message)
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Region data is not available')),
-                        );
-                      }
+                      _showAddPlantDialog(context, region);
                     },
                   ),
                   const SizedBox(height: 16),
@@ -72,7 +72,7 @@ class RegionDetailsScreen extends StatelessWidget {
                       ),
                       elevation: 4,
                       margin: const EdgeInsets.all(12),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -81,12 +81,12 @@ class RegionDetailsScreen extends StatelessWidget {
                             children: [
                               RegionDetailInfocard(
                                 title: "Expanse",
-                                value: "3000m²",
+                                value: "${region.surface.toStringAsFixed(0)}m²", // Display surface area
                                 imageName: "square_foot.png",
                               ),
                               RegionDetailInfocard(
                                 title: "Temperature",
-                                value: "25°C",
+                                value: "N/A", // Replace with actual data if available
                                 imageName: "thermostat_arrow_up.png",
                               ),
                             ],
@@ -96,12 +96,12 @@ class RegionDetailsScreen extends StatelessWidget {
                             children: [
                               RegionDetailInfocard(
                                 title: "Humidity",
-                                value: "20%",
+                                value: "N/A", // Replace with actual data if available
                                 imageName: "humidity.png",
                               ),
                               RegionDetailInfocard(
                                 title: "Irrigation",
-                                value: "50%",
+                                value: "N/A", // Replace with actual data if available
                                 imageName: "humidity_high.png",
                               ),
                             ],
@@ -121,7 +121,7 @@ class RegionDetailsScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Expanded(
+                  Expanded(
                     child: TabBarView(
                       children: [
                         SmartRegionsGrid(),
@@ -138,70 +138,69 @@ class RegionDetailsScreen extends StatelessWidget {
     );
   }
 
- void _showAddPlantDialog(BuildContext context, Region region) {
-  showDialog(
-    context: context,
-    builder: (context) => Consumer<RegionDetailsViewModel>(
-      builder: (context, viewModel, child) {
-        // When dialog opens, load plants if not already loaded.
-        Future.microtask(() {
-          if (viewModel.plants.isEmpty) {
-            viewModel.loadPlants();
-          }
-        });
+  void _showAddPlantDialog(BuildContext context, Region region) {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer<RegionDetailsViewModel>(
+        builder: (context, viewModel, child) {
+          Future.microtask(() {
+            if (viewModel.plants.isEmpty) {
+              viewModel.loadPlants();
+            }
+          });
 
-        return AlertDialog(
-          title: const Text('Select a Plant'),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child: viewModel.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : viewModel.plants.isEmpty
-                    ? const Center(child: Text('No plants available'))
-                    : ListView.builder(
-                        itemCount: viewModel.plants.length,
-                        itemBuilder: (context, index) {
-                          final plant = viewModel.plants[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(child: Text(plant.name)),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.remove),
-                                      onPressed: () =>
-                                          viewModel.decrementQuantity(plant.id),
-                                    ),
-                                    Text(viewModel.getQuantity(plant.id).toString()),
-                                    IconButton(
-                                      icon: const Icon(Icons.add),
-                                      onPressed: () =>
-                                          viewModel.incrementQuantity(plant.id),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                await viewModel.addSelectedPlantsToRegion(region.id);
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
+          return AlertDialog(
+            title: const Text('Select a Plant'),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 300,
+              child: viewModel.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : viewModel.plants.isEmpty
+                      ? const Center(child: Text('No plants available'))
+                      : ListView.builder(
+                          itemCount: viewModel.plants.length,
+                          itemBuilder: (context, index) {
+                            final plant = viewModel.plants[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(child: Text(plant.name)),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.remove),
+                                        onPressed: () =>
+                                            viewModel.decrementQuantity(plant.id),
+                                      ),
+                                      Text(viewModel.getQuantity(plant.id).toString()),
+                                      IconButton(
+                                        icon: const Icon(Icons.add),
+                                        onPressed: () =>
+                                            viewModel.incrementQuantity(plant.id),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
             ),
-          ],
-        );
-      },
-    ),
-  );
-}
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await viewModel.addSelectedPlantsToRegion(region.id);
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }

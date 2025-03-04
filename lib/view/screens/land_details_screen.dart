@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -28,6 +27,7 @@ class LandDetailsScreen extends StatelessWidget {
           if (viewModel.landResponse.data?.id != id) {
             viewModel.fetchLandById(id);
             viewModel.fetchRegionsForLand(id);
+            viewModel.fetchPlantsForLand(id);
           }
         });
         return _buildScaffold(context, viewModel.landResponse);
@@ -368,7 +368,7 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
             regionCount: "34", 
             cultivationType: land.name,
             location: land.cordonate,
-            onAddRegion: () => _showAddRegionPopup(context, land.id),
+            onAddRegion: () => _showAddRegionPopup(context, land),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -436,7 +436,7 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
   }
 }
 
-void _showAddRegionPopup(BuildContext context, String landId) {
+void _showAddRegionPopup(BuildContext context, Land landId) {
   TextEditingController nameController = TextEditingController();
   TextEditingController surfaceController = TextEditingController();
 

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/land.dart';
+import 'package:pim_project/model/domain/plant-with-quantity.dart';
 
 import 'api_client.dart';
 
@@ -53,4 +54,13 @@ Future<ApiResponse<Land>> updateLand(String id, Land land, {File? image}) async 
     );
   }
 }
+
+Future<ApiResponse<List<PlantWithQuantity>>> getPlantsByLandId(String landId) async {
+    return await _apiClient.get(
+      'lands/land/plants/$landId',
+      (json) => (json as List)
+          .map((plantJson) => PlantWithQuantity.fromJson(plantJson))
+          .toList(),
+    );
+  }
 }
