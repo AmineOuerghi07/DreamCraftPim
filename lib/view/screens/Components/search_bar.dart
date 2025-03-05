@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 
 class SearchBar extends StatelessWidget {
   final TextEditingController controller;
-   final FocusNode focusNode;
+  final FocusNode focusNode;
   final VoidCallback onFilterTap;
-const SearchBar({ 
-   required this.controller,
-   required this.focusNode,
-    required this.onFilterTap,super.key
-     });
+  final ValueChanged<String>? onChanged; // Already included, just needs to be used
+
+  const SearchBar({
+    required this.controller,
+    required this.focusNode,
+    required this.onFilterTap,
+    super.key,
+    this.onChanged,
+  });
 
   @override
-  Widget build(BuildContext context){
- return Row(
+  Widget build(BuildContext context) {
+    return Row(
       children: [
         // Search bar
         Expanded(
@@ -28,9 +32,10 @@ const SearchBar({
               contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Color(0xFF6200EA) , width: 1.0),
+                borderSide: BorderSide(color: Color(0xFF6200EA), width: 1.0),
               ),
             ),
+            onChanged: onChanged, // Connect the callback here
           ),
         ),
         const SizedBox(width: 8),

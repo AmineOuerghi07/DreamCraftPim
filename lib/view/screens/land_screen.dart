@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/constants/constants.dart';
@@ -11,7 +9,6 @@ import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
 import 'package:pim_project/view/screens/Components/home_cart.dart';
-import 'package:pim_project/view/screens/map_screen.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -104,7 +101,6 @@ class LandScreen extends StatelessWidget {
                               icon: const Icon(Icons.map, color: Colors.blue),
                               onPressed: () async {
                                 final selectedLocation = await context.push(RouteNames.mapScreen);
-                                
                                 if (selectedLocation != null) {
                                   setState(() {
                                     locationController.text = selectedLocation as String;
@@ -243,6 +239,9 @@ class LandScreen extends StatelessWidget {
                       controller: searchController,
                       focusNode: searchFocusNode,
                       onFilterTap: () {},
+                      onChanged: (query) { // New: Pass query to view model
+                        Provider.of<LandViewModel>(context, listen: false).searchLands(query);
+                      },
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -255,7 +254,7 @@ class LandScreen extends StatelessWidget {
                         Consumer<LandViewModel>(
                           builder: (context, viewModel, child) {
                             return Text(
-                              "${viewModel.lands.length} Places",
+                              "${viewModel.filteredLands.length} Places", // Use filteredLands
                               style: const TextStyle(
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold,
@@ -298,34 +297,36 @@ class LandScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-Widget _buildLandList(LandViewModel viewModel) {
-  if (viewModel.landsResponse.status == Status.LOADING) {
-    return const Center(child: CircularProgressIndicator());
-  } else if (viewModel.landsResponse.status == Status.ERROR) {
-    return Center(child: Text("Error: ${viewModel.landsResponse.message}"));
-  } else if (viewModel.lands.isEmpty) {
-    return const Center(child: Text("No lands available."));
+  Widget _buildLandList(LandViewModel viewModel) {
+    if (viewModel.landsResponse.status == Status.LOADING) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (viewModel.landsResponse.status == Status.ERROR) {
+      return Center(child: Text("Error: ${viewModel.landsResponse.message}"));
+    } else if (viewModel.filteredLands.isEmpty && viewModel.lands.isEmpty) {
+      return const Center(child: Text("No lands available."));
+    } else if (viewModel.filteredLands.isEmpty) {
+      return const Center(child: Text("No lands match your search."));
+    }
+
+    return ListView.builder(
+      itemCount: viewModel.filteredLands.length,
+      itemBuilder: (context, index) {
+        final land = viewModel.filteredLands[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: HomeCart(
+            title: land.name,
+            location: land.cordonate,
+            description: "Surface: ${land.surface}m² • ${land.forRent ? 'For Rent' : 'Not Available'}",
+            imageUrl: land.image.isNotEmpty ? AppConstants.imagesbaseURL + land.image : 'assets/images/placeholder.png',
+            id: land.id,
+            onDetailsTap: () {
+              GoRouter.of(context).push('/land-details/${land.id}');
+            },
+          ),
+        );
+      },
+    );
   }
-
-  return ListView.builder(
-    itemCount: viewModel.lands.length,
-    itemBuilder: (context, index) {
-      final land = viewModel.lands[index];
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: HomeCart(
-          title: land.name,
-          location: land.cordonate,
-          description: "Surface: ${land.surface}m² • ${land.forRent ? 'For Rent' : 'Not Available'}",
-          imageUrl: land.image.isNotEmpty ? AppConstants.imagesbaseURL + land.image : 'assets/images/placeholder.png',
-          id: land.id,
-          onDetailsTap: () {
-            GoRouter.of(context).push('/land-details/${land.id}');
-          },
-        ),
-      );
-    },
-  );
 }
