@@ -82,7 +82,7 @@ class _OSMFlutterMapState extends State<OSMFlutterMap>
   }
 //**************************************************** */
 Future<void> _goToCurrentLocation() async {
-  StreamSubscription<Position>? positionStream; // Declare outside try block
+  StreamSubscription<Position>? positionStream; 
   try {
     print('Checking location service...');
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
