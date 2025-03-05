@@ -1,0 +1,1 @@
+enum HighlightLevel { normal, medium, danger }
