@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/services/api_client.dart';
+import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
 import 'package:pim_project/view/screens/Components/home_cart.dart';
@@ -102,15 +103,11 @@ class LandScreen extends StatelessWidget {
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.map, color: Colors.blue),
                               onPressed: () async {
-                                final selectedLocation = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const OSMFlutterMap(),
-                                  ),
-                                );
+                                final selectedLocation = await context.push(RouteNames.mapScreen);
+                                
                                 if (selectedLocation != null) {
                                   setState(() {
-                                    locationController.text = selectedLocation;
+                                    locationController.text = selectedLocation as String;
                                   });
                                 }
                               },

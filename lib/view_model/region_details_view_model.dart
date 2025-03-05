@@ -122,26 +122,28 @@ class RegionDetailsViewModel with ChangeNotifier {
     }
   }
 
-  Future<void> addSelectedPlantsToRegion(String regionId) async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      for (var entry in _plantQuantities.entries) {
-        final plantId = entry.key;
-        final qty = entry.value;
-        if (qty > 0) {
-          await _regionService.addPlantToRegion(regionId, plantId, qty);
-        }
+ Future<void> addSelectedPlantsToRegion(String regionId, {Map<String, int>? selectedPlants}) async {
+  _isLoading = true;
+  notifyListeners();
+  try {
+    // Use the provided selectedPlants, or fall back to _plantQuantities if none provided
+    final plantsToAdd = selectedPlants ?? _plantQuantities;
+    for (var entry in plantsToAdd.entries) {
+      final plantId = entry.key;
+      final qty = entry.value;
+      if (qty > 0) {
+        await _regionService.addPlantToRegion(regionId, plantId, qty);
       }
-      // Refresh region data after adding plants
-      await getRegionById(regionId);
-    } catch (e) {
-      _errorMessage = 'Failed to add plants: ${e.toString()}';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
+    // Refresh region data after adding plants
+    await getRegionById(regionId);
+  } catch (e) {
+    _errorMessage = 'Failed to add plants: ${e.toString()}';
+  } finally {
+    _isLoading = false;
+    notifyListeners();
   }
+}
 
   Future<ApiResponse<Region>> updateRegion(Region updatedRegion) async {
     _isLoading = true;

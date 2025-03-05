@@ -105,7 +105,7 @@ Future<void> pickImageFromGallery(BuildContext context) async {
       _capturedImage = File(pickedFile.path);
 
       // Navigate to Loading Screen
-      context.push(RouteNames.loading_screen);
+      context.push(RouteNames.loadingScreen);
 
       if (_capturedImage != null) {
         final response = await _predictionViewModel.predictImage(_capturedImage!);

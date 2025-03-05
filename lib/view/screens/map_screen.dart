@@ -82,49 +82,68 @@ class _OSMFlutterMapState extends State<OSMFlutterMap>
   }
 //**************************************************** */
 Future<void> _goToCurrentLocation() async {
+  StreamSubscription<Position>? positionStream; // Declare outside try block
   try {
-    // Check if location services are enabled
+    print('Checking location service...');
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      print('Location services disabled');
       return _showErrorDialog('Please enable location services');
     }
 
-    // Check permissions
+    print('Checking permissions...');
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
+      print('Permission denied, requesting...');
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        print('Permission denied after request');
         return _showErrorDialog('Location permissions denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      print('Permission denied forever');
       return _showErrorDialog('Enable permissions in app settings');
     }
 
-    // Get position
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    ).timeout(const Duration(seconds: 15));
-
-    // Update map
-    final currentLocation = LatLng(position.latitude, position.longitude);
-    _mapController.move(currentLocation, 15);
-    
-    setState(() {
-      selectedLocation = currentLocation;
-      markers = [
-        Marker(
-          point: currentLocation,
-          child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
-        )
-      ];
+    print('Starting location stream...');
+    positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 0,
+      ),
+    ).listen((Position position) {
+      print('Position update: ${position.latitude}, ${position.longitude}');
+      final currentLocation = LatLng(position.latitude, position.longitude);
+      _mapController.move(currentLocation, 15);
+      setState(() {
+        selectedLocation = currentLocation;
+        markers = [
+          Marker(
+            point: currentLocation,
+            child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+          )
+        ];
+      });
+      positionStream?.cancel(); // Safe to use now, cancel after first position
     });
 
+    // Timeout the stream after 30 seconds
+    await Future.delayed(const Duration(seconds: 30), () {
+      positionStream?.cancel();
+      if (selectedLocation == null) {
+        throw TimeoutException('Location stream timed out');
+      }
+    });
   } on TimeoutException {
-    _showErrorDialog('Location request timed out');
+    _showErrorDialog('Location request timed out. Try moving to an open area.');
   } catch (e) {
+    print('Error: $e');
     _showErrorDialog('Error: ${e.toString()}');
+  } finally {
+    // Ensure stream is cancelled if an error occurs
+    positionStream?.cancel();
   }
 }
 //********************************************* */

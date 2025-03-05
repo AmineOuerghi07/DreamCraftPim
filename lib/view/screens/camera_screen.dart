@@ -181,7 +181,7 @@ Future<void> _takePhoto() async {
 // Update the _handleImageProcessing method
 Future<void> _handleImageProcessing(File image) async {
   // Show loading immediately
-  context.push(RouteNames.loading_screen);
+  context.push(RouteNames.loadingScreen);
 
   try {
     final predictionViewModel = Provider.of<PredictionViewModel>(
@@ -279,7 +279,7 @@ void _showResultDialog(File image, String response) {
                     // Elevated Button
                     ElevatedButton(
                       onPressed: () {
-                        context.push(RouteNames.chat_screen);
+                        context.push(RouteNames.chatScreen);
                       },
                       child: Text("Let's Talk with Hassan"),
                     ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
-import 'package:pim_project/routes/routes.dart'; // Adjust path as needed
+import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
@@ -18,7 +18,6 @@ class RegionDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
 
-    // Fetch region data if not already loaded
     if (viewModel.region == null || viewModel.region!.id != id) {
       Future.microtask(() {
         viewModel.getRegionById(id);
@@ -30,15 +29,11 @@ class RegionDetailsScreen extends StatelessWidget {
         final regionResponse = viewModel.regionResponse;
 
         if (regionResponse?.status == Status.LOADING || regionResponse == null) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         if (regionResponse.status == Status.ERROR) {
-          return Scaffold(
-            body: Center(child: Text(regionResponse.message!)),
-          );
+          return Scaffold(body: Center(child: Text(regionResponse.message!)));
         }
 
         final region = viewModel.region!;
@@ -58,17 +53,11 @@ class RegionDetailsScreen extends StatelessWidget {
                   itemBuilder: (BuildContext context) => [
                     const PopupMenuItem<String>(
                       value: 'update',
-                      child: ListTile(
-                        leading: Icon(Icons.edit),
-                        title: Text('Update Region'),
-                      ),
+                      child: ListTile(leading: Icon(Icons.edit), title: Text('Update Region')),
                     ),
                     const PopupMenuItem<String>(
                       value: 'delete',
-                      child: ListTile(
-                        leading: Icon(Icons.delete),
-                        title: Text('Delete Region'),
-                      ),
+                      child: ListTile(leading: Icon(Icons.delete), title: Text('Delete Region')),
                     ),
                   ],
                 ),
@@ -83,17 +72,16 @@ class RegionDetailsScreen extends StatelessWidget {
                     regionCount: region.plants.length.toString(),
                     cultivationType: region.name,
                     location: viewModel.land?.cordonate ?? "Loading...",
-                    onAddRegion: () {
-                      _showAddPlantDialog(context, region, viewModel);
-                    },
+                    onAddRegion: () => _navigateToAddPlantScreen(context, region, viewModel),
+                    buttonText: "Add Plant",
+                    showRegionCount: false,
+                    onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 150,
                     child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 4,
                       margin: const EdgeInsets.all(12),
                       child: Column(
@@ -173,6 +161,15 @@ class RegionDetailsScreen extends StatelessWidget {
     }
   }
 
+ void _navigateToAddPlantScreen(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
+  context.push('${RouteNames.addplantScreen}/${region.id}').then((result) {
+    if (result != null && result is Map<String, int>) {
+      // Pass the result directly to addSelectedPlantsToRegion
+      viewModel.addSelectedPlantsToRegion(region.id, selectedPlants: result);
+    }
+  });
+}
+
   void _showUpdateRegionDialog(BuildContext context, RegionDetailsViewModel viewModel) {
     final region = viewModel.region!;
     TextEditingController nameController = TextEditingController(text: region.name);
@@ -218,10 +215,7 @@ class RegionDetailsScreen extends StatelessWidget {
                       : () async {
                           if (nameController.text.isEmpty || surfaceController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Please fill all fields"),
-                                backgroundColor: Colors.red,
-                              ),
+                              const SnackBar(content: Text("Please fill all fields"), backgroundColor: Colors.red),
                             );
                             return;
                           }
@@ -229,17 +223,12 @@ class RegionDetailsScreen extends StatelessWidget {
                           final surface = double.tryParse(surfaceController.text);
                           if (surface == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Invalid surface value"),
-                                backgroundColor: Colors.red,
-                              ),
+                              const SnackBar(content: Text("Invalid surface value"), backgroundColor: Colors.red),
                             );
                             return;
                           }
 
-                          setState(() {
-                            isLoading = true;
-                          });
+                          setState(() => isLoading = true);
 
                           final updatedRegion = Region(
                             id: region.id,
@@ -249,27 +238,20 @@ class RegionDetailsScreen extends StatelessWidget {
                             sensors: region.sensors,
                             plants: region.plants,
                           );
-                         print('Sending update payload: ${updatedRegion.toJson()}');
+                          print('Sending update payload: ${updatedRegion.toJson()}');
                           final response = await viewModel.updateRegion(updatedRegion);
 
-                          setState(() {
-                            isLoading = false;
-                          });
+                          setState(() => isLoading = false);
 
                           if (response.status == Status.COMPLETED) {
                             Navigator.of(dialogContext).pop();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(response.message ?? "Update failed"),
-                                backgroundColor: Colors.red,
-                              ),
+                              SnackBar(content: Text(response.message ?? "Update failed"), backgroundColor: Colors.red),
                             );
                           }
                         },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700),
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text('Update'),
@@ -296,15 +278,12 @@ class RegionDetailsScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               final response = await viewModel.deleteRegion(viewModel.region!.id);
-              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop();
               if (response.status == Status.COMPLETED && context.mounted) {
-                context.go(RouteNames.land); // Navigate back after deletion
+                context.go(RouteNames.land);
               } else if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(response.message ?? 'Delete failed'),
-                    backgroundColor: Colors.red,
-                  ),
+                  SnackBar(content: Text(response.message ?? 'Delete failed'), backgroundColor: Colors.red),
                 );
               }
             },
@@ -315,68 +294,18 @@ class RegionDetailsScreen extends StatelessWidget {
     );
   }
 
-  void _showAddPlantDialog(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
+  void _showAddSensorsDialog(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
     showDialog(
       context: context,
-      builder: (context) => Consumer<RegionDetailsViewModel>(
-        builder: (context, viewModel, child) {
-          Future.microtask(() {
-            if (viewModel.plants.isEmpty) {
-              viewModel.loadPlants();
-            }
-          });
-
-          return AlertDialog(
-            title: const Text('Select a Plant'),
-            content: SizedBox(
-              width: double.maxFinite,
-              height: 300,
-              child: viewModel.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : viewModel.plants.isEmpty
-                      ? const Center(child: Text('No plants available'))
-                      : ListView.builder(
-                          itemCount: viewModel.plants.length,
-                          itemBuilder: (context, index) {
-                            final plant = viewModel.plants[index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(child: Text(plant.name)),
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.remove),
-                                        onPressed: () =>
-                                            viewModel.decrementQuantity(plant.id),
-                                      ),
-                                      Text(viewModel.getQuantity(plant.id).toString()),
-                                      IconButton(
-                                        icon: const Icon(Icons.add),
-                                        onPressed: () =>
-                                            viewModel.incrementQuantity(plant.id),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  await viewModel.addSelectedPlantsToRegion(region.id);
-                  Navigator.pop(context);
-                },
-                child: const Text('Save'),
-              ),
-            ],
-          );
-        },
+      builder: (context) => AlertDialog(
+        title: const Text('Add Sensors'),
+        content: const Text('This feature is coming soon!'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }

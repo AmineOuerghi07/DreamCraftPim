@@ -369,6 +369,8 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
             cultivationType: land.name,
             location: land.cordonate,
             onAddRegion: () => _showAddRegionPopup(context, land),
+             buttonText: 'AddRegion',
+            
           ),
           const SizedBox(height: 16),
           SizedBox(
