@@ -1,11 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // for JSON encoding
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart'; 
 
-class PhoneNumberScreen extends StatelessWidget {
+class PhoneNumberScreen extends StatefulWidget {
   const PhoneNumberScreen({super.key});
+
+  @override
+  _PhoneNumberScreenState createState() => _PhoneNumberScreenState();
+}
+
+class _PhoneNumberScreenState extends State<PhoneNumberScreen> {
+  String _phoneNumber = ""; // Stocke le numéro saisi
+
+  // Fonction pour envoyer l'OTP
+  Future<void> sendOtp(BuildContext context) async {
+    final url = Uri.parse('http://192.168.161.220:3000/account/forgot-password-otp-phone');
+
+    try {
+      debugPrint("📡 Sending OTP to: $_phoneNumber");
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({'phone': _phoneNumber}),
+      );
+
+      debugPrint("📥 Response Status Code: ${response.statusCode}");
+      debugPrint("📥 Response Body: ${response.body}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint("✅ OTP sent successfully!");
+        // Naviguer vers la page de vérification avec le numéro de téléphone
+        context.push(RouteNames.phoneVerification, extra: _phoneNumber);
+      } else {
+        debugPrint("❌ Failed to send OTP: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to send OTP')),
+        );
+      }
+    } catch (e) {
+      debugPrint("🚨 Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +69,7 @@ class PhoneNumberScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              "Enter your phone number we will send you confirmation code",
+              "Enter your phone number and we will send you a confirmation code",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF777777),
@@ -58,9 +101,12 @@ class PhoneNumberScreen extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: Colors.black,
-              ), // Tunisia
+              ),
               onChanged: (phone) {
-                print("Phone Number: ${phone.completeNumber}");
+                setState(() {
+                  _phoneNumber = phone.completeNumber; // Met à jour le numéro
+                });
+                debugPrint("📞 Phone Number Updated: $_phoneNumber");
               },
             ),
             const SizedBox(height: 20),
@@ -69,18 +115,15 @@ class PhoneNumberScreen extends StatelessWidget {
                 backgroundColor: const Color(0xFF3E754E),
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
-              
-                 onPressed: () {
-                  /*Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ResetPasswordScreen()),
+              onPressed: () {
+                if (_phoneNumber.isNotEmpty) {
+                  sendOtp(context); // Envoi l'OTP avec le bon numéro
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a phone number')),
                   );
-                  */
-                  context.push(RouteNames.phoneVerification);
-            },
-                
-              
+                }
+              },
               child: const Center(
                 child: Text(
                   "Send",

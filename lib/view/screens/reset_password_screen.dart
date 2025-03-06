@@ -1,11 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pim_project/view/screens/login_screen.dart';
+import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
-import 'package:pim_project/routes/routes.dart'; 
+import 'package:pim_project/routes/routes.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String userId;
+  const ResetPasswordScreen({Key? key, required this.userId}) : super(key: key);
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -13,10 +15,10 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false; // Add a loading state
 
   @override
   void dispose() {
@@ -25,13 +27,73 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     super.dispose();
   }
 
-  // Removed the input validation logic
-  void _resetPassword() {
-    String password = _passwordController.text;
-    String confirmPassword = _confirmPasswordController.text;
+  Future<void> _resetPassword() async {
+    String password = _passwordController.text.trim();
+    String confirmPassword = _confirmPasswordController.text.trim();
 
-    // Simply print the entered password now
-    print("Password reset successful: $password");
+    if (password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields")),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 6 characters")),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true; // Show loading indicator
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.161.220:3000/account/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'userId': widget.userId, 
+          'newPassword': password,
+          'confirmPassword': confirmPassword
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Password reset successful!")),
+        );
+        // Navigate to LoginScreen after successful password reset
+        context.goNamed(RouteNames.login);
+      } else {
+        String errorMessage = "Failed to reset password";
+        try {
+          final decodedResponse = json.decode(response.body);
+          errorMessage = decodedResponse["message"] ?? errorMessage;
+        } catch (_) {
+          // Handle error
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Network error: ${e.toString()}")),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false; // Hide loading indicator
+      });
+    }
   }
 
   Widget _buildPasswordField({
@@ -74,113 +136,100 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              "Reset Password",
-              style: TextStyle(
-                color: Color(0xFF3E754E),
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Set new password",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF777777),
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Password Field
-            _buildPasswordField(
-              controller: _passwordController,
-              hintText: "Password",
-              obscureText: _obscurePassword,
-              onToggle: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
-            ),
-
-            const SizedBox(height: 15),
-
-            // Confirm Password Field
-            _buildPasswordField(
-              controller: _confirmPasswordController,
-              hintText: "Confirm Password",
-              obscureText: _obscureConfirmPassword,
-              onToggle: () {
-                setState(() {
-                  _obscureConfirmPassword = !_obscureConfirmPassword;
-                });
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            // Save Button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3E754E),
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 50),
+              const Text(
+                "Reset Password",
+                style: TextStyle(
+                  color: Color(0xFF3E754E),
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                 ),
-                minimumSize: const Size(double.infinity, 50),
               ),
-         onPressed: () {
-  _resetPassword(); // Exécute la fonction de réinitialisation du mot de passe
-  context.push(RouteNames.login); // Navigue directement vers l'écran de connexion
-},
-
-              
-              child: const Text(
-                "Save",
-                style: TextStyle(color: Colors.white, fontSize: 16),
+              const SizedBox(height: 10),
+              const Text(
+                "Set new password",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF777777),
+                  fontSize: 16,
+                ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Sign In Link
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
-              },
-              child: Text.rich(
-                TextSpan(
-                  text: "Did you remember your password? ",
-                  style: GoogleFonts.roboto(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
-                    color: Color(0xFF777777),
-                  ),
-                  children: [
-                    TextSpan(
-                      text: "Sign In",
-                      style: GoogleFonts.roboto(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF3E754E),
+              const SizedBox(height: 20),
+              _buildPasswordField(
+                controller: _passwordController,
+                hintText: "Password",
+                obscureText: _obscurePassword,
+                onToggle: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              ),
+              const SizedBox(height: 15),
+              _buildPasswordField(
+                controller: _confirmPasswordController,
+                hintText: "Confirm Password",
+                obscureText: _obscureConfirmPassword,
+                onToggle: () {
+                  setState(() {
+                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const CircularProgressIndicator() // Show loading spinner
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3E754E),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      onPressed: _resetPassword,
+                      child: const Text(
+                        "Save",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
-                  ],
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () {
+                  // Navigate to the login page
+                  context.goNamed(RouteNames.login);
+                },
+                child: Text.rich(
+                  TextSpan(
+                    text: "Did you remember your password? ",
+                    style: GoogleFonts.roboto(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF777777),
+                    ),
+                    children: [
+                      TextSpan(
+                        text: "Sign In",
+                        style: GoogleFonts.roboto(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF3E754E),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,31 +1,120 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:pim_project/main.dart';
+import 'package:pim_project/routes/routes.dart';
+import 'dart:convert';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+import 'package:pim_project/view/screens/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class ProfileScreen extends StatefulWidget {
+  final String userId;
+
+  const ProfileScreen({Key? key, required this.userId}) : super(key: key);
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isLoading = true;
+  Map<String, dynamic>? _profileData;
+  bool _isPushNotificationEnabled = true; // Add this line
+
+  @override
+  void initState() {
+    super.initState();
+    print("📌 ProfileScreen initialized with userId: ${widget.userId}");
+    if (widget.userId.isNotEmpty) {
+      fetchUserProfile(widget.userId);
+    } else {
+      print("🚨 Error: userId is empty in ProfileScreen!");
+    }
+  }
+
+  Future<void> fetchUserProfile(String userId) async {
+  if (userId.isEmpty) {
+    print("🚨 Error: User ID is empty! Not making request.");
+    return;
+  }
+
+  final url = Uri.parse('http://192.168.161.220:3000/account/profile/$userId');
+  print("🔵 Sending request to: $url");
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      if (mounted) {
+        setState(() {
+          _profileData = data;
+          _isLoading = false;
+        });
+      }
+    } else {
+      print('🔴 Error: Status Code ${response.statusCode}');
+      print('🔴 Response Body: ${response.body}');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  } catch (e) {
+    print('🔴 Exception while fetching profile: $e');
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
+    final userId = MyApp.userId;
     return Scaffold(
-      body: Padding(
-          padding: const EdgeInsets.only(left: 20.0,right: 20.0, top: 60.0 , bottom: 0),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 60.0, bottom: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Profile Avatar
-              CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage('assets/images/profile.png'), 
-              ),
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _profileData != null &&
+                              _profileData!['photos'] != null &&
+                              _profileData!['photos'].isNotEmpty
+                          ? NetworkImage(_profileData!['photos'][0])
+                          : AssetImage('assets/images/gatous.png') as ImageProvider,
+                    ),
               SizedBox(height: 12),
               // Name and Email
-              Text(
-                'Hamid Kano',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Hamid.kano@gmail.com',
-                style: TextStyle(color: Colors.grey),
-              ),
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : Text(
+                      _profileData?['fullname'] ?? 'Name not available',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : Text(
+                      _profileData?['email'] ?? 'Email not available',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : _profileData?['address'] != null
+                      ? Text(
+                          'Address: ${_profileData!['address']}',
+                          style: TextStyle(color: Colors.grey),
+                        )
+                      : Container(),
               SizedBox(height: 12),
               // Edit Profile Button
               ElevatedButton(
@@ -38,7 +127,7 @@ class ProfileScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Edit Profile' , style: TextStyle(color: Colors.white),),
+                child: Text('Edit Profile', style: TextStyle(color: Colors.white)),
               ),
               SizedBox(height: 15),
               // Inventories Section
@@ -63,12 +152,17 @@ class ProfileScreen extends StatelessWidget {
               _buildListItem(
                 icon: Icons.notifications,
                 title: 'Push Notification',
-                trailing: Switch(
-                  value: true,
-                  onChanged: (value) {
-                    // Handle toggle
-                  },
-                  activeColor: Colors.green,
+                trailing: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Switch(
+                    value: _isPushNotificationEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _isPushNotificationEnabled = value;
+                      });
+                    },
+                    activeColor: Colors.green,
+                  ),
                 ),
               ),
               _buildListItem(
@@ -89,15 +183,17 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.logout,
                 title: 'Logout',
                 textColor: Colors.red,
-                onTap: () {
-                  // Handle Logout
+                onTap: () async {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('userId'); // Clear saved user data
+                  context.go(RouteNames.login); 
                 },
               ),
             ],
           ),
         ),
-      );
-    
+      ),
+    );
   }
 
   Widget _buildSectionTitle(String title) {
@@ -138,4 +234,3 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-

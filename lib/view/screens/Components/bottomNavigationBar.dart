@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
 import 'package:pim_project/ProviderClasses/camera_provider.dart';
+import 'package:pim_project/main.dart';
 import 'package:pim_project/model/repositories/prediction_repository.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view_model/prediction_view_model.dart';
@@ -71,7 +72,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
 
                 switch (index) {
                   case 0:
-                    context.go(RouteNames.home);
+                    context.go(RouteNames.home, extra: MyApp.userId);
                     break;
                   case 1:
                     context.go(RouteNames.market);
@@ -83,7 +84,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                     context.go(RouteNames.land);
                     break;
                   case 4:
-                    context.go(RouteNames.profile);
+                    context.go(RouteNames.profile, extra: MyApp.userId);
                     break;
                 }
               },

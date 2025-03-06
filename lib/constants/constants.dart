@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const String baseURL = "http://127.0.0.1:3000/api";
+//const String baseURL = "http://192.168.213.220:3000/sign-in";
 const String plantIllnessBaseURL = "http://127.0.0.1:8000/";
 class AppConstants {
   static const double padding = 16.0;
@@ -10,4 +10,15 @@ class AppConstants {
   static const Color primaryColor = Color(0xFF6200EA);
   static const Color backgroundColor = Color(0xFFF5F5F5);
   static const String  chatBaseUrl = "http://192.168.43.232:8001";
+  //
+    static const String baseUrl = "http://192.168.237.220:3000"; 
+
+
+
+
+  // API Endpoints
+  static const String signInEndpoint = "$baseUrl/sign-in";
+  static const String landsEndpoint = "$baseUrl/lands";
+  static const String regionsEndpoint = "$baseUrl/regions";
+  static const String usersEndpoint = "$baseUrl/users";
 }
