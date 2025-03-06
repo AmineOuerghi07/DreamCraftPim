@@ -12,20 +12,20 @@ class LandScreen extends StatelessWidget {
     // Define the search controller
     final TextEditingController searchController = TextEditingController();
     final FocusNode searchFocusNode = FocusNode();
-    void _unfocus() {
+    void unfocus() {
       if (searchFocusNode.hasFocus) {
         searchFocusNode.unfocus();
       }
     }
 
     return GestureDetector(
-      onTap: _unfocus,
+      onTap: unfocus,
       child: Scaffold(
         body: Column(
           children: [
             const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12)),
-            Header(
+            const Header(
               profileImage: "assets/images/profile.png",
               greetingText: "Haaa! ",
               username: "Mahamed",
@@ -44,13 +44,14 @@ class LandScreen extends StatelessWidget {
                         // Handle filter button action
                         print("Filter button tapped!");
                       },
+                      onChanged: (value) {},
                     ),
                     const SizedBox(height: 16),
                  
                     const SizedBox(height: 16),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
+                      children: [
                         Text(
                           "Your Greenhouses",
                           style: TextStyle(

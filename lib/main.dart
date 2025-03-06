@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
+import 'package:pim_project/ProviderClasses/cartProvider.dart';
+import 'package:pim_project/ProviderClasses/factureProvider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
-import 'package:pim_project/ProviderClasses/quantity_provider.dart';
+import 'package:pim_project/ProviderClasses/product_details_provider.dart';
+
+
 import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view/screens/Components/factureDialog.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
@@ -27,7 +33,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -61,8 +67,12 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider<BottomNavigationProvider>(
               create: (context) => BottomNavigationProvider()),
           ChangeNotifierProvider(create: (_) => SmartRegionsProvider()),
-          ChangeNotifierProvider(create: (_) => QuantityProvider()),
+          ChangeNotifierProvider(create: (_) => ProductDetailsProvider(productId: 'your_product_id')),
           ChangeNotifierProvider(create: (_) => MarketProvider()),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => FactureProvider()),
+          ChangeNotifierProvider(create: (_) => SeeAllProductsProvider()),
+
         ],
         child: Builder(builder: (context) {
           return MaterialApp.router(

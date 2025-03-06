@@ -42,16 +42,16 @@ class ConnectToBluetooth extends StatelessWidget {
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {},
-                child: const Text(
-                  "Connect Your Device",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 23, 106, 26),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                ),
+                child: const Text(
+                  "Connect Your Device",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ],

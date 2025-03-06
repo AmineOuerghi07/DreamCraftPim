@@ -27,18 +27,18 @@ const Header({ required this.profileImage,
                   children: [
                     TextSpan(
                       text: greetingText,
-                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
                     ),
                     TextSpan(
                       text: username, // database
-                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.w700),
+                      style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          Icon(Icons.notifications, color: Colors.green),
+          const Icon(Icons.notifications, color: Colors.green),
         ],
       ),
     );

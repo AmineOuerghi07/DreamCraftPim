@@ -9,14 +9,14 @@ class SmartRegionCard extends StatelessWidget {
   final ValueChanged<bool> onSwitchChanged;
 
   const SmartRegionCard({
-    Key? key,
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.title,
     required this.subtitle,
     required this.switchValue,
     required this.onSwitchChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

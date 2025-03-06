@@ -3,7 +3,7 @@ import 'package:pim_project/view/screens/components/header.dart';
 import 'package:pim_project/view/screens/components/search_bar.dart' as custom;
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +18,9 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
-              Header(
-                profileImage: 'assets/images/profile.png', // Replace with your image asset
+              const Header(
+                profileImage:
+                    'assets/images/profile.png', // Replace with your image asset
                 greetingText: 'Hi!',
                 username: 'Mohamed',
               ),
@@ -28,12 +29,14 @@ class HomeScreen extends StatelessWidget {
               // Search Bar
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                // HomeScreen.dart
                 child: custom.SearchBar(
                   controller: searchController,
                   focusNode: searchFocusNode,
                   onFilterTap: () {
-                    // Handle filter button action
                     print("Filter button tapped!");
+                  },
+                  onChanged: (value) {          
                   },
                 ),
               ),
@@ -92,7 +95,6 @@ class HomeScreen extends StatelessWidget {
                       Image.asset(
                         "assets/images/help.png",
                         fit: BoxFit.cover,
-
                       ),
                     ],
                   ),
@@ -135,8 +137,8 @@ class SectionTitle extends StatelessWidget {
   const SectionTitle({
     required this.title,
     required this.places,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +165,7 @@ class SectionTitle extends StatelessWidget {
 }
 
 class HorizontalCardList extends StatelessWidget {
-  const HorizontalCardList({Key? key}) : super(key: key);
+  const HorizontalCardList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -175,8 +177,12 @@ class HorizontalCardList extends StatelessWidget {
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.only(
-              left: index == 0 ? 16.0 : 8.0, // Add left padding for the first item
-              right: index == 4 ? 16.0 : 0.0, // Add right padding for the last item
+              left: index == 0
+                  ? 16.0
+                  : 8.0, // Add left padding for the first item
+              right: index == 4
+                  ? 16.0
+                  : 0.0, // Add right padding for the last item
             ),
             child: Card(
               shape: RoundedRectangleBorder(
@@ -200,11 +206,11 @@ class HorizontalCardList extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             'Maze Cultivation',
                             style: TextStyle(fontWeight: FontWeight.bold),
