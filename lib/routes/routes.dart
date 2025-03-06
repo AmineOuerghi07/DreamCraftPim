@@ -4,6 +4,7 @@ import 'package:pim_project/main.dart';
 
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
+import 'package:pim_project/view/screens/add_plant_screen.dart';
 import 'package:pim_project/view/screens/camera_screen.dart';
 import 'package:pim_project/view/screens/chat_screen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
@@ -14,6 +15,7 @@ import 'package:pim_project/view/screens/land_screen.dart';
 import 'package:pim_project/view/screens/loading_screen.dart';
 import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
+import 'package:pim_project/view/screens/map_screen.dart';
 import 'package:pim_project/view/screens/market_screen.dart';
 import 'package:pim_project/view/screens/phone_verification_screen.dart';
 import 'package:pim_project/view/screens/product_details_screen.dart';
@@ -46,8 +48,10 @@ class RouteNames {
   static const String oTPVerification = '/otp-verification';
   static const String camera = '/camera' ;
   static const String productDetails = '/product-details';
-    static const String loading_screen= '/loading_screen';
-  static const String chat_screen= '/chat_screen';
+  static const String loadingScreen= '/loading_screen';
+  static const String chatScreen= '/chat_screen';
+  static const String addplantScreen= '/add_plant_screen';
+  static const String mapScreen= '/map_screen';
 
 
 }
@@ -115,7 +119,7 @@ final GoRouter router = GoRouter(
           builder: (context, state) =>  const ForgotPasswordScreen(),
         ),
            GoRoute(
-          path: RouteNames.loading_screen,
+          path: RouteNames.loadingScreen,
           builder: (context, state) =>  const LoadingAnimationScreen(),
         ),
 GoRoute(
@@ -176,11 +180,23 @@ GoRoute(
       builder: (context, state) => const CameraScreen(),
       
     ),
+     GoRoute(
+      path: RouteNames.mapScreen,
+      builder: (context, state) => const OSMFlutterMap(),
+      
+    ),
          GoRoute(
-      path: RouteNames.chat_screen,
+      path: RouteNames.chatScreen,
       builder: (context, state) => const ChatScreen(),
       
     ),
-    
+
+GoRoute(
+  path: '${RouteNames.addplantScreen}/:regionId', 
+  builder: (context, state) {
+    final regionId = state.pathParameters['regionId']!;
+    return AddPlantScreen(regionId: regionId);
+  },
+),
   ],
 );

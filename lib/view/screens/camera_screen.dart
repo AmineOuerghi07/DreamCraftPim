@@ -14,9 +14,9 @@ class CameraScreen extends StatefulWidget {
   _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver {
+class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver , TickerProviderStateMixin  {
   CameraController? _controller;
-  File? _pickedImage;
+ // File? _pickedImage;
   bool _isFlashOn = false;
   double _currentZoom = 1.0;
   bool _isInitialized = false;
@@ -25,11 +25,25 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   double _initialScale = 1.0;
   double _startingZoom = 1.0;
   String _zoomStatus = ''; // Indicator for zoom status
-  final TransformationController _transformationController = TransformationController();
-
+  //final TransformationController _transformationController = TransformationController();
+  AnimationController? _scanAnimationController;
+  final Color _scannerColor = Colors.white;
+  bool _isCameraFrozen = false;
+  File? _capturedImageFile;
   @override
   void initState() {
     super.initState();
+     _scanAnimationController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3000),
+  );
+  _scanAnimationController!.addStatusListener((status) {
+    if (status == AnimationStatus.completed) {
+      _scanAnimationController!.reverse();
+    } else if (status == AnimationStatus.dismissed) {
+      _scanAnimationController!.forward();
+    }
+  });
     WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
   }
@@ -103,28 +117,28 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   }
 
   // Zoom in by increasing the zoom level
-  void _zoomIn() {
-    final double newZoom = (_currentZoom + 0.5).clamp(_minZoom, _maxZoom);
-    _updateZoom(newZoom);
-  }
+  // void _zoomIn() {
+  //   final double newZoom = (_currentZoom + 0.5).clamp(_minZoom, _maxZoom);
+  //   _updateZoom(newZoom);
+  // }
 
-  // Zoom out by decreasing the zoom level
-  void _zoomOut() {
-    final double newZoom = (_currentZoom - 0.5).clamp(_minZoom, _maxZoom);
-    _updateZoom(newZoom);
-  }
+  // // Zoom out by decreasing the zoom level
+  // void _zoomOut() {
+  //   final double newZoom = (_currentZoom - 0.5).clamp(_minZoom, _maxZoom);
+  //   _updateZoom(newZoom);
+  // }
 
   // Update the zoom level of the camera
-  void _updateZoom(double newZoom) {
-    if (_controller == null || !_isInitialized) return;
+  // void _updateZoom(double newZoom) {
+  //   if (_controller == null || !_isInitialized) return;
 
-    setState(() {
-      _currentZoom = newZoom;
-    });
+  //   setState(() {
+  //     _currentZoom = newZoom;
+  //   });
 
-    // Update the camera zoom
-    _controller!.setZoomLevel(_currentZoom);
-  }
+  //   // Update the camera zoom
+  //   _controller!.setZoomLevel(_currentZoom);
+  // }
 
   Future<void> _toggleFlash() async {
     if (!_isInitialized) return;
@@ -132,16 +146,72 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     await _controller!.setFlashMode(_isFlashOn ? FlashMode.torch : FlashMode.off);
   }
 
-  Future<void> _takePhoto() async {
-    if (!_isInitialized) return;
-    try {
-      final image = await _controller!.takePicture();
-      _handleImageProcessing(File(image.path));
-    } catch (e) {
-      debugPrint("Photo error: $e");
+ // Update the _takePhoto method
+Future<void> _takePhoto() async {
+  if (!_isInitialized || _isCameraFrozen) return;
+  
+  try {
+    // Capture image first
+    final image = await _controller!.takePicture();
+    final capturedFile = File(image.path);
+
+    // Freeze UI and start animation
+    setState(() {
+      _isCameraFrozen = true;
+      _capturedImageFile = capturedFile;
+      _scanAnimationController!.repeat(reverse: true);
+    });
+
+    // Wait for full animation cycle (down + up)
+    await Future.delayed(_scanAnimationController!.duration! * 2);
+
+  } catch (e) {
+    debugPrint("Photo error: $e");
+  } finally {
+    if (mounted) {
+      setState(() => _scanAnimationController!.stop());
+      // Process image after animation
+      if (_capturedImageFile != null) {
+        _handleImageProcessing(_capturedImageFile!);
+      }
     }
   }
+}
 
+// Update the _handleImageProcessing method
+Future<void> _handleImageProcessing(File image) async {
+  // Show loading immediately
+  context.push(RouteNames.loadingScreen);
+
+  try {
+    final predictionViewModel = Provider.of<PredictionViewModel>(
+      context, 
+      listen: false
+    );
+    
+    // Get actual prediction without artificial delay
+    final response = await predictionViewModel.predictImage(image);
+
+    if (mounted) {
+      // Immediately show result when ready
+      context.pop(); // Remove loading
+      setState(() {
+        _isCameraFrozen = false;
+        _capturedImageFile = null;
+      });
+      
+      // Show bottom sheet in the next frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showResultDialog(image, response.data!);
+      });
+    }
+  } catch (e) {
+    if (mounted) {
+      context.pop(); // Remove loading on error
+      // Show error message
+    }
+  }
+}
   Future<void> _pickFromGallery() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -150,37 +220,79 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     }
   }
 
-  Future<void> _handleImageProcessing(File image) async {
-    context.push(RouteNames.loading_screen);
 
-    // Simulate image processing
-    await Future.delayed(const Duration(seconds: 2));
-
-    context.pop();
-    final predictionViewModel = Provider.of<PredictionViewModel>(context, listen: false);
-    final response = await predictionViewModel.predictImage(image);
-    _showResultDialog(image , response.data!);
-  }
-
-  void _showResultDialog(File image,String response) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Processing Result'),
-        content: Column(
-          children: [
-            Image.file(image),
-            Text('Prediction: ${response}'),
-ElevatedButton(
-  onPressed: () {
-    context.push(RouteNames.chat_screen);
-  },
-  child: Text("Let's Talk with Hassan"),
-)          ],
-        ),
+void _showResultDialog(File image, String response) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => Container(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Section
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.file(image, fit: BoxFit.cover),
+              ),
+              SizedBox(width: 16),
+              
+              // Text and Icon Section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        // Text Column
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Processing Result', 
+                                   style: TextStyle(fontWeight: FontWeight.bold)),
+                              SizedBox(height: 4),
+                              Text('Prediction: $response',
+                                   style: TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                        
+                        // Icon
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward_ios, 
+                               size: 20),
+                          onPressed: () {
+                            // Add your arrow action here
+                          },
+                        ),
+                      ],
+                    ),
+                    
+                    // Elevated Button
+                    ElevatedButton(
+                      onPressed: () {
+                        context.push(RouteNames.chatScreen);
+                      },
+                      child: Text("Let's Talk with Hassan"),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -189,83 +301,161 @@ ElevatedButton(
     }
 
     // Get screen size
-    final screenSize = MediaQuery.of(context).size;
 
    return Scaffold(
-  body: GestureDetector(
-    onScaleStart: _handleScaleStart,
-    onScaleUpdate: _handleScaleUpdate,
-    child: Stack(
-      children: [
-        // AspectRatio widget to enforce 1:1 aspect ratio for the camera preview
-        Positioned.fill(
-          child: AspectRatio(
-            aspectRatio: 1,
-            child: OverflowBox(
-              alignment: Alignment.center,
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: _controller!.value.previewSize != null
-                      ? _controller!.value.previewSize!.height
-                      : MediaQuery.of(context).size.width,
-                  height: _controller!.value.previewSize != null
-                      ? _controller!.value.previewSize!.width
-                      : MediaQuery.of(context).size.width,
-                  child: CameraPreview(_controller!),
-                ),
+  body:
+   LayoutBuilder(
+     builder: (context, constraints) {
+
+     return GestureDetector(
+      onScaleStart: _handleScaleStart,
+      onScaleUpdate: _handleScaleUpdate,
+      child: Stack(
+        children: [
+          // AspectRatio widget to enforce 1:1 aspect ratio for the camera preview
+          Positioned.fill(
+  child: _isCameraFrozen && _capturedImageFile != null
+      ? Image.file(_capturedImageFile!, fit: BoxFit.cover)
+      : AspectRatio(
+          aspectRatio: 1,
+          child: OverflowBox(
+            alignment: Alignment.center,
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _controller!.value.previewSize?.height ?? MediaQuery.of(context).size.width,
+                height: _controller!.value.previewSize?.width ?? MediaQuery.of(context).size.width,
+                child: CameraPreview(_controller!),
               ),
             ),
           ),
         ),
+),
         Center(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: 200 * _currentZoom,
-            height: 200 * _currentZoom,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.green.withOpacity(0.5)),
-              borderRadius: BorderRadius.circular(20),
+     child: SizedBox(
+      width: 130 * _currentZoom,
+      height: 130 * _currentZoom,
+     //  decoration: BoxDecoration(
+     // border: Border.all(color: Colors.red),), // Debug border
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: CustomPaint(
+              painter: ScannerBorderPainter(
+                color: _scannerColor,
+                cornerLength: 20 * _currentZoom, // Scale with zoom
+              ),
             ),
           ),
-        ),
-        // Gallery icon at the bottom-left
-        Positioned(
-          bottom: 16,
-          left: 16,
-          child: FloatingActionButton(
-            onPressed: _pickFromGallery,
-            backgroundColor: Colors.green,
-            child: const Icon(Icons.photo_library),
+          AnimatedBuilder(
+            animation: _scanAnimationController!,
+            builder: (context, child) {
+                  final animationValue = CurvedAnimation(
+      parent: _scanAnimationController!,
+      curve: Curves.easeInOut,
+    ).value;
+              return Positioned(
+                top: animationValue * 130 * _currentZoom,
+                child: Container(
+                  width: 130 * _currentZoom,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        _scannerColor.withOpacity(0),
+                        _scannerColor,
+                        _scannerColor.withOpacity(0),
+                      ],
+                      stops: [0.25, 0.5, 0.75],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        ),
-        // Camera icon at the bottom-center
-        Positioned(
-          bottom: 16,
-          left: MediaQuery.of(context).size.width / 2 - 28, // Center horizontally
-          child: FloatingActionButton(
-            onPressed: _takePhoto,
-            backgroundColor: Colors.green,
-            child: const Icon(Icons.camera),
+        ],
+      ),
+       ),
           ),
-        ),
-        // Flash icon at the top-right
-        Positioned(
-          top: 16,
-          right: 16,
-          child: FloatingActionButton(
-            onPressed: _toggleFlash,
-            backgroundColor: Colors.green,
-            child: Icon(
-              _isFlashOn ? Icons.flash_on : Icons.flash_off,
+          // Gallery icon at the bottom-left
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: FloatingActionButton(
+              onPressed: _pickFromGallery,
+              backgroundColor: Colors.green,
+              child: const Icon(Icons.photo_library),
             ),
           ),
-        ),
-      ],
-    ),
-  ),
+          // Camera icon at the bottom-center
+          Positioned(
+            bottom: 16,
+            left: MediaQuery.of(context).size.width / 2 - 28, // Center horizontally
+            child: FloatingActionButton(
+              onPressed: _takePhoto,
+              backgroundColor: Colors.green,
+              child: const Icon(Icons.camera),
+            ),
+          ),
+          // Flash icon at the top-right
+          Positioned(
+            top: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: _toggleFlash,
+              backgroundColor: Colors.green,
+              child: Icon(
+                _isFlashOn ? Icons.flash_on : Icons.flash_off,
+              ),
+            ),
+          ),
+        ],
+      ),
+         );
+  }),
 );
 
 
   }
+}
+class ScannerBorderPainter extends CustomPainter {
+  final Color color;
+  final double cornerLength;
+
+  ScannerBorderPainter({
+    required this.color,
+    this.cornerLength = 20.0,
+  });
+
+ @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2
+      
+      ..style = PaintingStyle.stroke;
+      
+
+    // Drawing four corners
+    double cornerLength = 15;
+
+    // Top-left corner
+    canvas.drawLine(Offset(0, 0), Offset(cornerLength, 0), paint);
+    canvas.drawLine(Offset(0, 0), Offset(0, cornerLength), paint);
+
+    // Top-right corner
+    canvas.drawLine(Offset(size.width, 0), Offset(size.width - cornerLength, 0), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(size.width, cornerLength), paint);
+
+    // Bottom-left corner
+    canvas.drawLine(Offset(0, size.height), Offset(cornerLength, size.height), paint);
+    canvas.drawLine(Offset(0, size.height), Offset(0, size.height - cornerLength), paint);
+
+    // Bottom-right corner
+    canvas.drawLine(Offset(size.width, size.height), Offset(size.width - cornerLength, size.height), paint);
+    canvas.drawLine(Offset(size.width, size.height), Offset(size.width, size.height - cornerLength), paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

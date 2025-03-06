@@ -9,7 +9,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
-import 'package:pim_project/ProviderClasses/camera_provider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/ProviderClasses/quantity_provider.dart';
 import 'package:pim_project/constants/constants.dart';
@@ -19,6 +18,9 @@ import 'package:pim_project/view_model/chat_view_model.dart';
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
+
+import 'package:pim_project/view_model/land_view_model.dart';
+import 'package:pim_project/view_model/login_view_model.dart';
 import 'package:pim_project/view_model/market_view_model.dart';
 import 'package:pim_project/view_model/prediction_view_model.dart';
 import 'package:pim_project/view_model/product_details_view_model.dart';
@@ -58,6 +60,7 @@ class MyApp extends StatelessWidget {
         } else {
           // Set the userId once it's retrieved
           MyApp.userId = snapshot.data ?? "";
+
 
           return MultiProvider(
             providers: [

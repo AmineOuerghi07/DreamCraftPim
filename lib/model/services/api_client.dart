@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -19,14 +21,24 @@ class ApiClient {
   }
 
   // GET request
-  Future<ApiResponse<T>> get<T>(String endpoint, T Function(dynamic) fromJson) async {
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/$endpoint'));
-      return _handleResponse(response, fromJson);
-    } catch (e) {
-      return ApiResponse.error('Error during GET request: $e');
+Future<ApiResponse<T>> get<T>(String endpoint, T Function(dynamic) fromJson) async {
+  try {
+    final response = await http.get(Uri.parse('$baseUrl/$endpoint'));
+    
+    if (response.statusCode == 404) { // Handle not found
+      return ApiResponse.error('Resource not found');
     }
+    
+    if (response.body.isEmpty) { // Handle empty response
+      return ApiResponse.error('Empty response from server');
+    }
+    
+    return _handleResponse(response, fromJson);
+  } catch (e) {
+    print('GET Error: $e');
+    return ApiResponse.error('Error during GET request: $e');
   }
+}
 
   // POST request
   Future<ApiResponse<T>> post<T>(String endpoint, dynamic body, T Function(dynamic) fromJson) async {
@@ -56,6 +68,39 @@ class ApiClient {
     }
   }
 
+
+Future<ApiResponse<T>> postMultipart<T>({
+    required String endpoint,
+    required Map<String, String> fields,
+    required Map<String, File> files,
+    required T Function(dynamic) parser,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      var request = http.MultipartRequest('POST', url);
+
+      // Add fields
+      fields.forEach((key, value) {
+        request.fields[key] = value;
+      });
+
+      // Add files
+      files.forEach((key, value) async {
+        request.files.add(await http.MultipartFile.fromPath(key, value.path));
+      });
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse.completed(parser(json.decode(responseBody)));
+      } else {
+        return ApiResponse.error('Failed to upload: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return ApiResponse.error('Network error: ${e.toString()}');
+    }
+  }
   // DELETE request
   Future<ApiResponse<void>> delete(String endpoint) async {
     try {
@@ -83,6 +128,51 @@ class ApiClient {
       return ApiResponse.error('Error during PATCH request: $e');
     }
   }
+Future<ApiResponse<T>> putMultipart<T>({
+  required String endpoint,
+  required Map<String, String> fields,
+  required Map<String, File> files,
+  required T Function(dynamic) parser,
+}) async {
+    try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      var request = http.MultipartRequest('PUT', url);
+
+      // Add fields
+      fields.forEach((key, value) {
+        request.fields[key] = value;
+      });
+
+      // Add files
+      files.forEach((key, value) async {
+        request.files.add(await http.MultipartFile.fromPath(key, value.path));
+      });
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse.completed(parser(json.decode(responseBody)));
+      } else {
+        return ApiResponse.error('Failed to upload: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      return ApiResponse.error('Network error: ${e.toString()}');
+    }
+}
+  Future<ApiResponse<dynamic>> sendMultipart(http.MultipartRequest request) async {
+  try {
+    final response = await request.send();
+    final body = await response.stream.bytesToString();
+    
+    if (response.statusCode == 200) {
+      return ApiResponse.completed(json.decode(body));
+    }
+    return ApiResponse.error('Failed: ${response.statusCode}');
+  } catch (e) {
+    return ApiResponse.error('Exception: $e');
+  }
+}
 }
 
 class ApiResponse<T> {
