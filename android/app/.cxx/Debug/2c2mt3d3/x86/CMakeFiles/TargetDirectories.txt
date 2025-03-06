@@ -1,0 +1,2 @@
+C:/Users/LENOVO/Desktop/pim/front/DreamCraftPim/android/app/.cxx/Debug/2c2mt3d3/x86/CMakeFiles/edit_cache.dir
+C:/Users/LENOVO/Desktop/pim/front/DreamCraftPim/android/app/.cxx/Debug/2c2mt3d3/x86/CMakeFiles/rebuild_cache.dir
