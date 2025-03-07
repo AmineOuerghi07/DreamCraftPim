@@ -1,3 +1,4 @@
+// constants/constants.dart
 import 'package:flutter/material.dart';
 
 
@@ -11,7 +12,7 @@ class AppConstants {
   static const Color backgroundColor = Color(0xFFF5F5F5);
   static const String  chatBaseUrl = "http://192.168.43.232:8001";
   //
-  static const String baseUrl = "http://192.168.237.220:3000"; 
+  static const String baseUrl = "http://192.168.43.232:3000"; 
 
 
 

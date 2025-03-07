@@ -1,13 +1,15 @@
+// model/services/OtpService.dart
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:pim_project/constants/constants.dart';
 
 class OtpService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://192.168.161.220:3000/account'));
+  final Dio _dio = Dio(BaseOptions(baseUrl: '${AppConstants.baseUrl}/account'));
 
   // Send OTP request via phone number
   Future<bool> sendOtp(String phoneNumber) async {
-    final Uri url = Uri.parse('http://192.168.161.220:3000/account/send-otp');
+    final Uri url = Uri.parse('${AppConstants.baseUrl}/account/send-otp');
 
     try {
       print("Sending OTP to: $phoneNumber");
@@ -36,7 +38,7 @@ class OtpService {
 
   // Send OTP request via Email
   Future<bool> sendOtpEmail(String email) async {
-    final Uri url = Uri.parse('http://192.168.161.220:3000/account/forgot-password-otp-email');
+    final Uri url = Uri.parse('${AppConstants.baseUrl}/account/forgot-password-otp-email');
 
     try {
       print("Sending OTP to: $email");
@@ -65,7 +67,7 @@ class OtpService {
 
   // Verify OTP request
   Future<bool> verifyOtp(String otp, String userId) async {
-    final Uri url = Uri.parse('192.168.161.220:3000/account/verify-otp');
+    final Uri url = Uri.parse('${AppConstants.baseUrl}/account/verify-otp');
 
     try {
       final response = await http.post(

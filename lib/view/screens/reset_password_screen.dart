@@ -1,9 +1,11 @@
+// view/screens/reset_password_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/constants/constants.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String userId;
@@ -58,7 +60,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.161.220:3000/account/reset-password'),
+        Uri.parse('${AppConstants.baseUrl}/account/reset-password'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'userId': widget.userId, 

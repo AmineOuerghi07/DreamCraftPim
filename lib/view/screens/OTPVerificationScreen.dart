@@ -1,9 +1,11 @@
+// view/screens/OTPVerificationScreen.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pinput/pinput.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:pim_project/constants/constants.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -31,7 +33,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
     try {
       var response = await http.post(
-        Uri.parse('http://192.168.161.220:3000/account/forgot-password-otp-email'),
+        Uri.parse('${AppConstants.baseUrl}/account/forgot-password-otp-email'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': widget.email}), // Dynamic email
       );
@@ -69,7 +71,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   // Send OTP function
   Future<void> _sendOtp() async {
     var response = await http.post(
-      Uri.parse('http://192.168.161.220:3000/account/forgot-password-otp-email'),
+      Uri.parse('${AppConstants.baseUrl}/account/forgot-password-otp-email'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'email': widget.email}),
     );
