@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pim_project/main.dart';
 
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
@@ -71,16 +72,32 @@ final GoRouter router = GoRouter(
       routes: [
         GoRoute(
           path: RouteNames.home,
-          builder: (context, state) => const HomeScreen(),
+          
+          builder: (context, state) {
+            String id = state.extra as String ?? "";
+            return HomeScreen(userId: id);
+          } 
         ),
         GoRoute(
           path: RouteNames.market,
           builder: (context, state) => const MarketScreen(),
         ),
-        GoRoute(
-          path: RouteNames.profile,
-          builder: (context, state) => const ProfileScreen(),
-        ),
+        
+    GoRoute(
+  path: RouteNames.profile,
+  builder: (context, state) {
+    final userId = state.extra as String? ?? ''; // Safely get userId
+    if (userId.isEmpty) {
+      print("🚨 Error: User ID is empty or null!");
+    } else {
+      print("✅ User ID received: $userId");
+    }
+    return ProfileScreen(userId: userId);
+  },
+),
+
+
+
         GoRoute(
           path: RouteNames.land,
           builder: (context, state) => const LandScreen(),
@@ -94,9 +111,9 @@ final GoRouter router = GoRouter(
           builder: (context, state) => const PhoneNumberScreen(),
         ),
         GoRoute(
-          path: RouteNames.login,
-          builder: (context, state) => const LoginScreen(),
-        ),
+      path: RouteNames.login,
+      builder: (context, state) => const LoginScreen(),
+    ),
         GoRoute(
           path: RouteNames.forgetPassword,
           builder: (context, state) =>  const ForgotPasswordScreen(),
@@ -105,17 +122,28 @@ final GoRouter router = GoRouter(
           path: RouteNames.loadingScreen,
           builder: (context, state) =>  const LoadingAnimationScreen(),
         ),
-        GoRoute(
-          path: RouteNames.resetPassword,
-          builder: (context, state) =>  const ResetPasswordScreen(),
-        ),
+GoRoute(
+  path: RouteNames.resetPassword,
+  builder: (context, state) {
+    final userId = state.uri.queryParameters['userId'] ?? '';  // Extract userId from query params
+    return ResetPasswordScreen(userId: userId);
+  },
+),
+
+
+
+
         GoRoute(
           path: RouteNames.signup,
           builder: (context, state) =>  const SignupScreen(),
           ),
-          GoRoute(path: RouteNames.oTPVerification,
-          builder: (context, state) => const OTPVerificationScreen(),
-          ),
+          GoRoute(
+  path: RouteNames.oTPVerification,
+  builder: (context, state) {
+    final email = state.uri.queryParameters['email'] ?? '';  // Get the email from query parameters
+    return OTPVerificationScreen(email: email);  // Pass the email to OTPVerificationScreen
+  },
+),
           GoRoute(
             path: RouteNames.emailVerification,
             builder: (context, state) => const EmailVerificationScreen(),

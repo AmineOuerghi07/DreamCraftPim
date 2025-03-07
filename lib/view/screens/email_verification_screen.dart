@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class EmailVerificationScreen extends StatelessWidget {
   const EmailVerificationScreen({Key? key}) : super(key: key);
@@ -26,7 +30,7 @@ class EmailVerificationScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 80),
                   Text(
-                    "Forget Password",
+                    "Forgot Password",
                     style: GoogleFonts.roboto(
                       color: const Color(0xFF3E754E),
                       fontSize: 28,
@@ -71,9 +75,10 @@ class EmailVerificationScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(100),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         String email = _emailController.text;
-                        /*if (email.isEmpty || !email.contains('@')) {
+
+                        if (email.isEmpty || !email.contains('@')) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content:
@@ -81,14 +86,31 @@ class EmailVerificationScreen extends StatelessWidget {
                           );
                           return;
                         }
-*/
-                        // Proceed to OTP screen after email validation
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => OTPVerificationScreen(),
-                          ),
+
+                        // Send request to the backend to check if email exists and send OTP
+                        var response = await http.post(
+                          Uri.parse('http://192.168.161.220:3000/account/forgot-password-otp-email'),
+                          headers: {'Content-Type': 'application/json'},
+                          body: json.encode({'email': email}),
                         );
+
+                        if (response.statusCode == 200 || response.statusCode == 201) {
+                          // OTP sent successfully, show alert and navigate to OTP verification
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('OTP sent successfully')),
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OTPVerificationScreen(email: email),
+                            ),
+                          );
+                        } else {
+                          // Show alert if email not found
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Email not found')),
+                          );
+                        }
                       },
                       child: Text(
                         "Send",
@@ -110,3 +132,4 @@ class EmailVerificationScreen extends StatelessWidget {
     );
   }
 }
+

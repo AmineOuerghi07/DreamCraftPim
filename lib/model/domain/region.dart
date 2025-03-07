@@ -1,10 +1,11 @@
-// model/domain/region.dart
+
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/plant-with-quantity.dart';
 
 class Region {
   final String id;
   final String name;
+
   final Land land;
   final double surface;
   final List<String> sensors;

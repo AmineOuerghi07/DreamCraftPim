@@ -2,8 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pinput/pinput.dart';
 import 'package:go_router/go_router.dart';
-class PhoneVerificationScreen extends StatelessWidget {
+
+class PhoneVerificationScreen extends StatefulWidget {
   const PhoneVerificationScreen({super.key});
+
+  @override
+  _PhoneVerificationScreenState createState() => _PhoneVerificationScreenState();
+}
+
+class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
+  String? otpReceived; // Variable to hold OTP received
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // ✅ Correctly extracting OTP using GoRouter
+    final extra = GoRouterState.of(context).extra;
+    if (extra is String) {
+      otpReceived = extra; // Ensure it's a String
+    } else {
+      otpReceived = null; // Handle the case where no OTP is provided
+    }
+  }
+
+ Future<void> verifyOtp(String enteredOtp, BuildContext context) async {
+  print("🔍 Entered OTP: $enteredOtp");
+  print("🔍 Received OTP: $otpReceived");
+
+  if (enteredOtp == otpReceived) {
+    context.push(RouteNames.resetPassword);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Incorrect OTP')),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +50,7 @@ class PhoneVerificationScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);
+            context.pop();
           },
         ),
         title: const Text(
@@ -57,7 +92,7 @@ class PhoneVerificationScreen extends StatelessWidget {
                 ),
               ),
               onCompleted: (pin) {
-                print("Entered OTP: $pin");
+                verifyOtp(pin, context); // Verify OTP on completion
               },
             ),
             const SizedBox(height: 20),
@@ -84,18 +119,9 @@ class PhoneVerificationScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
-                
                 onPressed: () {
-                  /*Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ResetPasswordScreen()),
-                  );
-                  */
-                  context.push(RouteNames.resetPassword);
-                                  },
-                
-            
+                  verifyOtp('manualOtp', context);
+                },
                 child: const Text(
                   "Verify",
                   style: TextStyle(
