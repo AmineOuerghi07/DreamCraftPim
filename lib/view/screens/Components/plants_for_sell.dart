@@ -68,6 +68,7 @@ class PlantCard extends StatelessWidget {
                 child: Center(
                   child: Image.asset(
                     product.image ?? "assets/images/pngwing.png", // Use product image URL or placeholder
+
                     height: 80,
                     fit: BoxFit.contain,
                   ),

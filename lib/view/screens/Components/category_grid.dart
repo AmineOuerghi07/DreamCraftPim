@@ -7,6 +7,7 @@ class CategoryGrid extends StatelessWidget {
   final List<String> categories;
   CategoryGrid({super.key, required this.categories});
 
+
   @override
   Widget build(BuildContext context) {
     return Expanded( // Removed unnecessary Column

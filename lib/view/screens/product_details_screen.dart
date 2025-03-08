@@ -35,6 +35,7 @@ class ProductDetailsScreen extends StatelessWidget {
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
+
               ),
               actions: [
                 IconButton(
@@ -117,6 +118,7 @@ class ProductDetailsScreen extends StatelessWidget {
                   const Text(
                     'Description',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+
                   ),
                   const SizedBox(height: 8),
                   Text(product.description ?? 'No description available'),

@@ -4,7 +4,8 @@ class SearchBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onFilterTap;
-  final ValueChanged<String> onChanged; // ✅ Correction ici
+
+  final ValueChanged<String>? onChanged; // Already included, just needs to be used
 
   const SearchBar({
     required this.controller,
@@ -12,6 +13,7 @@ class SearchBar extends StatelessWidget {
     required this.onFilterTap,
     required this.onChanged, // ✅ Ajouté ici
     super.key,
+
   });
 
   @override
@@ -34,8 +36,10 @@ class SearchBar extends StatelessWidget {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Color(0xFF6200EA), width: 1.0),
+
               ),
             ),
+            onChanged: onChanged, // Connect the callback here
           ),
         ),
         const SizedBox(width: 8),
