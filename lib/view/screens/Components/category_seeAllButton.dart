@@ -1,17 +1,21 @@
+
 import 'package:flutter/material.dart';
 
 class CategorySeeallbutton extends StatelessWidget {
   final VoidCallback navigateSeeAll;
-  const CategorySeeallbutton({super.key, required this.navigateSeeAll});
+  final List<String> categories;
+  // ignore: prefer_typing_uninitialized_variables
+  final index;
+  const CategorySeeallbutton({super.key, required this.navigateSeeAll, required this.categories, required this.index}); 
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          "Plants",
-          style: TextStyle(
+        Text(
+          categories[index],
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

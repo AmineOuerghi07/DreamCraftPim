@@ -11,7 +11,7 @@ class SmartRegionCard extends StatelessWidget {
   final HighlightLevel highlightLevel;
 
   const SmartRegionCard({
-    Key? key,
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.title,
