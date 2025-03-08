@@ -59,17 +59,15 @@ class Marketheader extends StatelessWidget {
                         await cartProvider.getcartProducts();
 
                     // ✅ Convert List<Product> → List<Map<String, dynamic>>
-                    List<Map<String, dynamic>> cartProductsMap = cartProducts
-                        .map((product) => product.toJson())
-                        .toList();
+                    List<Product> cartProductsMap = cartProducts;
+
 
                     // ✅ Show dialog after converting products
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return PaymentDialog(
-                          products:
-                              cartProductsMap, // Now correctly passing as List<Map<String, dynamic>>
+                        //  products: cartProductsMap, // Now correctly passing as List<Map<String, dynamic>>
                           onClose: () {
                             Navigator.pop(context);
                           },

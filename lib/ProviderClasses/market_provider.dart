@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 class MarketProvider extends ChangeNotifier {
   bool _isFilterActive = false;
+  bool _changefilterIcon = false;
   bool _isCategoryFilterActive = false;
   bool _isLoading = false;
   List<Product> _products = [];
@@ -14,7 +15,9 @@ class MarketProvider extends ChangeNotifier {
   String _category = '';
 
 
+
   String get category => _category;
+  bool get changefilterIcon => _changefilterIcon;
   bool get isFilterActive => _isFilterActive;
   bool get isLoading => _isLoading;
   bool get isCategoryFilterActive => _isCategoryFilterActive;
@@ -52,6 +55,11 @@ class MarketProvider extends ChangeNotifier {
 
   void toggleFilter() {
     _isFilterActive = !_isFilterActive;
+    notifyListeners();
+  }
+
+  void changeFilterIcon() {
+    _changefilterIcon = !_changefilterIcon;
     notifyListeners();
   }
 

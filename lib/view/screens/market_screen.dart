@@ -5,7 +5,7 @@ import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
 
 import 'package:pim_project/view/screens/Components/marketHeader.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
-import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
+import 'package:pim_project/view/screens/Components/marketScreenSearchBar.dart' as custom;
 import 'package:pim_project/view/screens/Components/seeAllProductsWithSameCategory.dart';
 import 'package:provider/provider.dart';
 
@@ -49,11 +49,20 @@ class MarketScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    custom.SearchBar(
+                    custom.Marketscreensearchbar(
                       controller: searchController,
                       focusNode: searchFocusNode,
                       onFilterTap: () {
-                        context.read<MarketProvider>().toggleFilter();
+                        if((marketProvider.isCategoryFilterActive)&&(marketProvider.changefilterIcon)) {
+                        marketProvider.toggleCategoryFilter(marketProvider.category);
+                        }else{
+                          marketProvider.toggleFilter();
+                        }
+                                             
+                        if (!marketProvider.isCategoryFilterActive) {
+                          marketProvider.changeFilterIcon();
+                        }
+                        
                       },
                       onChanged: (value) {
                         // Ensure MarketProvider updates based on search input
@@ -101,6 +110,7 @@ class MarketScreen extends StatelessWidget {
                                   categories: provider.categories,
                                   index: index,
                                   navigateSeeAll: () {
+                                    provider.changeFilterIcon();
                                     provider.toggleCategoryFilter(
                                         provider.categories[index]);
                                   }),

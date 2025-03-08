@@ -38,9 +38,15 @@ Future<void> checkSharedPref(Product product) async {
   List<String>? cartQte = prefs.getStringList('cartQte');
   cart ??= [];
   cartQte ??= [];
-  
-  cartQte.add(quantity.toString());
-  cart.add(product.id); // Assuming product.id is a string, otherwise convert it to string
+  if (cart.contains(product.id)) {
+    int index = cart.indexOf(product.id);
+    cartQte[index] = (int.parse(cartQte[index]) + quantity).toString();
+    await prefs.setStringList('cartQte', cartQte);
+  } else {
+    cartQte.add(quantity.toString());
+    cart.add(product.id); 
+  }
+ 
   await prefs.setStringList('cart', cart);
   await prefs.setStringList('cartQte', cartQte);
 }

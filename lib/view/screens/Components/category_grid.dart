@@ -21,8 +21,10 @@ class CategoryGrid extends StatelessWidget {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
+                  
                   marketProvider.toggleFilter(); // Toggle filter
                   marketProvider.toggleCategoryFilter(categories[index]); // Toggle category filter
+                 
                 },
                 child: Card(
                   shape: RoundedRectangleBorder(

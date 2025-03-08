@@ -6,11 +6,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CartProvider extends ChangeNotifier {
   bool isConfirmed = false;
   List<Product> cartItems = []; // Store cart items
+  
+  List<Product> get _products => cartItems;
 
-  void toggleConfirmation(bool value) {
-    isConfirmed = value;
-    notifyListeners();
-  }
+void toggleConfirmation(bool? value) {
+  if (value == null) return; // Handle null case
+  isConfirmed = value;
+  notifyListeners();
+}
+
+
 
   Future<List<Product>> getcartProducts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -31,9 +36,31 @@ class CartProvider extends ChangeNotifier {
         }
       }
     }
+    
 
     cartItems = returnList; // Store in provider
     notifyListeners(); // Notify UI updates
     return returnList;
   }
+
+ Future<void> removeItem(Product product) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> cart = prefs.getStringList('cart') ?? [];
+  List<String> cartQte = prefs.getStringList('cartQte') ?? [];
+
+  if (cart.contains(product.id)) {
+    int index = cart.indexOf(product.id);
+    cart.removeAt(index);
+    cartQte.removeAt(index);
+
+    await prefs.setStringList('cart', cart);
+    await prefs.setStringList('cartQte', cartQte);
+  }
+
+  // ✅ Remove from memory too
+  cartItems.removeWhere((p) => p.id == product.id);
+
+  notifyListeners(); // Notify UI update
+}
+
 }
