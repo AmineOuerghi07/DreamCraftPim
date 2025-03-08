@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/product.dart';
 
 class PlantsForSell extends StatelessWidget {
@@ -66,12 +67,13 @@ class PlantCard extends StatelessWidget {
               // Plant image
               Expanded(
                 child: Center(
-                  child: Image.asset(
-                    product.image ?? "assets/images/pngwing.png", // Use product image URL or placeholder
-
-                    height: 80,
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.network(
+  "${AppConstants.baseUrl}/uploads/${product.image}",
+  height: 200,
+  errorBuilder: (context, error, stackTrace) {
+    return const Text('Error loading image'); // Debug image loading issues
+  },
+),
                 ),
               ),
               const SizedBox(height: 8),
