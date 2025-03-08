@@ -1,3 +1,4 @@
+// view/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,7 @@ import 'dart:convert';
 
 import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pim_project/constants/constants.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -39,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return;
   }
 
-  final url = Uri.parse('http://192.168.161.220:3000/account/profile/$userId');
+  final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
   print("🔵 Sending request to: $url");
 
   try {

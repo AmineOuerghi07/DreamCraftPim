@@ -1,3 +1,4 @@
+// model/services/api_client.dart
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -5,8 +6,21 @@ import 'dart:convert';
 
 class ApiClient {
   final String baseUrl;
+  String? _authToken;
 
   ApiClient({required this.baseUrl});
+
+  void setAuthToken(String token) {
+    _authToken = token;
+  }
+
+  Map<String, String> get _headers {
+    final headers = {'Content-Type': 'application/json'};
+    if (_authToken != null) {
+      headers['Authorization'] = 'Bearer $_authToken';
+    }
+    return headers;
+  }
 
   // Helper method to handle common response logic
   ApiResponse<T> _handleResponse<T>(http.Response response, T Function(dynamic) fromJson) {
@@ -21,31 +35,41 @@ class ApiClient {
   }
 
   // GET request
-Future<ApiResponse<T>> get<T>(String endpoint, T Function(dynamic) fromJson) async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/$endpoint'));
-    
-    if (response.statusCode == 404) { // Handle not found
-      return ApiResponse.error('Resource not found');
+  Future<ApiResponse<T>> get<T>(String endpoint, T Function(dynamic) fromJson) async {
+    try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      print('Making GET request to: $url'); // Debug log
+      print('Headers: $_headers'); // Debug log
+
+      final response = await http.get(
+        url,
+        headers: _headers,
+      );
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
+      if (response.statusCode == 404) {
+        return ApiResponse.error('Resource not found');
+      }
+      
+      if (response.body.isEmpty) {
+        return ApiResponse.error('Empty response from server');
+      }
+      
+      return _handleResponse(response, fromJson);
+    } catch (e) {
+      print('GET Error: $e'); // Debug log
+      return ApiResponse.error('Error during GET request: $e');
     }
-    
-    if (response.body.isEmpty) { // Handle empty response
-      return ApiResponse.error('Empty response from server');
-    }
-    
-    return _handleResponse(response, fromJson);
-  } catch (e) {
-    print('GET Error: $e');
-    return ApiResponse.error('Error during GET request: $e');
   }
-}
 
   // POST request
   Future<ApiResponse<T>> post<T>(String endpoint, dynamic body, T Function(dynamic) fromJson) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/$endpoint'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: jsonEncode(body),
       );
       return _handleResponse(response, fromJson);
@@ -59,7 +83,7 @@ Future<ApiResponse<T>> get<T>(String endpoint, T Function(dynamic) fromJson) asy
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/$endpoint'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: jsonEncode(body),
       );
       return _handleResponse(response, fromJson);
@@ -68,8 +92,7 @@ Future<ApiResponse<T>> get<T>(String endpoint, T Function(dynamic) fromJson) asy
     }
   }
 
-
-Future<ApiResponse<T>> postMultipart<T>({
+  Future<ApiResponse<T>> postMultipart<T>({
     required String endpoint,
     required Map<String, String> fields,
     required Map<String, File> files,
@@ -120,7 +143,7 @@ Future<ApiResponse<T>> postMultipart<T>({
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/$endpoint'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: jsonEncode(body),
       );
       return _handleResponse(response, fromJson);

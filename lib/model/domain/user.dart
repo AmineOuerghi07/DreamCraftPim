@@ -1,7 +1,8 @@
+// model/domain/user.dart
 class User {
   final String userId;
-  final String fullname;
   final String email;
+  final String fullname;
   final String phonenumber;
   final String password;
   final String address;
@@ -9,8 +10,8 @@ class User {
 
   User({
     required this.userId,
-    required this.fullname,
     required this.email,
+    required this.fullname,
     required this.phonenumber,
     required this.address,
     required this.password,
@@ -20,13 +21,13 @@ class User {
   // Convert JSON response to User object
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      userId: json['id'] ?? '', 
-      fullname: json['fullname'] ?? '',
-      email: json['email'] ?? '',
-      phonenumber: json['phonenumber'] ?? '',
-      address: json['address'] ?? '',
-      password: json['password'] ?? '',
-      role: json['role'] ?? '',
+      userId: json['_id']?.toString() ?? json['id']?.toString() ?? json['userId']?.toString() ?? '',
+      fullname: json['fullname']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phonenumber: json['phonenumber']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
+      role: json['role']?.toString() ?? '',
     );
   }
 
