@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
+import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/model/repositories/user_repository.dart';
 import 'package:pim_project/model/services/user_service.dart';
@@ -103,6 +104,7 @@ class MyApp extends StatelessWidget {
               ),
               ChangeNotifierProvider(create: (context) => ForgetPasswordViewModel()),
               ChangeNotifierProvider(create: (context) => HomeViewModel()),
+               ChangeNotifierProvider(create: (context) => LandViewModel()),
               ChangeNotifierProvider(create: (context) => LandDetailsViewModel()),
               ChangeNotifierProvider(create: (context) => MarketViewModel()),
               ChangeNotifierProvider(create: (context) => ProductDetailsViewModel()),

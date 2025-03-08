@@ -55,7 +55,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await loginViewModel.login(email, password, rememberMe);
 
     if (success && mounted) {
-      context.go(RouteNames.home, extra: MyApp.userId);
+      final userId = loginViewModel.currentUser?.userId ?? MyApp.userId;
+      if (userId.isNotEmpty) {
+        context.go(RouteNames.home, extra: userId);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur: ID utilisateur non trouvé')),
+        );
+      }
     }
   }
 

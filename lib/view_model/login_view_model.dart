@@ -1,5 +1,6 @@
 // view_model/login_view_model.dart
 import 'package:flutter/material.dart';
+import 'package:pim_project/main.dart';
 import 'package:pim_project/model/repositories/user_repository.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
@@ -28,13 +29,18 @@ class LoginViewModel with ChangeNotifier {
       if (response.status == Status.COMPLETED && response.data != null) {
         currentUser = response.data;
         
-        // Save user data if remember me is checked
+        // Save user data and update MyApp.userId
+        await UserPreferences.setUserId(response.data!.userId);
+        MyApp.userId = response.data!.userId;
+        
+        // Save additional user data if remember me is checked
         if (rememberMe) {
           await UserPreferences.setUser(response.data!);
           await UserPreferences.setRememberMe(true);
         } else {
-          // If remember me is not checked, clear any previously saved data
+          // If remember me is not checked, only keep the current session data
           await UserPreferences.clear();
+          await UserPreferences.setUserId(response.data!.userId); // Keep the current session ID
         }
         
         return true;
