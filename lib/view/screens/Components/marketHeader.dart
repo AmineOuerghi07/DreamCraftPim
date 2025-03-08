@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/cartProvider.dart';
-import 'package:pim_project/model/product.dart';
-import 'package:pim_project/view/screens/Components/factureDialog.dart';
+
+import 'package:pim_project/view/screens/components/factureDialog.dart';
 import 'package:provider/provider.dart';
 
 class Marketheader extends StatelessWidget {
@@ -52,29 +52,13 @@ class Marketheader extends StatelessWidget {
           Consumer<CartProvider>(
             builder: (context, cartProvider, child) {
               return GestureDetector(
-                  child: const Icon(Icons.shopping_cart, color: Colors.green),
-                  onTap: () async {
-                    // ✅ Wait for products to be loaded
-                    List<Product> cartProducts =
-                        await cartProvider.getcartProducts();
-
-                    // ✅ Convert List<Product> → List<Map<String, dynamic>>
-                    List<Product> cartProductsMap = cartProducts;
-
-
-                    // ✅ Show dialog after converting products
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return PaymentDialog(
-                        //  products: cartProductsMap, // Now correctly passing as List<Map<String, dynamic>>
-                          onClose: () {
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
-                    );
+                child: const Icon(Icons.shopping_cart, color: Colors.green),
+                onTap: () {
+                  CartBottomSheet.show(context, () {
+                    // Handle payment completion
                   });
+                },
+              );
             },
           ),
         ],

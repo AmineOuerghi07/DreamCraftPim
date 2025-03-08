@@ -23,7 +23,6 @@ import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/Components/factureDialog.dart';
 
-import 'package:pim_project/ProviderClasses/quantity_provider.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/repositories/prediction_repository.dart';
 import 'package:pim_project/model/services/predection_service.dart';
@@ -146,7 +145,6 @@ class MyApp extends StatelessWidget {
               // Other Providers
               ChangeNotifierProvider(create: (context) => BottomNavigationProvider()),
               ChangeNotifierProvider(create: (_) => SmartRegionsProvider()),
-              ChangeNotifierProvider(create: (_) => QuantityProvider()),
               ChangeNotifierProvider(create: (_) => MarketProvider()),
           ChangeNotifierProvider(create: (_) => ProductDetailsProvider(productId: 'your_product_id')),
           ChangeNotifierProvider(create: (_) => CartProvider()),
