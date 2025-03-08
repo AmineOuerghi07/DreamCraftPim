@@ -1,3 +1,4 @@
+// view/screens/email_verification_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +6,7 @@ import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:pim_project/constants/constants.dart';
 
 class EmailVerificationScreen extends StatelessWidget {
   const EmailVerificationScreen({Key? key}) : super(key: key);
@@ -89,7 +91,7 @@ class EmailVerificationScreen extends StatelessWidget {
 
                         // Send request to the backend to check if email exists and send OTP
                         var response = await http.post(
-                          Uri.parse('http://192.168.161.220:3000/account/forgot-password-otp-email'),
+                          Uri.parse('${AppConstants.baseUrl}/account/forgot-password-otp-email'),
                           headers: {'Content-Type': 'application/json'},
                           body: json.encode({'email': email}),
                         );

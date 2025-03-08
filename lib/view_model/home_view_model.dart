@@ -1,3 +1,4 @@
+// view_model/home_view_model.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -20,7 +21,7 @@ class HomeViewModel with ChangeNotifier {
   Future<void> fetchRentedLands(String userId) async {
   print('📤 Sending request with userId: $userId');
 
-  final String url = 'http://192.168.161.220:3000/lands/users/$userId';
+  final String url = '${AppConstants.baseUrl}/lands/users/$userId';
   final response = await http.get(Uri.parse(url));
 
   print('📜 Response Status: ${response.statusCode}');
@@ -46,7 +47,7 @@ class HomeViewModel with ChangeNotifier {
 Future<void> fetchConnectedRegions(String userId) async {
   print('📤 Sending request with userId: $userId');
 
-  final String url = 'http://192.168.161.220:3000/lands/region/users/$userId';
+  final String url = '${AppConstants.baseUrl}/lands/region/users/$userId';
   final response = await http.get(Uri.parse(url));
 
   print('📜 Response Status: ${response.statusCode}');

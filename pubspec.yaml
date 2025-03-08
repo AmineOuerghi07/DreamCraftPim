@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   google_fonts: ^6.1.0
   font_awesome_flutter: ^10.5.0
   cupertino_icons: ^1.0.8
@@ -59,6 +60,7 @@ dependencies:
   firebase_core: ^3.12.1
   firebase_auth: ^5.5.1
   google_sign_in: 6.2.2
+  fluttertoast: ^8.2.4
 shared_preferences: ^2.0.11
 
 

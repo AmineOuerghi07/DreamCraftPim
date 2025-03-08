@@ -1,10 +1,11 @@
+// model/services/region_service.dart
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
 
 class RegionService {
 
-  final ApiClient _apiClient = ApiClient(baseUrl: AppConstants.baseURL);
+  final ApiClient _apiClient = ApiClient(baseUrl: AppConstants.baseUrl);
 
   Future<ApiResponse<Region>> addRegion(Region region) async {
         return _apiClient.post(

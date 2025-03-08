@@ -15,8 +15,8 @@ class HomeCart extends StatelessWidget {
     required this.imageUrl,
     required this.id,
     required this.onDetailsTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,15 +81,15 @@ class HomeCart extends StatelessWidget {
                   const SizedBox(height: 4),
                   ElevatedButton(
                     onPressed: onDetailsTap,
-                    child:  Text(
-                      "Read Details",
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
+                    ),
+                    child:  Text(
+                      "Read Details",
+                      style: TextStyle(fontSize: 12, color: Colors.white),
                     ),
                   ),
                 ],

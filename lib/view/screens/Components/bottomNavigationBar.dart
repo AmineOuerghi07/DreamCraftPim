@@ -43,7 +43,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                     child: InkWell(
                       onTap: () {
                         provider.setIndex(0);
-                        context.go(RouteNames.home);
+                        context.go(RouteNames.home,extra:  MyApp.userId);
                       },
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -98,7 +98,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                     child: InkWell(
                       onTap: () {
                         provider.setIndex(4);
-                        context.go(RouteNames.profile);
+                        context.go(RouteNames.profile,extra: MyApp.userId);
                       },
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

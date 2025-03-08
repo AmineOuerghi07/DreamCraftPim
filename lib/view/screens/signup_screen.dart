@@ -1,8 +1,10 @@
+// view/screens/signup_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:pim_project/routes/routes.dart'; // Import Dio for HTTP requests
+import 'package:pim_project/constants/constants.dart';
 
 class SignupScreen extends StatefulWidget {
   
@@ -218,7 +220,7 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       // Send POST request to the signup endpoint
       final response = await dio.post(
-        'http://192.168.161.220:3000/account/sign-up', // Your IP address here
+        '${AppConstants.baseUrl}/account/sign-up', // Your IP address here
         data: {
           'fullname': fullname,
           'email': email,

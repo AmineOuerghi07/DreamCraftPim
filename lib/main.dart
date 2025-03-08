@@ -1,5 +1,9 @@
+// main.dart
 import 'package:flutter/material.dart';
-import 'package:pim_project/model/services/UserPreferences%20.dart';
+
+import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
+import 'package:pim_project/model/services/UserPreferences.dart';
+import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/model/repositories/user_repository.dart';
 import 'package:pim_project/model/services/user_service.dart';
@@ -9,18 +13,26 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
+import 'package:pim_project/ProviderClasses/cartProvider.dart';
+import 'package:pim_project/ProviderClasses/factureProvider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
-import 'package:pim_project/ProviderClasses/quantity_provider.dart';
+
+import 'package:pim_project/ProviderClasses/product_details_provider.dart';
+
+
+import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view/screens/Components/factureDialog.dart';
+
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/repositories/prediction_repository.dart';
 import 'package:pim_project/model/services/predection_service.dart';
 import 'package:pim_project/view_model/chat_view_model.dart';
+
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 
-import 'package:pim_project/view_model/land_view_model.dart';
-import 'package:pim_project/view_model/login_view_model.dart';
+
 import 'package:pim_project/view_model/market_view_model.dart';
 import 'package:pim_project/view_model/prediction_view_model.dart';
 import 'package:pim_project/view_model/product_details_view_model.dart';
@@ -29,27 +41,47 @@ import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:pim_project/view_model/reset_password_view_model.dart';
 import 'package:pim_project/view_model/signup_view_model.dart';
 import 'package:pim_project/view_model/welcome_view_model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pim_project/model/services/api_client.dart';
 
-void main() {
+Future<void> initializeFirebase() async {
+  try {
+    await Firebase.initializeApp();
+    return;
+  } catch (e) {
+    Fluttertoast.showToast(
+      msg: "Some features might be limited. Firebase services are not available.",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+    // Return without throwing to allow app to continue
+    return;
+  }
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeFirebase();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) async {
-
     runApp(MyApp());
   });
 }
 
 class MyApp extends StatelessWidget {
+
   static String userId = "";
 
   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return FutureBuilder<String?>(
-      future: UserPreferences.getUserId(), // Retrieve userId from SharedPreferences
+      future: UserPreferences.getUserId(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show a loading indicator while waiting for the userId
           return MaterialApp(
             home: Scaffold(
               body: Center(
@@ -58,28 +90,34 @@ class MyApp extends StatelessWidget {
             ),
           );
         } else {
-          // Set the userId once it's retrieved
           MyApp.userId = snapshot.data ?? "";
-
 
           return MultiProvider(
             providers: [
-              // Add UserService and UserRepository providers
-              Provider(create: (context) => UserService(apiClient: context)),
+              // Core Services
               Provider(
+                create: (context) => ApiClient(baseUrl: AppConstants.baseUrl),
+              ),
+              Provider(
+                create: (context) => UserService(
+                  apiClient: context.read<ApiClient>(),
+                ),
+              ),
+              ChangeNotifierProvider(
                 create: (context) => UserRepository(
-                  userService: context.read<UserService>(), // Pass UserService to UserRepository
+                  userService: context.read<UserService>(),
                 ),
               ),
 
               // View Models
               ChangeNotifierProvider(
                 create: (context) => LoginViewModel(
-                  userRepository: context.read<UserRepository>(), // Pass UserRepository to LoginViewModel
-                ),
+                  userRepository: context.read<UserRepository>(),
+                )..checkLoginStatus(),
               ),
               ChangeNotifierProvider(create: (context) => ForgetPasswordViewModel()),
               ChangeNotifierProvider(create: (context) => HomeViewModel()),
+               ChangeNotifierProvider(create: (context) => LandViewModel()),
               ChangeNotifierProvider(create: (context) => LandDetailsViewModel()),
               ChangeNotifierProvider(create: (context) => MarketViewModel()),
               ChangeNotifierProvider(create: (context) => ProductDetailsViewModel()),
@@ -107,8 +145,11 @@ class MyApp extends StatelessWidget {
               // Other Providers
               ChangeNotifierProvider(create: (context) => BottomNavigationProvider()),
               ChangeNotifierProvider(create: (_) => SmartRegionsProvider()),
-              ChangeNotifierProvider(create: (_) => QuantityProvider()),
               ChangeNotifierProvider(create: (_) => MarketProvider()),
+          ChangeNotifierProvider(create: (_) => ProductDetailsProvider(productId: 'your_product_id')),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => FactureProvider()),
+          ChangeNotifierProvider(create: (_) => SeeAllProductsProvider()),
             ],
             child: MaterialApp.router(
               title: "PIM",

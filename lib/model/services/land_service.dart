@@ -1,3 +1,4 @@
+// model/services/land_service.dart
 import 'dart:io';
 
 import 'package:pim_project/constants/constants.dart';
@@ -7,7 +8,7 @@ import 'package:pim_project/model/domain/plant-with-quantity.dart';
 import 'api_client.dart';
 
 class LandService {
-  final ApiClient _apiClient = ApiClient(baseUrl: AppConstants.baseURL);
+  final ApiClient _apiClient = ApiClient(baseUrl: AppConstants.baseUrl);
 
  
   Future<ApiResponse<Land>> addLand({
