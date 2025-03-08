@@ -41,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return;
   }
 
-  final url = Uri.parse('${AppConstants.baseUrl}/account/profile/$userId');
+  final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
   print("🔵 Sending request to: $url");
 
   try {

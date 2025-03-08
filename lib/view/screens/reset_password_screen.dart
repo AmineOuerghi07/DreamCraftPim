@@ -74,7 +74,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           const SnackBar(content: Text("Password reset successful!")),
         );
         // Navigate to LoginScreen after successful password reset
-        context.goNamed(RouteNames.login);
+        context.go(RouteNames.login);
       } else {
         String errorMessage = "Failed to reset password";
         try {
