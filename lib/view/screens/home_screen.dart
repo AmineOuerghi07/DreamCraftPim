@@ -7,6 +7,7 @@ import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/model/domain/land.dart';
 
 class HomeScreen extends StatelessWidget {
+
   final String userId;
 
   const HomeScreen({Key? key, required this.userId}) : super(key: key);
@@ -30,6 +31,7 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
+
               Header(
                 profileImage: 'assets/images/profile.png',
                 greetingText: 'Hi!',
@@ -40,11 +42,14 @@ class HomeScreen extends StatelessWidget {
               // Search Bar
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                // HomeScreen.dart
                 child: custom.SearchBar(
                   controller: searchController,
                   focusNode: searchFocusNode,
                   onFilterTap: () {
                     print("Filter button tapped!");
+                  },
+                  onChanged: (value) {          
                   },
                 ),
               ),
@@ -97,6 +102,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
+
                       Image.asset("assets/images/help.png", fit: BoxFit.cover),
                     ],
                   ),
@@ -229,8 +235,8 @@ class SectionTitle extends StatelessWidget {
   const SectionTitle({
     required this.title,
     required this.places,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -256,6 +262,7 @@ class SectionTitle extends StatelessWidget {
   }
 }
 
+
 class HorizontalCardList<T> extends StatelessWidget {
   final List<T> items;
   final Widget Function(T) itemBuilder;
@@ -276,6 +283,7 @@ class HorizontalCardList<T> extends StatelessWidget {
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.only(
+
               left: index == 0 ? 16.0 : 8.0,
               right: index == items.length - 1 ? 16.0 : 0.0,
             ),
@@ -284,6 +292,7 @@ class HorizontalCardList<T> extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SizedBox(
+
                 width: 150,
                 child: itemBuilder(items[index]),
               ),

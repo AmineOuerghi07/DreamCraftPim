@@ -1,5 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
+
+import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
@@ -11,12 +13,22 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
+import 'package:pim_project/ProviderClasses/cartProvider.dart';
+import 'package:pim_project/ProviderClasses/factureProvider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
+
+import 'package:pim_project/ProviderClasses/product_details_provider.dart';
+
+
+import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view/screens/Components/factureDialog.dart';
+
 import 'package:pim_project/ProviderClasses/quantity_provider.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/repositories/prediction_repository.dart';
 import 'package:pim_project/model/services/predection_service.dart';
 import 'package:pim_project/view_model/chat_view_model.dart';
+
 import 'package:pim_project/view_model/forget_password_view_model.dart';
 import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
@@ -59,12 +71,14 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+
   static String userId = "";
 
   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return FutureBuilder<String?>(
       future: UserPreferences.getUserId(),
       builder: (context, snapshot) {
@@ -134,6 +148,10 @@ class MyApp extends StatelessWidget {
               ChangeNotifierProvider(create: (_) => SmartRegionsProvider()),
               ChangeNotifierProvider(create: (_) => QuantityProvider()),
               ChangeNotifierProvider(create: (_) => MarketProvider()),
+          ChangeNotifierProvider(create: (_) => ProductDetailsProvider(productId: 'your_product_id')),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => FactureProvider()),
+          ChangeNotifierProvider(create: (_) => SeeAllProductsProvider()),
             ],
             child: MaterialApp.router(
               title: "PIM",

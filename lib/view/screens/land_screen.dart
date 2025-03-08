@@ -25,6 +25,7 @@ class LandScreen extends StatelessWidget {
     final TextEditingController searchController = TextEditingController();
     final FocusNode searchFocusNode = FocusNode();
 
+
     void _unfocus() {
       if (searchFocusNode.hasFocus) {
         searchFocusNode.unfocus();
@@ -219,10 +220,11 @@ class LandScreen extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: _unfocus,
+      onTap: unfocus,
       child: Scaffold(
         body: Column(
           children: [
+
             const Padding(padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12)),
             const Header(
               profileImage: "assets/images/profile.png",
@@ -242,8 +244,10 @@ class LandScreen extends StatelessWidget {
                       onChanged: (query) { // New: Pass query to view model
                         Provider.of<LandViewModel>(context, listen: false).searchLands(query);
                       },
+                      onChanged: (value) {},
                     ),
                     const SizedBox(height: 16),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
