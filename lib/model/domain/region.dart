@@ -54,7 +54,6 @@ class Region {
   }
 
   Map<String, dynamic> toJson() => {
-        '_id': id,
         'name': name,
         'land': land.toJson(),
         'surface': surface,

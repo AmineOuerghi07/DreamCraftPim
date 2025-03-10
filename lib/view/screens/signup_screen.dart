@@ -226,7 +226,7 @@ class _SignupScreenState extends State<SignupScreen> {
           'email': email,
           'password': password,
           'confirmpassword': confirmPassword,
-          'phone': phone,
+          'phonenumber': phone,
           'address': address,
         },
       );

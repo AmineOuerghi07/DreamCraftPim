@@ -28,6 +28,7 @@ class SignupViewModel with ChangeNotifier {
         address: address,
         password: password,
         role: role,
+        phone: phonenumber,
       );
 
       // Pass the User object to the repository
