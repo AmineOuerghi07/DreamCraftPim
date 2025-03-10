@@ -1,4 +1,3 @@
-// model/domain/user.dart
 class User {
   final String userId;
   final String email;
@@ -7,6 +6,7 @@ class User {
   final String password;
   final String address;
   final String role;
+  final String phone;
 
   User({
     required this.userId,
@@ -16,6 +16,7 @@ class User {
     required this.address,
     required this.password,
     required this.role,
+    required this.phone,
   });
 
   // Convert JSON response to User object
@@ -28,6 +29,7 @@ class User {
       address: json['address']?.toString() ?? '',
       password: json['password']?.toString() ?? '',
       role: json['role']?.toString() ?? '',
+      phone: json['phonenumber']?.toString() ?? '',
     );
   }
 
@@ -44,8 +46,7 @@ class User {
       'address': address,
       'password': password,
       'role': role,
+      'phonenumber': phone,
     };
   }
-
-  
 }
