@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/product.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
@@ -50,10 +51,13 @@ class ProductDetailsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Image.asset(
-                      product.image ?? '../assets/images/pngwing.png',
-                      height: 200,
-                    ),
+                    child: Image.network(
+  "${AppConstants.baseUrl}/uploads/${product.image}",
+  height: 200,
+  errorBuilder: (context, error, stackTrace) {
+    return const Text('Error loading image'); // Debug image loading issues
+  },
+)
                   ),
                   const SizedBox(height: 4),
                   Row(

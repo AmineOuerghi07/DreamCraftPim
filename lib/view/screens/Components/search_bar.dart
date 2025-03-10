@@ -4,16 +4,14 @@ class SearchBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onFilterTap;
-
   final ValueChanged<String>? onChanged; // Already included, just needs to be used
 
   const SearchBar({
     required this.controller,
     required this.focusNode,
     required this.onFilterTap,
-    required this.onChanged, // ✅ Ajouté ici
     super.key,
-
+    this.onChanged,
   });
 
   @override
@@ -25,18 +23,16 @@ class SearchBar extends StatelessWidget {
           child: TextField(
             controller: controller,
             focusNode: focusNode,
-            onChanged: onChanged, // ✅ Correction ici
             decoration: InputDecoration(
               hintText: "Search...",
-              hintStyle: const TextStyle(color: Colors.black54),
-              prefixIcon: const Icon(Icons.search, color: Colors.black54),
+              hintStyle: TextStyle(color: Colors.black54),
+              prefixIcon: Icon(Icons.search, color: Colors.black54),
               filled: true,
               fillColor: Colors.transparent,
               contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF6200EA), width: 1.0),
-
+                borderSide: BorderSide(color: Color(0xFF6200EA), width: 1.0),
               ),
             ),
             onChanged: onChanged, // Connect the callback here
@@ -53,7 +49,7 @@ class SearchBar extends StatelessWidget {
               color: Colors.green,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.filter_list, color: Colors.white),
+            child: Icon(Icons.filter_list, color: Colors.white),
           ),
         ),
       ],

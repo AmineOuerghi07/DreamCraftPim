@@ -97,6 +97,7 @@ class UserService {
               address: '',
               password: '',
               role: '',
+              phone: ''
             );
             await UserPreferences.setUser(minimalUser);
             return ApiResponse.completed(minimalUser);
@@ -190,6 +191,7 @@ class UserService {
           address: tokenData['address'] ?? '',
           password: '', // We don't store the password
           role: tokenData['roles']?.isNotEmpty == true ? tokenData['roles'][0] : '',
+          phone: tokenData['phone'] ?? '',
         );
 
         // Store the user data
