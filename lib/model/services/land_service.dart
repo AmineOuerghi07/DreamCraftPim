@@ -56,6 +56,15 @@ Future<ApiResponse<Land>> updateLand(String id, Land land, {File? image}) async 
   }
 }
 
+Future<ApiResponse<List<Land>>> getLandsByUserId(String userId) async {
+  return await _apiClient.get(
+    'lands/users/$userId',
+    (json) => (json as List).map((landJson) => Land.fromJson(landJson)).toList(),
+  );
+}
+
+
+
 Future<ApiResponse<List<PlantWithQuantity>>> getPlantsByLandId(String landId) async {
     return await _apiClient.get(
       'lands/land/plants/$landId',

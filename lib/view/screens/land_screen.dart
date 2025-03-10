@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
@@ -17,9 +18,8 @@ class LandScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Defer the fetchLands() call until after the build phase
     Future.microtask(() {
-      Provider.of<LandViewModel>(context, listen: false).fetchLands();
+      Provider.of<LandViewModel>(context, listen: false).fetchLandsByUserId(MyApp.userId);
     });
 
     final TextEditingController searchController = TextEditingController();

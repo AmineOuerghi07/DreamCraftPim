@@ -1,3 +1,4 @@
+import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/region.dart';
 
 class Land {
@@ -44,7 +45,7 @@ factory Land.fromJson(Map<String, dynamic> json) {
       'cordonate': cordonate,
       'surface': surface.toString(),
       'forRent': forRent.toString(),
-      'user': "67ba2be5c1e090ed269faa5a"
+      'user': MyApp.userId,
     };
   }
 

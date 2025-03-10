@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/model/services/land_service.dart';
@@ -22,9 +23,7 @@ class LandViewModel extends ChangeNotifier {
   ApiResponse<Land> _addLandResponse = ApiResponse.initial('');
   ApiResponse<Land> get addLandResponse => _addLandResponse;
 
-  LandViewModel() {
-    fetchLands();
-  }
+
 
   Future<ApiResponse<List<Land>>> fetchLands() async {
     _landsResponse = ApiResponse.loading('Fetching lands...');
@@ -81,7 +80,7 @@ class LandViewModel extends ChangeNotifier {
 
       if (response.status == Status.COMPLETED) {
         _addLandResponse = ApiResponse.completed(response.data!);
-        await fetchLands(); // Refetch lands and reset filtered list
+        await fetchLandsByUserId(MyApp.userId); // Refetch lands and reset filtered list
       } else {
         _addLandResponse = ApiResponse.error(response.message ?? 'Failed to add land');
       }
@@ -106,4 +105,27 @@ class LandViewModel extends ChangeNotifier {
     }
     notifyListeners(); // Notify UI to rebuild with filtered lands
   }
+
+  Future<void> fetchLandsByUserId(String userId) async {
+  print('📤 Sending request with userId: $userId');
+
+
+  try {
+    final response = await _landService.getLandsByUserId(userId);
+    print('📥 Response: ${response.status} - ${response.data}');
+
+    if (response.status == Status.COMPLETED && response.data != null) {
+      _lands = response.data!;
+      _filteredLands = _lands; // Initially, filtered lands = all lands
+      _landsResponse = ApiResponse.completed(_lands);
+    } else {
+      _landsResponse = ApiResponse.error(response.message ?? 'Unknown error');
+    }
+  } catch (e, stack) {
+    print('Fetch Error: $e\n$stack');
+    _landsResponse = ApiResponse.error('Failed to fetch lands: ${e.toString()}');
+  } finally {
+    notifyListeners();
+  }
+}
 }
