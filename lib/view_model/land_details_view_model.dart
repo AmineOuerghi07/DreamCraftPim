@@ -30,6 +30,18 @@ class LandDetailsViewModel with ChangeNotifier {
   List<PlantWithQuantity> _plants = [];
   List<PlantWithQuantity> get plants => _plants;
 
+LandDetailsViewModel(String landId) {
+    _initialize(landId);
+  }
+
+  // Private async method to handle initialization
+  Future<void> _initialize(String landId) async {
+    await Future.wait([
+      fetchLandById(landId),
+      fetchRegionsForLand(landId),
+      fetchPlantsForLand(landId),
+    ]);
+  }
   // Reset plant data when switching lands
   void resetPlants() {
     _plants = [];

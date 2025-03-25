@@ -75,6 +75,20 @@ class MyApp extends StatelessWidget {
 
   MyApp({super.key});
 
+Future<String> _getInitialRoute() async {
+    final rememberMe = await UserPreferences.getRememberMe();
+    final userId = await UserPreferences.getUserId();
+    final token = await UserPreferences.getToken();
+
+    // If "Remember Me" is enabled and userId/token exist, go to HomeScreen
+    if (rememberMe && userId != null && token != null) {
+      MyApp.userId = userId; // Set the static userId
+      return RouteNames.home;
+    } else {
+      return RouteNames.login; // Otherwise, go to LoginScreen
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -118,7 +132,7 @@ class MyApp extends StatelessWidget {
               ChangeNotifierProvider(create: (context) => ForgetPasswordViewModel()),
               ChangeNotifierProvider(create: (context) => HomeViewModel()),
                ChangeNotifierProvider(create: (context) => LandViewModel()),
-              ChangeNotifierProvider(create: (context) => LandDetailsViewModel()),
+             // ChangeNotifierProvider(create: (context) => LandDetailsViewModel()), this will be called in the land_screen.dart
               ChangeNotifierProvider(create: (context) => MarketViewModel()),
               ChangeNotifierProvider(create: (context) => ProductDetailsViewModel()),
               ChangeNotifierProvider(create: (context) => ProfileViewModel()),

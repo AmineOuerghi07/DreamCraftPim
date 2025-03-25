@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
@@ -30,9 +31,16 @@ class LandDetailsScreen extends StatelessWidget {
             viewModel.fetchPlantsForLand(id);
           }
         });
-        return _buildScaffold(context, viewModel.landResponse);
+   return WillPopScope(
+          onWillPop: () async {
+            // Fetch updated plants when navigating back
+            await viewModel.fetchPlantsForLand(id);
+            return true; // Allow navigation
+          },
+          child: _buildScaffold(context, viewModel.landResponse),
+        );
       },
-    );
+    );    
      
   }
 
@@ -331,7 +339,7 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
             if (context.mounted) {
               // Pop details screen and refresh list
               context.pop(); 
- Provider.of<LandViewModel>(context, listen: false).fetchLands();
+ Provider.of<LandViewModel>(context, listen: false).fetchLandsByUserId(MyApp.userId);
              }
           },
           child: const Text('Delete', style: TextStyle(color: Colors.red)),

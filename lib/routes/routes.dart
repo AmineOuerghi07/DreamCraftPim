@@ -23,6 +23,8 @@ import 'package:pim_project/view/screens/region_details_screen.dart';
 import 'package:pim_project/view/screens/profile_screen.dart';
 import 'package:pim_project/view/screens/reset_password_screen.dart';
 import 'package:pim_project/view/screens/signup_screen.dart';
+import 'package:pim_project/view_model/land_details_view_model.dart';
+import 'package:provider/provider.dart';
 
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -157,7 +159,9 @@ GoRoute(
       path: '${RouteNames.landDetails}/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        return LandDetailsScreen(id: id);
+        return ChangeNotifierProvider(
+          create: (_) => LandDetailsViewModel(id),
+          child: LandDetailsScreen(id: id));
       },
     ),
     
