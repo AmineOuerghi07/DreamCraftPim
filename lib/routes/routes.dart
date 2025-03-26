@@ -159,9 +159,8 @@ GoRoute(
       path: '${RouteNames.landDetails}/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
-        return ChangeNotifierProvider(
-          create: (_) => LandDetailsViewModel(id),
-          child: LandDetailsScreen(id: id));
+        return 
+          LandDetailsScreen(id: id);
       },
     ),
     

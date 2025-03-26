@@ -132,7 +132,7 @@ Future<String> _getInitialRoute() async {
               ChangeNotifierProvider(create: (context) => ForgetPasswordViewModel()),
               ChangeNotifierProvider(create: (context) => HomeViewModel()),
                ChangeNotifierProvider(create: (context) => LandViewModel()),
-             // ChangeNotifierProvider(create: (context) => LandDetailsViewModel()), this will be called in the land_screen.dart
+              ChangeNotifierProvider(create: (context) => LandDetailsViewModel("")), 
               ChangeNotifierProvider(create: (context) => MarketViewModel()),
               ChangeNotifierProvider(create: (context) => ProductDetailsViewModel()),
               ChangeNotifierProvider(create: (context) => ProfileViewModel()),

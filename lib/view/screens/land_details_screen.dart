@@ -429,7 +429,6 @@ void _showDeleteConfirmationDialog(BuildContext context, LandDetailsViewModel vi
                     if (viewModel.regionsResponse.status == Status.ERROR) {
                       return Center(child: Text(viewModel.regionsResponse.message!));
                     }
-                    print("efezfez${viewModel.regions}");
                     return LandRegionsGrid(
                       landId: id,
                       regions: viewModel.regions,

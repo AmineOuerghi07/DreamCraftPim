@@ -21,4 +21,15 @@ class PlantWithQuantity {
         'plant': plant.toJson(), // Assuming Plant has a toJson method
         'quantity': totalQuantity, // Match backend field name
       };
+
+      @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlantWithQuantity &&
+          runtimeType == other.runtimeType &&
+          plant == other.plant &&
+          totalQuantity == other.totalQuantity;
+
+  @override
+  int get hashCode => plant.hashCode ^ totalQuantity.hashCode;
 }

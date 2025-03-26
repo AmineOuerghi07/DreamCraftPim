@@ -3,39 +3,24 @@ import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:provider/provider.dart';
 
-class PlantsGrid extends StatefulWidget {
+class PlantsGrid extends StatelessWidget {
   final String landId;
 
   const PlantsGrid({super.key, required this.landId});
 
   @override
-  _PlantsGridState createState() => _PlantsGridState();
-}
-
-class _PlantsGridState extends State<PlantsGrid> {
-  @override
-  void initState() {
-    super.initState();
-    // Trigger the initialization of the LandDetailsViewModel
-    Future.microtask(() {
-      final viewModel = Provider.of<LandDetailsViewModel>(context, listen: false);
-      viewModel.fetchPlantsForLand(widget.landId); // Ensure plants are fetched
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final vm = Provider.of<LandDetailsViewModel>(context, listen: false);
+    print('PlantsGrid ViewModel instance: $vm');
     return Consumer<LandDetailsViewModel>(
       builder: (context, viewModel, child) {
-        // Get the current plants list
+        print('Consumer rebuilding, plants: ${viewModel.plants.length}, instance: $viewModel');
         final plants = viewModel.plants;
 
-        // Only show loading indicator on initial load
         if (plants.isEmpty && viewModel.plantsResponse.status == Status.LOADING) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // If we have an error and no plants, show error message
         if (plants.isEmpty && viewModel.plantsResponse.status == Status.ERROR) {
           return Center(
             child: Column(
@@ -44,7 +29,7 @@ class _PlantsGridState extends State<PlantsGrid> {
                 Text('Error: ${viewModel.plantsResponse.message}'),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => viewModel.fetchPlantsForLand(widget.landId),
+                  onPressed: () => viewModel.fetchPlantsForLand(landId),
                   child: const Text('Retry'),
                 ),
               ],
@@ -52,19 +37,19 @@ class _PlantsGridState extends State<PlantsGrid> {
           );
         }
 
-        // If no plants, show empty state
         if (plants.isEmpty) {
           return const Center(child: Text('No plants found for this land'));
         }
 
-        // Show the list of plants
         return ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 8),
           itemCount: plants.length,
           itemBuilder: (context, index) {
             final plantWithQty = plants[index];
             final plant = plantWithQty.plant;
+            print('Building card for ${plant.name}, quantity: ${plantWithQty.totalQuantity}');
             return Card(
+              key: ValueKey('${plant.id}_${plantWithQty.totalQuantity}'), // Unique key
               margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
