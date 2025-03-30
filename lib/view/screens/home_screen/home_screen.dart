@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/region.dart';
+import 'package:pim_project/view/screens/home_screen/components/field_management_grid.dart';
+import 'package:pim_project/view/screens/home_screen/components/weather_card.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view/screens/components/header.dart';
 import 'package:pim_project/view/screens/components/search_bar.dart' as custom;
@@ -40,74 +42,88 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                // HomeScreen.dart
-                child: custom.SearchBar(
-                  controller: searchController,
-                  focusNode: searchFocusNode,
-                  onFilterTap: () {
-                    print("Filter button tapped!");
-                  },
-                  onChanged: (value) {          
-                  },
-                ),
-              ),
+      
               const SizedBox(height: 16),
-
-              // Help Card
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Need Our Help?",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text("Feel free to contact our support for any troubles"),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: () {
-                                print("Call Now button tapped!");
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              child: const Text(
-                                "Call Now",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      Image.asset("assets/images/help.png", fit: BoxFit.cover),
-                    ],
-                  ),
+                child: WeatherCard(),
+              ),
+              const SizedBox(height: 20),
+              
+              // Field Management Grid Component
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: FieldManagementGrid(
+                  onFeatureSelected: (feature) {
+                    // Handle feature selection
+                    print('Selected feature: $feature');
+                    
+                    // Add navigation logic based on selected feature
+                    switch (feature) {
+                      case 'regions':
+                        // Navigate to regions page
+                        break;
+                      case 'lands':
+                        // Navigate to lands page
+                        break;
+                      // Add other cases as needed
+                    }
+                  },
                 ),
               ),
+              // Help Card
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              //   child: Container(
+              //     padding: const EdgeInsets.all(16),
+              //     decoration: BoxDecoration(
+              //       color: Colors.green.withOpacity(0.1),
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     child: Row(
+              //       children: [
+              //         Expanded(
+              //           child: Column(
+              //             crossAxisAlignment: CrossAxisAlignment.start,
+              //             children: [
+              //               const Text(
+              //                 "Need Our Help?",
+              //                 style: TextStyle(
+              //                   fontSize: 16,
+              //                   fontWeight: FontWeight.bold,
+              //                 ),
+              //               ),
+              //               const SizedBox(height: 8),
+              //               const Text("Feel free to contact our support for any troubles"),
+              //               const SizedBox(height: 8),
+              //               ElevatedButton(
+              //                 onPressed: () {
+              //                   print("Call Now button tapped!");
+              //                 },
+              //                 style: ElevatedButton.styleFrom(
+              //                   backgroundColor: Colors.green,
+              //                   shape: RoundedRectangleBorder(
+              //                     borderRadius: BorderRadius.circular(4),
+              //                   ),
+              //                 ),
+              //                 child: const Text(
+              //                   "Call Now",
+              //                   style: TextStyle(
+              //                     fontSize: 12,
+              //                     color: Colors.white,
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //         const SizedBox(width: 16),
+
+              //         Image.asset("assets/images/help.png", fit: BoxFit.cover),
+              //       ],
+              //     ),
+              //   ),
+              // ),
                const SizedBox(height: 16),
 
               // Connected Regions Section

@@ -20,8 +20,6 @@ import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 
 
-import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/Components/factureDialog.dart';
 
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/repositories/prediction_repository.dart';

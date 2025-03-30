@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pim_project/main.dart';
 
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
@@ -9,7 +8,7 @@ import 'package:pim_project/view/screens/camera_screen.dart';
 import 'package:pim_project/view/screens/chat_screen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
 import 'package:pim_project/view/screens/forget_password_screen.dart';
-import 'package:pim_project/view/screens/home_screen.dart';
+import 'package:pim_project/view/screens/home_screen/home_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen.dart';
 import 'package:pim_project/view/screens/land_screen.dart';
 import 'package:pim_project/view/screens/loading_screen.dart';
@@ -23,8 +22,7 @@ import 'package:pim_project/view/screens/region_details_screen.dart';
 import 'package:pim_project/view/screens/profile_screen.dart';
 import 'package:pim_project/view/screens/reset_password_screen.dart';
 import 'package:pim_project/view/screens/signup_screen.dart';
-import 'package:pim_project/view_model/land_details_view_model.dart';
-import 'package:provider/provider.dart';
+
 
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -76,7 +74,7 @@ final GoRouter router = GoRouter(
           path: RouteNames.home,
           
           builder: (context, state) {
-            String id = state.extra as String ?? "";
+            String id = state.extra as String ;
             return HomeScreen(userId: id);
           } 
         ),
