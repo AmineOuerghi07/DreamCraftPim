@@ -58,7 +58,7 @@ class FieldManagementGrid extends StatelessWidget {
             Expanded(
               child: FeatureCard(
                 title: 'Balance',
-                icon: Icons.account_balance_outlined,
+                icon: Icons.account_balance_wallet_outlined,
                 iconBgColor: Colors.yellow[100]!,
                 onTap: () => onFeatureSelected('balance'),
               ),
