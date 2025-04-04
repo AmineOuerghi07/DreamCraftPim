@@ -4,7 +4,7 @@ import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:provider/provider.dart';
 
 class PlantsGrid extends StatelessWidget {
-  final String landId;
+  final String ? landId;
 
   const PlantsGrid({super.key, required this.landId});
 
@@ -29,7 +29,7 @@ class PlantsGrid extends StatelessWidget {
                 Text('Error: ${viewModel.plantsResponse.message}'),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => viewModel.fetchPlantsForLand(landId),
+                  onPressed: () => viewModel.fetchPlantsForLand(landId!),
                   child: const Text('Retry'),
                 ),
               ],

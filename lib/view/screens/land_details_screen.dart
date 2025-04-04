@@ -53,7 +53,7 @@ class LandDetailsScreen extends StatelessWidget {
     //      backgroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => context.go(RouteNames.land),
+            onPressed: () => context.pop(),
           ),
          actions: [
   PopupMenuButton<String>(
@@ -537,6 +537,7 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                                   name: nameController.text,
                                   surface: surface,
                                   land: landId,
+                                  isConnected: false
                                   // Add other required fields as per your Region model
                                 );
 

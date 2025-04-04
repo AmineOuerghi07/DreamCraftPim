@@ -73,4 +73,12 @@ Future<ApiResponse<List<PlantWithQuantity>>> getPlantsByLandId(String landId) as
           .toList(),
     );
   }
+
+
+  Future<ApiResponse<List<Land>>> findLandsForRent() async {
+    return _apiClient.get(
+      'lands/land/check/forRent',
+      (json) => (json as List).map((l) => Land.fromJson(l)).toList(),
+    );
+  }
 }

@@ -249,6 +249,7 @@ void _navigateToAddPlantScreen(
                             land: region.land,
                             sensors: region.sensors,
                             plants: region.plants,
+                            isConnected: region.isConnected,
                           );
                           print('Sending update payload: ${updatedRegion.toJson()}');
                           final response = await viewModel.updateRegion(updatedRegion);

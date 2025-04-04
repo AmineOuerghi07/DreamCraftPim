@@ -6,7 +6,7 @@ import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:provider/provider.dart';
 
 class LandRegionsGrid extends StatelessWidget {
-  final String landId;
+  final String ?landId;
   final List<Region> regions;
 
   const LandRegionsGrid({
@@ -36,11 +36,16 @@ class LandRegionsGrid extends StatelessWidget {
             final region = regions[index];
             return GestureDetector(
               onTap: () {
-                final landDetailsVM = context.read<LandDetailsViewModel>();
-                context.push(
-                  '${RouteNames.regionDetails}/${region.id}',
-                  extra: landDetailsVM, // Pass LandDetailsViewModel
-                );
+                if (landId != null) {
+        final landDetailsVM = context.read<LandDetailsViewModel>();
+        context.push(
+          '${RouteNames.regionDetails}/${region.id}',
+          extra: landDetailsVM,
+        );
+      } else {
+        context.push('${RouteNames.regionDetails}/${region.id}');
+      }
+    
               },
               child: Card(
                 shape: RoundedRectangleBorder(

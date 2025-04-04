@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
+import 'package:pim_project/view_model/connected_region_view_model.dart';
+import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/model/repositories/user_repository.dart';
@@ -129,6 +131,8 @@ Future<String> _getInitialRoute() async {
               ),
               ChangeNotifierProvider(create: (context) => ForgetPasswordViewModel()),
               ChangeNotifierProvider(create: (context) => HomeViewModel()),
+              ChangeNotifierProvider(create: (context) => ConnectedRegionViewModel()),
+              ChangeNotifierProvider(create: (_) => LandForRentViewModel()),
                ChangeNotifierProvider(create: (context) => LandViewModel()),
               ChangeNotifierProvider(create: (context) => LandDetailsViewModel("")), 
               ChangeNotifierProvider(create: (context) => MarketViewModel()),
