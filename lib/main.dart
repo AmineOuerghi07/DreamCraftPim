@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
+import 'package:pim_project/view_model/connected_region_view_model.dart';
+import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/model/repositories/user_repository.dart';
@@ -20,8 +22,6 @@ import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 
 
-import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/Components/factureDialog.dart';
 
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/repositories/prediction_repository.dart';
@@ -75,6 +75,20 @@ class MyApp extends StatelessWidget {
 
   MyApp({super.key});
 
+Future<String> _getInitialRoute() async {
+    final rememberMe = await UserPreferences.getRememberMe();
+    final userId = await UserPreferences.getUserId();
+    final token = await UserPreferences.getToken();
+
+    // If "Remember Me" is enabled and userId/token exist, go to HomeScreen
+    if (rememberMe && userId != null && token != null) {
+      MyApp.userId = userId; // Set the static userId
+      return RouteNames.home;
+    } else {
+      return RouteNames.login; // Otherwise, go to LoginScreen
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -117,8 +131,10 @@ class MyApp extends StatelessWidget {
               ),
               ChangeNotifierProvider(create: (context) => ForgetPasswordViewModel()),
               ChangeNotifierProvider(create: (context) => HomeViewModel()),
+              ChangeNotifierProvider(create: (context) => ConnectedRegionViewModel()),
+              ChangeNotifierProvider(create: (_) => LandForRentViewModel()),
                ChangeNotifierProvider(create: (context) => LandViewModel()),
-              ChangeNotifierProvider(create: (context) => LandDetailsViewModel()),
+              ChangeNotifierProvider(create: (context) => LandDetailsViewModel("")), 
               ChangeNotifierProvider(create: (context) => MarketViewModel()),
               ChangeNotifierProvider(create: (context) => ProductDetailsViewModel()),
               ChangeNotifierProvider(create: (context) => ProfileViewModel()),

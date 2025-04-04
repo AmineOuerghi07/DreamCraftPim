@@ -1,12 +1,9 @@
-// view/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:pim_project/main.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'dart:convert';
 
-import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pim_project/constants/constants.dart';
 
@@ -76,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = MyApp.userId;
+   // final userId = MyApp.userId;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(

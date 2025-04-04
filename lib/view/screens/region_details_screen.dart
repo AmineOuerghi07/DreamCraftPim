@@ -7,17 +7,19 @@ import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart'
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
+import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
 
 class RegionDetailsScreen extends StatelessWidget {
   final String id;
-  const RegionDetailsScreen({required this.id, super.key});
+  final LandDetailsViewModel? landDetailsViewModel;
+  const RegionDetailsScreen({required this.id,this.landDetailsViewModel, super.key});
 
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
-
+    final landVM = landDetailsViewModel ?? context.read<LandDetailsViewModel>();
     if (viewModel.region == null || viewModel.region!.id != id) {
       Future.microtask(() {
         viewModel.getRegionById(id);
@@ -25,7 +27,7 @@ class RegionDetailsScreen extends StatelessWidget {
     }
 
     return Consumer<RegionDetailsViewModel>(
-      builder: (context, viewModel, child) {
+      builder: (contextRegionDetailsViewModel, viewModel, child) {
         final regionResponse = viewModel.regionResponse;
 
         if (regionResponse?.status == Status.LOADING || regionResponse == null) {
@@ -72,8 +74,7 @@ class RegionDetailsScreen extends StatelessWidget {
                     regionCount: region.plants.length.toString(),
                     cultivationType: region.name,
                     location: viewModel.land?.cordonate ?? "Loading...",
-                    onAddRegion: () => _navigateToAddPlantScreen(context, region, viewModel),
-                    buttonText: "Add Plant",
+onAddRegion: () => _navigateToAddPlantScreen(contextRegionDetailsViewModel, region, viewModel, landVM),                    buttonText: "Add Plant",
                     showRegionCount: false,
                     onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
                   ),
@@ -161,13 +162,24 @@ class RegionDetailsScreen extends StatelessWidget {
     }
   }
 
- void _navigateToAddPlantScreen(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
-  context.push('${RouteNames.addplantScreen}/${region.id}').then((result) {
+void _navigateToAddPlantScreen(
+  BuildContext context,
+  Region region,
+  RegionDetailsViewModel regionVM,
+  LandDetailsViewModel landVM,
+) {
+  context.push('${RouteNames.addplantScreen}/${region.id}').then((result) async {
     if (result != null && result is Map<String, int>) {
-      // Pass the result directly to addSelectedPlantsToRegion
-      viewModel.addSelectedPlantsToRegion(region.id, selectedPlants: result);
+      await regionVM.addSelectedPlantsToRegion(region.id, selectedPlants: result);
+      print('Navigation ViewModel instance: $landVM, hash: ${landVM.hashCode}');
+      
+    //  await Future.delayed(const Duration(seconds: 2)); // Keep 2s delay
+      await landVM.fetchPlantsForLand(region.land.id);
+      
+      print('Fetch completed for landId: ${region.land.id}, quantity: ${landVM.plants.isNotEmpty ? landVM.plants.first.totalQuantity : "none"}');
     }
   });
+}
 }
 
   void _showUpdateRegionDialog(BuildContext context, RegionDetailsViewModel viewModel) {
@@ -237,6 +249,7 @@ class RegionDetailsScreen extends StatelessWidget {
                             land: region.land,
                             sensors: region.sensors,
                             plants: region.plants,
+                            isConnected: region.isConnected,
                           );
                           print('Sending update payload: ${updatedRegion.toJson()}');
                           final response = await viewModel.updateRegion(updatedRegion);
@@ -309,4 +322,3 @@ class RegionDetailsScreen extends StatelessWidget {
       ),
     );
   }
-}

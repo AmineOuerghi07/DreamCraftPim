@@ -26,61 +26,45 @@ class SmartRegionCard extends StatelessWidget {
     // Base background color based on switchValue
     Color baseColor = switchValue ? const Color(0xFF204D4F) : Colors.grey;
 
-    // Define highlight styles
+    // Define highlight styles without border colors
     BoxDecoration cardDecoration;
-    Color subtitleColor;
     switch (highlightLevel) {
       case HighlightLevel.normal:
         cardDecoration = BoxDecoration(
           color: baseColor,
           borderRadius: BorderRadius.circular(12),
         );
-        subtitleColor = Colors.white70;
         break;
       case HighlightLevel.medium:
         cardDecoration = BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              baseColor,
-              Colors.yellow.withOpacity(0.3), // Subtle yellow tint
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: baseColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.yellow, width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.yellow.withOpacity(0.1),
-              blurRadius: 4,
-              spreadRadius: 1,
-            ),
-          ],
         );
-        subtitleColor = Colors.yellow[200]!; // Lighter yellow for readability
         break;
       case HighlightLevel.danger:
         cardDecoration = BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              baseColor,
-              Colors.red.withOpacity(0.4), // Subtle red tint
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: baseColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.red.withOpacity(0.1),
-              blurRadius: 4,
-              spreadRadius: 2,
-            ),
-          ],
         );
-        subtitleColor = Colors.red[300]!; // Lighter red for readability
         break;
+    }
+
+    // Determine subtitle color based on highlightLevel and title
+    Color getSubtitleColor() {
+      switch (highlightLevel) {
+        case HighlightLevel.medium:
+          return const Color(0xFFEAA31F); // Warning color
+        case HighlightLevel.danger:
+          return const Color(0xFFCF2F2F); // Danger color
+        case HighlightLevel.normal:
+          if (title == "Irrigation") {
+            return const Color(0xFF4968FF); // Water safe color
+          } else if (title == "Soil") {
+            return const Color(0xFFB95C00); // Growth color
+          } else {
+            return const Color(0xFFB9A900); // Default safe color
+          }
+      }
     }
 
     return Card(
@@ -141,20 +125,9 @@ class SmartRegionCard extends StatelessWidget {
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 14,
-                        color: subtitleColor,
-                        fontWeight: highlightLevel == HighlightLevel.danger
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        shadows: highlightLevel != HighlightLevel.normal
-                            ? [
-                                Shadow(
-                                  color: subtitleColor.withOpacity(0.6),
-                                  blurRadius: 2,
-                                  offset: const Offset(1, 1),
-                                ),
-                              ]
-                            : null,
+                        fontSize: 16, 
+                        color: getSubtitleColor(), // Dynamic color based on logic
+                        fontWeight: FontWeight.bold, // Always bold
                       ),
                     ),
                   ],

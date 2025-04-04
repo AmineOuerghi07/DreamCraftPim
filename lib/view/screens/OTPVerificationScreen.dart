@@ -66,7 +66,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     }
   }
 
-  bool _isLoading = false;
+ // bool _isLoading = false;
 
   // Send OTP function
   Future<void> _sendOtp() async {

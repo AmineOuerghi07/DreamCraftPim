@@ -1,15 +1,11 @@
 // view/screens/login_screen.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/main.dart';
-import 'package:pim_project/model/domain/user.dart' as AppUser;
 import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:pim_project/view/screens/signup_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/login_view_model.dart';
 
