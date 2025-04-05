@@ -38,6 +38,7 @@ class Region {
                 surface: 0.0,
                 image: '',
                 regions: [],
+                rentPrice: 0.0,
               )
             : Land.fromJson(json['land'] as Map<String, dynamic>),
         surface: (json['surface'] as num?)?.toDouble() ?? 0.0,
@@ -58,7 +59,7 @@ class Region {
   }
 
   Map<String, dynamic> toJson() => {
-    '_id': id,
+  
         'name': name,
         'land': land.toJson(),
         'surface': surface,
