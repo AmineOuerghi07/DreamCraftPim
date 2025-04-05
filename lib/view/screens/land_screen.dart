@@ -171,6 +171,7 @@ class LandScreen extends StatelessWidget {
                                       forRent: false,
                                       image: '',
                                       regions: [],
+                                      rentPrice: 0,
                                     );
                                     final landViewModel = Provider.of<LandViewModel>(context, listen: false);
                                     await landViewModel.addLand(land: newLand, image: _selectedImage!).then((response) {
