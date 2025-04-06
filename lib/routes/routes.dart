@@ -45,6 +45,7 @@ class RouteNames {
   static const String camera = '/camera';
   static const String productDetails = '/product-details';
   static const String loadingScreen = '/loading_screen';
+  static const String processingScreen = '/processing';
   static const String chatScreen = '/chat_screen';
   static const String addplantScreen = '/add_plant_screen';
   static const String mapScreen = '/map_screen';
@@ -117,10 +118,7 @@ final GoRouter router = GoRouter(
       path: RouteNames.forgetPassword,
       builder: (context, state) => const ForgotPasswordScreen(),
     ),
-    GoRoute(
-      path: RouteNames.loadingScreen,
-      builder: (context, state) => const LoadingAnimationScreen(),
-    ),
+
     GoRoute(
       path: RouteNames.resetPassword,
       builder: (context, state) {
@@ -176,9 +174,13 @@ final GoRouter router = GoRouter(
       path: RouteNames.mapScreen,
       builder: (context, state) => const OSMFlutterMap(),
     ),
-    GoRoute(
+  GoRoute(
       path: RouteNames.chatScreen,
-      builder: (context, state) => const ChatScreen(),
+      builder: (context, state) => ChatScreen(initialData: state.extra as Map<String, dynamic>?),
+    ),
+    GoRoute(
+      path: RouteNames.processingScreen, // New route for animation
+      builder: (context, state) => const LoadingAnimationScreen(),
     ),
     GoRoute(
       path: '${RouteNames.addplantScreen}/:regionId',
