@@ -109,51 +109,164 @@ class _HumidityScreenContent extends StatelessWidget {
             );
           }
           
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: _buildCurrentHumidity(humidityData),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 3,
-                        child: _buildHumidityDetails(humidityData),
-                      ),
-                    ],
-                  ),
-                ),
-                _buildHumidityGraph(humidityData),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _buildDailySummary(humidityData),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildDailyComparison(humidityData),
-                      ),
-                    ],
-                  ),
-                ),
-                _buildRelativeHumidity(humidityData),
-              ],
+         return SingleChildScrollView(
+  child: Column(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
+              child: _buildCombinedHumidityBox(humidityData),
             ),
-          );
+            const SizedBox(width: 16),
+            /*
+            Expanded(
+              flex: 3,
+              child: _buildCombinedHumidityBox(humidityData),
+            ),
+            */
+          ],
+        ),
+      ),
+      _buildHumidityGraph(humidityData),
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _buildDailySummary(humidityData),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildDailyComparison(humidityData),
+            ),
+          ],
+        ),
+      ),
+      _buildRelativeHumidity(humidityData),
+    ],
+  ),
+);
         },
       ),
     );
   }
-  
+  ///integrer les deux box 
+Widget _buildCombinedHumidityBox(Map<String, dynamic> data) {
+  final humidity = data['humidity']?['current'] ?? '0%';
+  final dewPoint = data['humidity']?['dewPoint'] ?? 'N/A';
+
+  final dailySummary = data['dailySummary'] as Map<String, dynamic>?; 
+  final averageHumidity = dailySummary?['averageHumidity'] ?? 'N/A'; 
+  final dewPointRange = dailySummary?['dewPointRange'] ?? 'N/A';
+
+  return Container(
+  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16), // Less padding
+ width: 260, // Narrower width
+  height: 280, // Smaller height to match card style
+      decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF29B6F6), Color(0xFF0288D1)],
+      ),
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.blue.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.water_drop,
+          color: Colors.white,
+          size: 28, // Increased icon size for more visual balance
+        ),
+        Center(
+          child: Column(
+            children: [
+              Text(
+                humidity,
+                style: const TextStyle(
+                  fontSize: 32, // Increased font size for visibility
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const Text(
+                'Humidité actuelle',
+                style: TextStyle(
+                  fontSize: 16, // Adjusted text size for a better fit
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12), // More space between sections
+        _buildHumidityInfoRow(Icons.thermostat, 'Point de rosée', dewPoint),
+        const Divider(height: 32, color: Colors.white30),
+        const Text(
+          'Détails journaliers',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildHumidityInfoRow(Icons.water_drop, 'Humidité moyenne', averageHumidity),
+        const SizedBox(height: 8),
+        _buildHumidityInfoRow(Icons.thermostat_auto, 'Plage point de rosée', dewPointRange),
+      ],
+    ),
+  );
+}
+
+Widget _buildHumidityInfoRow(IconData icon, String label, String value) {
+  return Row(
+    children: [
+      Icon(icon, size: 16, color: Colors.white),
+      const SizedBox(width: 8),
+      Expanded(
+        flex: 2,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+
+            color: Colors.white70,
+          ),
+        ),
+      ),
+      Expanded(
+        flex: 1,
+        child: Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+             fontWeight: FontWeight.w500,
+            
+           color: Colors.white,
+          ),
+          textAlign: TextAlign.end,
+        ),
+      ),
+    ],
+  );
+}
+
+  /*
   Widget _buildCurrentHumidity(Map<String, dynamic> data) {
     final humidity = data['humidity']?['current'] ?? '0%';
     final dewPoint = data['humidity']?['dewPoint'] ?? 'N/A';
@@ -314,7 +427,7 @@ class _HumidityScreenContent extends StatelessWidget {
       ],
     );
   }
-  
+  */
   Widget _buildHumidityGraph(Map<String, dynamic> data) {
     final humidity = data['humidity'] as Map<String, dynamic>?;
     if (humidity == null) return const SizedBox.shrink();
@@ -355,7 +468,7 @@ class _HumidityScreenContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 300,
+           // height: 300,
             width: double.infinity,
             child: CustomPaint(
               size: const Size(double.infinity, 300),
@@ -383,6 +496,8 @@ class _HumidityScreenContent extends StatelessWidget {
     }
     
     return Container(
+       width: 160, 
+    height: 160, 
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -406,7 +521,7 @@ class _HumidityScreenContent extends StatelessWidget {
               color: Color(0xFF0288D1),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             description,
             style: const TextStyle(
@@ -450,7 +565,7 @@ class _HumidityScreenContent extends StatelessWidget {
           const SizedBox(height: 12),
           _buildComparisonRow('Aujourd\'hui', comparison['today'] ?? 'N/A'),
           _buildComparisonRow('Hier', comparison['yesterday'] ?? 'N/A'),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -529,8 +644,8 @@ class _HumidityScreenContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
+            color: Colors.grey.withOpacity(0.1),    
+             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
@@ -547,7 +662,8 @@ class _HumidityScreenContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text(
+            
+             Text(
             relativeHumidity['definition'] ?? '',
             style: const TextStyle(
               fontSize: 14,
@@ -556,6 +672,8 @@ class _HumidityScreenContent extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Container(
+          width: double.infinity,
+
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.orange.withOpacity(0.1),
@@ -726,4 +844,6 @@ class HumidityChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+
+
 } 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
+import 'package:pim_project/view/screens/Components/header.dart';
 
 import 'package:pim_project/view/screens/Components/marketHeader.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
@@ -87,13 +88,10 @@ class _MarketScreenState extends State<MarketScreen> {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              Marketheader(
+               Header(
                 greetingText: 'Bonjour ',
                 username: _username,
                 userId: widget.userId,
-                onProfileTap: () {
-                  context.push(RouteNames.profile, extra: widget.userId);
-                },
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),

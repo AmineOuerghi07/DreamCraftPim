@@ -69,16 +69,16 @@ class WeatherCard extends StatelessWidget {
   final String city;
 
   const WeatherCard({
-    Key? key,
-    this.temperature = '18°C',
-    this.condition = 'rain',
-    this.humidity = 'N/A',
-    this.advice = 'Aucun conseil disponible',
-    this.precipitation = '0%',
-    this.soilCondition = 'N/A',
-    this.parameters = const {},
-    this.city = 'Tunis', required weather,
-  }) : super(key: key);
+  Key? key,
+  this.temperature = '18°C',
+  required this.condition, 
+  this.humidity = 'N/A',
+  this.advice = 'Aucun conseil disponible',
+  this.precipitation = '0%',
+  this.soilCondition = 'N/A',
+  this.parameters = const {},
+ required this.city,
+ }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +89,7 @@ class WeatherCard extends StatelessWidget {
     final Map<String, String> displayParameters = {
       'Humidité': humidity,
       'Précipitation': precipitation,
-      'Sol': soilCondition,
+      'Soil': soilCondition,
     };
     
     return Container(
@@ -150,7 +150,7 @@ class WeatherCard extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => HumidityScreen(
                               humidity: entry.value,
-                              city: 'Tunis',
+                              city: city,
                             ),
                           ),
                         );
@@ -372,7 +372,7 @@ Widget _buildWeatherParameters(BuildContext context) {
       _buildParameterItem(
         context,
         Icons.terrain,
-        'Sol',
+        'Soil',
         soilCondition,
         onTap: null,
       ),

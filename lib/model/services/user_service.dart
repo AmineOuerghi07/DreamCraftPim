@@ -194,6 +194,7 @@ class UserService {
           password: '', // We don't store the password
           role: tokenData['roles']?.isNotEmpty == true ? tokenData['roles'][0] : '',
           phone: tokenData['phone'] ?? '',
+          image: tokenData['image']?? '',
         );
 
         // Store the user data

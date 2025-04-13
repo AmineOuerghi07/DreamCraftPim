@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
+import 'package:pim_project/model/services/language_service.dart';
 import 'package:pim_project/view_model/connected_region_view_model.dart';
 import 'package:pim_project/view_model/humidity_view_model.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
@@ -38,7 +39,6 @@ import 'package:pim_project/view_model/signup_view_model.dart';
 import 'package:pim_project/view_model/welcome_view_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pim_project/model/services/api_client.dart';
-import 'package:pim_project/services/language_service.dart';
 
 Future<void> initializeFirebase() async {
   try {

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pim_project/main.dart';
 import 'dart:io';
-import 'dart:async';  // Ajout de l'import pour TimeoutException
 import 'package:pim_project/model/services/user_service.dart';
 import 'package:pim_project/model/domain/user.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
@@ -35,7 +33,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   File? _image;
   final ImagePicker _picker = ImagePicker();
-  bool _isLoading = false;
   bool _showPasswordFields = false;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -49,23 +46,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     print('🔄 EditProfileScreen initialisé');
     final apiClient = ApiClient(baseUrl: AppConstants.baseUrl);
     _userService = UserService(apiClient: apiClient);
-    _loadUserData();
   }
 
-  void _loadUserData() {
-    if (widget.userData != null) {
-      print('📝 Données utilisateur reçues:');
-      print('- Nom: ${widget.userData!['fullname']}');
-      print('- Adresse: ${widget.userData!['address']}');
-      print('- Téléphone: ${widget.userData!['phonenumber']}');
-      
-      setState(() {
-        _fullNameController.text = widget.userData!['fullname'] ?? '';
-        _addressController.text = widget.userData!['address'] ?? '';
-        _phoneController.text = widget.userData!['phonenumber'] ?? '';
-      });
-    }
-  }
+ 
 
   Future<void> _pickImage() async {
     print('📸 Début de la sélection d\'image...');
@@ -107,6 +90,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'fullname': _fullNameController.text.trim(),
         'address': _addressController.text.trim(),
         'phonenumber': _phoneController.text.trim(),
+        
       };
 
       request.fields.addAll(fields);
@@ -141,7 +125,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             duration: Duration(seconds: 2),
           ),
         );
-        
+
         // Retourner directement au profil
         context.go(RouteNames.profile, extra: {'userId': userId});
       } else {
@@ -182,154 +166,151 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         centerTitle: true,
         actions: [
-          if (!_isLoading)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _updateProfile,
-            ),
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _updateProfile,
+          ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _pickImage,
                 child: Column(
                   children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.green.shade100,
-                            backgroundImage: _image != null 
-                                ? FileImage(_image!) 
-                                : (_currentImageUrl != null 
-                                    ? NetworkImage(_currentImageUrl!) as ImageProvider 
-                                    : null),
-                            child: (_image == null && _currentImageUrl == null)
-                                ? const Icon(Icons.camera_alt, size: 50, color: Color(0xFF82C784))
-                                : null,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.clickToChangePhoto,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.green.shade100,
+                      backgroundImage: _image != null
+                          ? FileImage(_image!)
+                          : (_currentImageUrl != null
+                              ? NetworkImage(_currentImageUrl!) as ImageProvider
+                              : null),
+                      child: (_image == null && _currentImageUrl == null)
+                          ? const Icon(Icons.camera_alt, size: 50, color: Color(0xFF82C784))
+                          : null,
                     ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _fullNameController,
-                      decoration: InputDecoration(
-                        labelText: l10n.fullName,
-                        prefixIcon: const Icon(Icons.person),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.clickToChangePhoto,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return l10n.pleaseEnterName;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _addressController,
-                      decoration: InputDecoration(
-                        labelText: l10n.address,
-                        prefixIcon: const Icon(Icons.location_on),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: InputDecoration(
-                        labelText: l10n.phoneNumber,
-                        prefixIcon: const Icon(Icons.phone),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    CheckboxListTile(
-                      title: Text(l10n.changePassword),
-                      value: _showPasswordFields,
-                      onChanged: (value) {
-                        setState(() {
-                          _showPasswordFields = value ?? false;
-                        });
-                      },
-                    ),
-                    if (_showPasswordFields) ...[
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: !_isPasswordVisible,
-                        decoration: InputDecoration(
-                          labelText: l10n.newPassword,
-                          prefixIcon: const Icon(Icons.lock),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordVisible = !_isPasswordVisible;
-                              });
-                            },
-                          ),
-                        ),
-                        validator: (value) {
-                          if (_showPasswordFields && (value == null || value.isEmpty)) {
-                            return l10n.pleaseEnterPassword;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        obscureText: !_isConfirmPasswordVisible,
-                        decoration: InputDecoration(
-                          labelText: l10n.confirmPassword,
-                          prefixIcon: const Icon(Icons.lock),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                              });
-                            },
-                          ),
-                        ),
-                        validator: (value) {
-                          if (_showPasswordFields) {
-                            if (value == null || value.isEmpty) {
-                              return l10n.pleaseConfirmPassword;
-                            }
-                            if (value != _passwordController.text) {
-                              return l10n.passwordsDoNotMatch;
-                            }
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _updateProfile,
-                      child: Text(l10n.save),
                     ),
                   ],
                 ),
               ),
-            ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _fullNameController,
+                decoration: InputDecoration(
+                  labelText: l10n.fullName,
+                  prefixIcon: const Icon(Icons.person),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.pleaseEnterName;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _addressController,
+                decoration: InputDecoration(
+                  labelText: l10n.address,
+                  prefixIcon: const Icon(Icons.location_on),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(
+                  labelText: l10n.phoneNumber,
+                  prefixIcon: const Icon(Icons.phone),
+                ),
+              ),
+              const SizedBox(height: 16),
+              CheckboxListTile(
+                title: Text(l10n.changePassword),
+                value: _showPasswordFields,
+                onChanged: (value) {
+                  setState(() {
+                    _showPasswordFields = value ?? false;
+                  });
+                },
+              ),
+              if (_showPasswordFields) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: !_isPasswordVisible,
+                  decoration: InputDecoration(
+                    labelText: l10n.newPassword,
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (_showPasswordFields && (value == null || value.isEmpty)) {
+                      return l10n.pleaseEnterPassword;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: !_isConfirmPasswordVisible,
+                  decoration: InputDecoration(
+                    labelText: l10n.confirmPassword,
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (_showPasswordFields) {
+                      if (value == null || value.isEmpty) {
+                        return l10n.pleaseConfirmPassword;
+                      }
+                      if (value != _passwordController.text) {
+                        return l10n.passwordsDoNotMatch;
+                      }
+                    }
+                    return null;
+                  },
+                ),
+              ],
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _updateProfile,
+                child: Text(l10n.save),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 username: _username,
                 userId: widget.userId,
               ),
-              const SizedBox(height: 16),
+            
 
               // Search Bar
               const SizedBox(height: 16),
@@ -228,17 +228,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   print('✅ [HomeScreen] Affichage de la carte météo avec les données');
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: WeatherCard(
-                      temperature: viewModel.weatherData?['temperature'] ?? 'N/A',
-                      weather: viewModel.weatherData?['weather'] ?? 'N/A',
-                      humidity: viewModel.weatherData?['humidity'] ?? 'N/A',
-                      advice: viewModel.weatherData?['advice'] ?? 'Aucun conseil disponible',
-                      precipitation: viewModel.weatherData?['precipitation'] ?? '0%',
-                      soilCondition: viewModel.weatherData?['soilCondition'] ?? 'N/A',
-                    ),
-                  );
+                 return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+           child: WeatherCard(
+    temperature: viewModel.weatherData?['temperature'] ?? 'N/A',
+    condition: viewModel.weatherData?['weather'] ?? 'N/A',
+    humidity: viewModel.weatherData?['humidity'] ?? 'N/A',
+    advice: viewModel.weatherData?['advice'] ?? 'Aucun conseil disponible',
+    precipitation: viewModel.weatherData?['precipitation'] ?? '0%',
+    soilCondition: viewModel.weatherData?['soilCondition'] ?? 'N/A',
+  city: viewModel.weatherData?['city'] ?? 'Ville inconnue',
+  ),
+);
                 },
               ),
               const SizedBox(height: 20),

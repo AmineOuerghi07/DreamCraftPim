@@ -38,10 +38,23 @@ class _HeaderState extends State<Header> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         if (mounted && data['image'] != null) {
-          setState(() {
-            _photoUrl = '${AppConstants.imagesbaseURL}${data['image']}';
-            print('🖼️ [Header] Image URL mise à jour: $_photoUrl');
-          });
+          // Vérifier si l'image n'est pas vide ou null
+          final imageUrl = '${AppConstants.imagesbaseURL}${data['image']}';
+          
+          // Tester si l'URL est valide
+          try {
+            final testResponse = await http.head(Uri.parse(imageUrl));
+            if (testResponse.statusCode == 200) {
+              setState(() {
+                _photoUrl = imageUrl;
+                print('🖼️ [Header] Image URL mise à jour: $_photoUrl');
+              });
+            } else {
+              print('❌ Image non accessible: ${testResponse.statusCode}');
+            }
+          } catch (e) {
+            print('❌ Erreur lors du test de l\'URL de l\'image: $e');
+          }
         }
       }
     } catch (e) {
@@ -75,41 +88,48 @@ class _HeaderState extends State<Header> {
                   backgroundColor: Colors.green.shade100,
                   child: _photoUrl != null
                       ? ClipOval(
-                          child: Image.network(
-                            _photoUrl!,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              print('❌ Erreur lors du chargement de l\'image: $error');
-                              return const Icon(Icons.person, size: 25, color: Colors.green);
-                            },
-                          ),
-                        )
-                      : const Icon(Icons.person, size: 25, color: Colors.green),
+                            child: Image.network(
+                              _photoUrl!,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                print('❌ Erreur de chargement de l\'image: $error');
+                                return const Icon(Icons.person, size: 25, color: Colors.green);
+                              },
+                            ),
+                          )
+                        : const Icon(Icons.person, size: 25, color: Colors.green),
                 ),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.greetingText,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  Text(
-                    widget.username,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+           Row(
+  crossAxisAlignment: CrossAxisAlignment.center, // Align vertically centered
+  children: [
+    Text(
+      widget.greetingText,
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.grey,
+        height: 1.2, // Makes vertical alignment tighter
+      ),
+    ),
+    const SizedBox(width: 2), // very tight spacing
+    Text(
+      widget.username,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        height: 1.2,
+      ),
+    ),
+  ],
+),
+ ],
           ),
           IconButton(
             icon: const Icon(Icons.notifications_none),

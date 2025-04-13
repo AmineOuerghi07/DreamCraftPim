@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pim_project/model/services/language_service.dart';
 import 'package:provider/provider.dart';
-import 'package:pim_project/services/language_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart';

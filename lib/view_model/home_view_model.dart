@@ -110,7 +110,7 @@ Future<void> fetchWeather(String city) async {
       print('🏁 [HomeViewModel] Fin de la récupération de la météo');
     }
   }
-
+/*
   Future<void> fetchWeatherByCoordinates(double latitude, double longitude) async {
     print('🌤️ [HomeViewModel] Début de la récupération de la météo pour les coordonnées: $latitude, $longitude');
     _isLoading = true;
@@ -136,4 +136,5 @@ Future<void> fetchWeather(String city) async {
       notifyListeners();
     }
   }
+  */
 }

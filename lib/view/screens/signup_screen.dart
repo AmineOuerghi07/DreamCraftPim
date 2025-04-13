@@ -5,9 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'package:pim_project/routes/routes.dart'; // Import Dio for HTTP requests
 import 'package:pim_project/constants/constants.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:http/http.dart' as http;
 
 class SignupScreen extends StatefulWidget {
   
@@ -20,8 +17,6 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   bool isChecked = false;
   final Dio dio = Dio(); // Initialize Dio instance for HTTP requests
-  File? _image;
-  final ImagePicker _picker = ImagePicker();
 
   // Controllers for the form fields
   final TextEditingController fullNameController = TextEditingController();
@@ -30,25 +25,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-
-  Future<void> _pickImage() async {
-    print('📸 Début de la sélection d\'image...');
-    try {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-      print('📂 Fichier sélectionné: ${pickedFile?.path}');
-
-      if (pickedFile != null) {
-        setState(() {
-          _image = File(pickedFile.path);
-          print('✅ Image chargée avec succès: ${_image?.path}');
-        });
-      } else {
-        print('❌ Aucune image sélectionnée');
-      }
-    } catch (e) {
-      print('❌ Erreur lors de la sélection de l\'image: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,33 +57,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   fontSize: 16,
                   fontWeight: FontWeight.w300, // Light
                   color: const Color(0xB0777777), // 67% opacity
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Profile Image Picker
-              GestureDetector(
-                onTap: _pickImage,
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.green.shade100,
-                      backgroundImage: _image != null ? FileImage(_image!) : null,
-                      child: _image == null
-                          ? const Icon(Icons.camera_alt, size: 50, color: Colors.green)
-                          : null,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Tap to add profile photo",
-                      style: GoogleFonts.roboto(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
                 ),
               ),
 
@@ -269,56 +218,42 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('${AppConstants.baseUrl}/account/sign-up'),
+      // Send POST request to the signup endpoint
+      final response = await dio.post(
+        '${AppConstants.baseUrl}/account/sign-up', // Your IP address here
+        data: {
+          'fullname': fullname,
+          'email': email,
+          'password': password,
+          'confirmpassword': confirmPassword,
+          'phonenumber': phone,
+          'address': address,
+        },
       );
 
-      // Add text fields
-      request.fields['fullname'] = fullname;
-      request.fields['email'] = email;
-      request.fields['password'] = password;
-      request.fields['confirmpassword'] = confirmPassword;
-      request.fields['phonenumber'] = phone;
-      request.fields['address'] = address;
-
-      // Add image if selected
-      if (_image != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'file',
-            _image!.path,
-          ),
-        );
-      }
-
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-
+      // Check the response status code
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Signup successful: $responseBody');
+        print('Signup successful: ${response.data}');
         
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Signup successful! Please login.')),
-          );
-          context.push(RouteNames.login);
-        }
+        // You could save user data locally if needed (e.g., in SharedPreferences)
+        
+        // Navigate to login screen after successful signup
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Signup successful! Please login.')),
+        );
+        context.push(RouteNames.login);  // Redirect to login screen
       } else {
-        print('Signup failed: ${response.statusCode}, $responseBody');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Signup failed')),
-          );
-        }
+        print('Signup failed: ${response.statusCode}, ${response.data}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Signup failed')),
+        );
       }
     } catch (e) {
+      // Handle error during signup
       print('Error during signup: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 }
