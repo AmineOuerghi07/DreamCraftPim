@@ -7,6 +7,7 @@ class User {
   final String address;
   final String role;
   final String phone;
+  final String? image; // optional image
 
   User({
     required this.userId,
@@ -17,6 +18,7 @@ class User {
     required this.password,
     required this.role,
     required this.phone,
+    this.image,
   });
 
   // Convert JSON response to User object
@@ -30,6 +32,7 @@ class User {
       password: json['password']?.toString() ?? '',
       role: json['role']?.toString() ?? '',
       phone: json['phonenumber']?.toString() ?? '',
+      image: json['image']?.toString(),
     );
   }
 
@@ -47,6 +50,7 @@ class User {
       'password': password,
       'role': role,
       'phonenumber': phone,
+      'image': image,
     };
   }
 }

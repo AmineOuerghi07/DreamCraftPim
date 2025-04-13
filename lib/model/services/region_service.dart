@@ -52,4 +52,11 @@ class RegionService {
     (json) => Region.fromJson(json),
   );
 }
+
+Future<ApiResponse<List<Region>>> findConnectedRegions(String userId) async {
+    return _apiClient.get(
+      'lands/region/connectedRegions/$userId',
+      (json) => (json as List).map((r) => Region.fromJson(r)).toList(),
+    );
+  }
 }

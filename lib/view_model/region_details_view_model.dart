@@ -6,6 +6,8 @@ import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/model/services/land_service.dart';
 import 'package:pim_project/model/services/plant_service.dart';
 import 'package:pim_project/model/services/region_service.dart';
+import 'package:pim_project/view_model/land_details_view_model.dart';
+import 'package:pim_project/view_model/land_view_model.dart';
 
 class RegionDetailsViewModel with ChangeNotifier {
   final PlantService _plantService = PlantService();
@@ -136,7 +138,9 @@ class RegionDetailsViewModel with ChangeNotifier {
       }
     }
     // Refresh region data after adding plants
-    await getRegionById(regionId);
+    LandDetailsViewModel landDetailsViewModel = LandDetailsViewModel(region?.land.id ?? ''); 
+   await  landDetailsViewModel.fetchPlantsForLand(region!.land.id);
+       await getRegionById(regionId);
   } catch (e) {
     _errorMessage = 'Failed to add plants: ${e.toString()}';
   } finally {

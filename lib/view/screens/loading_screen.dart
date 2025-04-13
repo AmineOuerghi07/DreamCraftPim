@@ -1,6 +1,38 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pim_project/routes/routes.dart';
+
+class LoadingScreen extends StatefulWidget {
+  const LoadingScreen({super.key});
+
+  @override
+  State<LoadingScreen> createState() => _LoadingScreenState();
+}
+
+class _LoadingScreenState extends State<LoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _redirectAfterDelay();
+  }
+
+  Future<void> _redirectAfterDelay() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    context.go(RouteNames.home);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
 
 class LoadingAnimationScreen extends StatefulWidget {
   const LoadingAnimationScreen({Key? key}) : super(key: key);

@@ -1,17 +1,14 @@
 // view/screens/login_screen.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/main.dart';
-import 'package:pim_project/model/domain/user.dart' as AppUser;
 import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:pim_project/view/screens/signup_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/login_view_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -96,6 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final loginViewModel = context.watch<LoginViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       backgroundColor: Colors.white,
@@ -153,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         icon: const Icon(Icons.email, color: Color(0xFF777777)),
                         border: InputBorder.none,
-                        hintText: "Email",
+                        hintText: l10n.email,
                         hintStyle: GoogleFonts.roboto(
                           fontSize: 16,
                           fontWeight: FontWeight.w300,
@@ -276,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        "Or continue with",
+                        l10n.orContinueWith,
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           fontWeight: FontWeight.w300,

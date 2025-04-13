@@ -18,7 +18,7 @@ class SmartRegionsProvider extends ChangeNotifier {
       "icon": Icons.water_drop,
       "iconColor": Colors.blue,
       "title": "Irrigation",
-      "subtitle": "200m",
+      "subtitle": "100m",
     },
     {
       "icon": Icons.landscape_rounded,

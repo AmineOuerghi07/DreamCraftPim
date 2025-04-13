@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
-import 'package:pim_project/ProviderClasses/camera_provider.dart';
 import 'package:pim_project/main.dart';
-import 'package:pim_project/model/repositories/prediction_repository.dart';
 
 import 'package:pim_project/routes/routes.dart';
 import 'package:provider/provider.dart';

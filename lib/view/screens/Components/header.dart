@@ -1,47 +1,114 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/constants/constants.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Header extends StatelessWidget {
-   final String profileImage;
+class Header extends StatefulWidget {
   final String greetingText;
   final String username;
-const Header({ required this.profileImage,
+  final String userId;
+
+  const Header({
+    Key? key,
     required this.greetingText,
-    required this.username, super.key });
+    required this.username,
+    required this.userId,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context){
-        return Container(
-      color: Colors.grey[100], // Header background color
+  State<Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+  String? _photoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPhoto();
+  }
+
+  Future<void> _loadUserPhoto() async {
+    try {
+      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (mounted && data['photos'] != null && data['photos'].isNotEmpty) {
+          setState(() {
+            _photoUrl = data['photos'][0];
+          });
+        }
+      }
+    } catch (e) {
+      print('❌ Error loading user photo: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                backgroundImage: AssetImage(profileImage), // network image after 
-              ),
-              const SizedBox(width: 8),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: greetingText,
-                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-                    ),
-                    TextSpan(
-                      text: username, // database
-                      style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w700),
-                    ),
-                  ],
+              GestureDetector(
+                onTap: () {
+                  context.push(RouteNames.profile, extra: widget.userId);
+                },
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.green.shade100,
+                  child: _photoUrl != null
+                      ? ClipOval(
+                          child: Image.network(
+                            _photoUrl!,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.person, size: 25, color: Colors.green);
+                            },
+                          ),
+                        )
+                      : const Icon(Icons.person, size: 25, color: Colors.green),
                 ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.greetingText,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  Text(
+                    widget.username,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const Icon(Icons.notifications, color: Colors.green),
+          IconButton(
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {
+              // Handle notification tap
+            },
+          ),
         ],
       ),
     );
   }
-
 }

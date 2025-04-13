@@ -1,14 +1,16 @@
-// view/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:pim_project/main.dart';
 import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view/screens/about_screen.dart';
+import 'package:pim_project/view/screens/contact_screen.dart';
+import 'package:pim_project/view/screens/editprofile_screen.dart';
 import 'dart:convert';
 
-import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:pim_project/view/screens/language_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -76,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = MyApp.userId;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -86,42 +88,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               // Profile Avatar
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : CircleAvatar(
                       radius: 50,
-                      backgroundImage: _profileData != null &&
+                      backgroundColor: Colors.green.shade100,
+                      child: _profileData != null && 
                               _profileData!['photos'] != null &&
                               _profileData!['photos'].isNotEmpty
-                          ? NetworkImage(_profileData!['photos'][0])
-                          : AssetImage('assets/images/gatous.png') as ImageProvider,
+                          ? ClipOval(
+                              child: Image.network(
+                                _profileData!['photos'][0],
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.person, size: 50, color: Colors.green);
+                                },
+                              ),
+                            )
+                          : const Icon(Icons.person, size: 50, color: Colors.green),
                     ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               // Name and Email
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : Text(
-                      _profileData?['fullname'] ?? 'Name not available',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      _profileData?['fullname'] ?? l10n.nameNotAvailable,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : Text(
-                      _profileData?['email'] ?? 'Email not available',
-                      style: TextStyle(color: Colors.grey),
+                      _profileData?['email'] ?? l10n.emailNotAvailable,
+                      style: const TextStyle(color: Colors.grey),
                     ),
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : _profileData?['address'] != null
                       ? Text(
-                          'Address: ${_profileData!['address']}',
-                          style: TextStyle(color: Colors.grey),
+                          '${l10n.address}: ${_profileData!['address']}',
+                          style: const TextStyle(color: Colors.grey),
                         )
                       : Container(),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               // Edit Profile Button
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to Edit Profile
+                  context.push(RouteNames.editProfile);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
@@ -129,31 +142,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Edit Profile', style: TextStyle(color: Colors.white)),
+                child: Text(l10n.editProfile, style: const TextStyle(color: Colors.white)),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               // Inventories Section
               _buildSectionTitle('Inventories'),
               _buildListItem(
                 icon: Icons.receipt_long,
-                title: 'My Billings',
+                title: l10n.myBillings,
                 onTap: () {
                   // Handle My Billings tap
                 },
               ),
               _buildListItem(
                 icon: Icons.support_agent,
-                title: 'Contact Support',
+                title: l10n.contactSupport,
                 onTap: () {
-                  // Handle Contact Support tap
+                  context.push(RouteNames.contact);
                 },
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               // Preferences Section
-              _buildSectionTitle('Preferences'),
+              _buildSectionTitle(l10n.preferences),
               _buildListItem(
                 icon: Icons.notifications,
-                title: 'Push Notification',
+                title: l10n.pushNotification,
                 trailing: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Switch(
@@ -169,26 +182,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               _buildListItem(
                 icon: Icons.info,
-                title: 'About',
+                title: l10n.about,
                 onTap: () {
-                  // Handle About tap
+                  context.push(RouteNames.about);
                 },
               ),
               _buildListItem(
                 icon: Icons.language,
-                title: 'Change Language',
+                title: l10n.changeLanguage,
                 onTap: () {
+                  context.go(RouteNames.languageScreen);
                   // Handle Change Language tap
                 },
               ),
               _buildListItem(
                 icon: Icons.logout,
-                title: 'Logout',
+                title: l10n.logout,
                 textColor: Colors.red,
                 onTap: () async {
                   SharedPreferences prefs = await SharedPreferences.getInstance();
-                  await prefs.remove('userId'); // Clear saved user data
-                  context.go(RouteNames.login); 
+                  await prefs.remove('userId');
+                  if (context.mounted) {
+                    context.go(RouteNames.login);
+                  }
                 },
               ),
             ],

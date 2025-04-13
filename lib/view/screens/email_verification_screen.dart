@@ -1,8 +1,6 @@
 // view/screens/email_verification_screen.dart
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

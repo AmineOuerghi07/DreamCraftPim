@@ -56,4 +56,17 @@ class Plant {
       description: description ?? this.description,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Plant &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          imageUrl == other.imageUrl &&
+          name == other.name &&
+          description == other.description;
+
+  @override
+  int get hashCode => id.hashCode ^ imageUrl.hashCode ^ name.hashCode ^ description.hashCode;
 }
