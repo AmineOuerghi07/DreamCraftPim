@@ -37,14 +37,23 @@ class _HeaderState extends State<Header> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        if (mounted && data['photos'] != null && data['photos'].isNotEmpty) {
+        if (mounted && data['image'] != null) {
           setState(() {
-            _photoUrl = data['photos'][0];
+            _photoUrl = '${AppConstants.imagesbaseURL}${data['image']}';
+            print('🖼️ [Header] Image URL mise à jour: $_photoUrl');
           });
         }
       }
     } catch (e) {
-      print('❌ Error loading user photo: $e');
+      print('❌ Erreur lors du chargement de la photo: $e');
+    }
+  }
+
+  @override
+  void didUpdateWidget(Header oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId) {
+      _loadUserPhoto();
     }
   }
 
@@ -72,6 +81,7 @@ class _HeaderState extends State<Header> {
                             height: 40,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
+                              print('❌ Erreur lors du chargement de l\'image: $error');
                               return const Icon(Icons.person, size: 25, color: Colors.green);
                             },
                           ),

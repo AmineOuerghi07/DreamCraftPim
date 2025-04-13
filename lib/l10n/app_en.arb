@@ -59,5 +59,11 @@
   "location": "Location",
   "cancel": "Cancel",
   "apply": "Apply",
-  "imagesBaseURL": "Images Base URL"
+  "imagesBaseURL": "Images Base URL",
+  "changePassword": "Change Password",
+  "newPassword": "New Password",
+  "pleaseEnterPassword": "Please enter your password",
+  "pleaseConfirmPassword": "Please confirm your password",
+  "pleaseEnterName": "Please enter your name",
+  "passwordsDoNotMatch": "Passwords do not match"
 } 

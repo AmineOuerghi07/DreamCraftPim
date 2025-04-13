@@ -135,7 +135,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: RouteNames.editProfile,
-          builder: (context, state) => const EditProfileScreen(),
+          builder: (context, state) => EditProfileScreen(userData: state.extra as Map<String, dynamic>),
         ),
       ],
     ),

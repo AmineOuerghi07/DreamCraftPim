@@ -174,7 +174,7 @@ class WeatherCard extends StatelessWidget {
       ),
     );
   }
-  Widget _buildWeatherIcon() {
+   Widget _buildWeatherIcon() {
   // Determine which icons to show based on condition
   if (condition.toLowerCase().contains('sunny') || condition.toLowerCase().contains('clear')) {
     double temp = double.tryParse(temperature.replaceAll('°C', '').trim()) ?? 18;
@@ -275,6 +275,7 @@ Widget _buildSnowAnimation() {
   }
 
   // Get the appropriate background color for the value container
+ // Get the appropriate background color for the value container
   Color getValueBgColor() {
     // Subtle background color that complements the main background
     if (condition.toLowerCase().contains('sunny') || condition.toLowerCase().contains('clear')) {

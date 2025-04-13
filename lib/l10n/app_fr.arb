@@ -139,6 +139,10 @@
   "login": "Connexion",
   "register": "S'inscrire",
   "changePassword": "Changer le mot de passe",
+  "newPassword": "Nouveau mot de passe",
+  "pleaseEnterPassword": "Veuillez entrer votre mot de passe",
+  "pleaseConfirmPassword": "Veuillez confirmer votre mot de passe",
+  "imagesBaseURL": "URL de base des images",
   "myAccount": "Mon compte",
   "myBookings": "Mes réservations",
   "myFavorites": "Mes favoris",
@@ -160,6 +164,7 @@
   "myChangePassword": "Changer le mot de passe",
   "myProfile": "Mon profil",
   "myEditProfile": "Modifier mon profil",
-  "imagesBaseURL": "URL de base des images",
-  "cancel": "Annuler"
+  "cancel": "Annuler",
+  "pleaseEnterName": "Veuillez entrer votre nom",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas"
 } 

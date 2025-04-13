@@ -93,15 +93,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       radius: 50,
                       backgroundColor: Colors.green.shade100,
                       child: _profileData != null && 
-                              _profileData!['photos'] != null &&
-                              _profileData!['photos'].isNotEmpty
+                              _profileData!['image'] != null
                           ? ClipOval(
                               child: Image.network(
-                                _profileData!['photos'][0],
+                                '${AppConstants.imagesbaseURL}${_profileData!['image']}',
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
+                                  print('❌ Erreur de chargement de l\'image: $error');
                                   return const Icon(Icons.person, size: 50, color: Colors.green);
                                 },
                               ),
@@ -134,7 +134,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Edit Profile Button
               ElevatedButton(
                 onPressed: () {
-                  context.push(RouteNames.editProfile);
+                  if (_profileData != null) {
+                    context.push(RouteNames.editProfile, extra: _profileData);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,

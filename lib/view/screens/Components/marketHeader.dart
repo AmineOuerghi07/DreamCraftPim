@@ -37,14 +37,23 @@ class _MarketheaderState extends State<Marketheader> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        if (mounted && data['photos'] != null && data['photos'].isNotEmpty) {
+        if (mounted && data['image'] != null) {
           setState(() {
-            _photoUrl = data['photos'][0];
+            _photoUrl = '${AppConstants.imagesbaseURL}${data['image']}';
+            print('🖼️ [MarketHeader] Image URL mise à jour: $_photoUrl');
           });
         }
       }
     } catch (e) {
-      print('❌ Error loading user photo: $e');
+      print('❌ Erreur lors du chargement de la photo: $e');
+    }
+  }
+
+  @override
+  void didUpdateWidget(Marketheader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId) {
+      _loadUserPhoto();
     }
   }
 
