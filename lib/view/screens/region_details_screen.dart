@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
+import 'package:pim_project/view/screens/components/region_detail_text.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
@@ -78,52 +78,10 @@ onAddRegion: () => _navigateToAddPlantScreen(contextRegionDetailsViewModel, regi
                     showRegionCount: false,
                     onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 150,
-                    child: Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 4,
-                      margin: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              RegionDetailInfocard(
-                                title: "Expanse",
-                                value: "${region.surface.toStringAsFixed(0)}m²",
-                                imageName: "square_foot.png",
-                              ),
-                              RegionDetailInfocard(
-                                title: "Temperature",
-                                value: "N/A",
-                                imageName: "thermostat_arrow_up.png",
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              RegionDetailInfocard(
-                                title: "Humidity",
-                                value: "N/A",
-                                imageName: "humidity.png",
-                              ),
-                              RegionDetailInfocard(
-                                title: "Irrigation",
-                                value: "N/A",
-                                imageName: "humidity_high.png",
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+ RegionInformationSection(
+        description: "On This Region we find a lot of Plants that dependes on a lot of sensors like the tempreatrue and the lighting including the lighting, soil and we can customie the irragation for the needed thin!",
+      ),
+      
                   const TabBar(
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.grey,
@@ -133,7 +91,7 @@ onAddRegion: () => _navigateToAddPlantScreen(contextRegionDetailsViewModel, regi
                       Tab(text: "Plants"),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  
                   Expanded(
                     child: TabBarView(
                       children: [

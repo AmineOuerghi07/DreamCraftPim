@@ -65,7 +65,7 @@ class WeatherCard extends StatelessWidget {
   const WeatherCard({
     Key? key,
     this.temperature = '18°C',
-    this.condition = 'rain',
+    this.condition = 'snow',
     this.parameters = const {
       'Humidity': 'Good',
       'Soil Moisture': 'Good',
