@@ -416,7 +416,7 @@ void initState() {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF82C784),
+                                color: const Color.fromARGB(255, 239, 242, 239),
                                 shape: BoxShape.circle,
                                 border: Border.all(color: Colors.white, width: 2),
                               ),
