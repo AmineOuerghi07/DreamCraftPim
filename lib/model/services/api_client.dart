@@ -211,6 +211,9 @@ class ApiResponse<T> {
 
   ApiResponse.error(this.message) : status = Status.ERROR;
 
+
+  get errorMessage => null;
+
   @override
   String toString() {
     return "Status : $status \n Message : $message \n Data : $data";

@@ -3,14 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
+import 'package:pim_project/view/screens/about_screen.dart';
 import 'package:pim_project/view/screens/add_plant_screen.dart';
 import 'package:pim_project/view/screens/camera_screen.dart';
 import 'package:pim_project/view/screens/chat_screen.dart';
+import 'package:pim_project/view/screens/contact_screen.dart';
+import 'package:pim_project/view/screens/editprofile_screen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
 import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:pim_project/view/screens/home_screen/home_screen.dart';
+import 'package:pim_project/view/screens/humidity_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen.dart';
 import 'package:pim_project/view/screens/land_screen.dart';
+import 'package:pim_project/view/screens/language_screen.dart';
 import 'package:pim_project/view/screens/loading_screen.dart';
 import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
@@ -49,6 +54,12 @@ class RouteNames {
   static const String chatScreen = '/chat_screen';
   static const String addplantScreen = '/add_plant_screen';
   static const String mapScreen = '/map_screen';
+  static const String humidity = '/humidity_screen';
+  static const String about = '/about_screen';
+  static const String contact = '/contact_screen';
+  static const String editProfile = '/editprofile';
+  static const String languageScreen = '/language_screen';
+  static const String settings = '/loading_screen';
 }
 
 final GoRouter router = GoRouter(
@@ -86,7 +97,10 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: RouteNames.market,
-          builder: (context, state) => const MarketScreen(),
+          builder: (context, state) {
+            final userId = state.extra as String? ?? MyApp.userId;
+            return MarketScreen(userId: userId);
+          },
         ),
         GoRoute(
           path: RouteNames.profile,
@@ -102,7 +116,26 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: RouteNames.land,
-          builder: (context, state) => const LandScreen(),
+          builder: (context, state) {
+            final userId = state.extra as String? ?? MyApp.userId;
+            return LandScreen(userId: userId);
+          },
+        ),
+        GoRoute(
+          path: RouteNames.languageScreen,
+          builder: (context, state) => const LanguageScreen(),
+        ),
+        GoRoute(
+          path: RouteNames.about,
+          builder: (context, state) => const AboutScreen(),
+        ),
+        GoRoute(
+          path: RouteNames.contact,
+          builder: (context, state) => const ContactScreen(),
+        ),
+        GoRoute(
+          path: RouteNames.editProfile,
+          builder: (context, state) => EditProfileScreen(userData: state.extra as Map<String, dynamic>),
         ),
       ],
     ),
@@ -188,6 +221,21 @@ final GoRouter router = GoRouter(
         final regionId = state.pathParameters['regionId']!;
         return AddPlantScreen(regionId: regionId);
       },
+    ),
+
+    GoRoute(
+      path: '${RouteNames.humidity}/:humidity',
+      builder: (context, state) {
+        final humidity = state.pathParameters['humidity']!;
+        final city = (state.extra as Map<String, dynamic>?)?['city'] ?? 'Tunis';
+        return HumidityScreen(humidity: humidity, city: city);
+      },
+    ),
+    GoRoute(
+      path: RouteNames.settings,
+      builder: (context, state) => LoadingScreen(onLoaded: () async {
+        return RouteNames.home;
+      }),
     ),
   ],
   redirect: (context, state) {

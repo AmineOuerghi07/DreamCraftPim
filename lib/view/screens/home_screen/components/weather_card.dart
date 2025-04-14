@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/view/screens/home_screen/components/components_animations.dart';
+import 'package:pim_project/view/screens/humidity_screen.dart';
 
 Color _getPrimaryColor(String condition, String temperature) {
   // Extract numeric temperature value
@@ -60,38 +61,52 @@ Color _getSecondaryColor(String condition, String temperature) {
 class WeatherCard extends StatelessWidget {
   final String temperature;
   final String condition;
+  final String humidity;
+  final String advice;
+  final String precipitation;
+  final String soilCondition;
   final Map<String, String> parameters;
+  final String city;
 
   const WeatherCard({
-    Key? key,
-    this.temperature = '18°C',
-    this.condition = 'snow',
-    this.parameters = const {
-      'Humidity': 'Good',
-      'Soil Moisture': 'Good',
-      'Precipitation': 'Good',
-    },
-  }) : super(key: key);
+  Key? key,
+  this.temperature = '18°C',
+  required this.condition, 
+  this.humidity = 'N/A',
+  this.advice = 'Aucun conseil disponible',
+  this.precipitation = '0%',
+  this.soilCondition = 'N/A',
+  this.parameters = const {},
+ required this.city,
+ }) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
     final Color primaryColor = _getPrimaryColor(condition, temperature);
-  final Color secondaryColor = _getSecondaryColor(condition, temperature);
-  
-  return Container(
-    width: double.infinity,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.center,
-        end: Alignment.bottomRight,
-        colors: [
-          primaryColor,   // Dynamic primary color
-          secondaryColor, // Dynamic secondary color
-        ],
-        stops: [0.0, 0.6],
+    final Color secondaryColor = _getSecondaryColor(condition, temperature);
+    
+    // Créer les paramètres à partir des valeurs individuelles
+    final Map<String, String> displayParameters = {
+      'Humidité': humidity,
+      'Précipitation': precipitation,
+      'Soil': soilCondition,
+    };
+    
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.center,
+          end: Alignment.bottomRight,
+          colors: [
+            primaryColor,   // Dynamic primary color
+            secondaryColor, // Dynamic secondary color
+          ],
+          stops: [0.0, 0.6],
+        ),
+        borderRadius: BorderRadius.circular(16),
       ),
-      borderRadius: BorderRadius.circular(16),
-    ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -121,17 +136,46 @@ class WeatherCard extends StatelessWidget {
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: parameters.entries.map((entry) => 
-                _buildWeatherParameter(entry.key, entry.value)
-              ).toList(),
+              children: displayParameters.entries.map((entry) {
+                // If the parameter is "Humidity", make it clickable
+                if (entry.key == "Humidité") {
+                  return GestureDetector(
+                    onTap: () {
+                      print('🟢 Clic sur l\'humidité détecté');
+                      print('📊 Valeur de l\'humidité: ${entry.value}');
+                      print('🌆 Ville actuelle: Tunis');
+                      
+                      try {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HumidityScreen(
+                              humidity: entry.value,
+                              city: city,
+                            ),
+                          ),
+                        );
+                        print('✅ Navigation vers HumidityScreen réussie');
+                      } catch (e) {
+                        print('❌ Erreur lors de la navigation: $e');
+                      }
+                    },
+                    child: _buildWeatherParameter(entry.key, entry.value),
+                  );
+                }
+                // Otherwise, just display normally
+                return _buildWeatherParameter(entry.key, entry.value);
+              }).toList(),
             ),
+            // Ajouter le conseil météo
+            if (advice.isNotEmpty && advice != 'Aucun conseil disponible')
+              _buildWeatherAdvice(),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildWeatherIcon() {
+   Widget _buildWeatherIcon() {
   // Determine which icons to show based on condition
   if (condition.toLowerCase().contains('sunny') || condition.toLowerCase().contains('clear')) {
     double temp = double.tryParse(temperature.replaceAll('°C', '').trim()) ?? 18;
@@ -232,6 +276,7 @@ Widget _buildSnowAnimation() {
   }
 
   // Get the appropriate background color for the value container
+ // Get the appropriate background color for the value container
   Color getValueBgColor() {
     // Subtle background color that complements the main background
     if (condition.toLowerCase().contains('sunny') || condition.toLowerCase().contains('clear')) {
@@ -294,6 +339,111 @@ Widget _buildSnowAnimation() {
         ),
       ),
     ],
+  );
+}
+
+Widget _buildWeatherParameters(BuildContext context) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      _buildParameterItem(
+        context,
+        Icons.water_drop,
+        'Humidité',
+        '$humidity%',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HumidityScreen(
+                city: city,
+                humidity: humidity,
+              ),
+            ),
+          );
+        },
+      ),
+      _buildParameterItem(
+        context,
+        Icons.water,
+        'Précipitations',
+        '$precipitation mm',
+        onTap: null,
+      ),
+      _buildParameterItem(
+        context,
+        Icons.terrain,
+        'Soil',
+        soilCondition,
+        onTap: null,
+      ),
+    ],
+  );
+}
+
+Widget _buildParameterItem(
+  BuildContext context,
+  IconData icon,
+  String label,
+  String value, {
+  VoidCallback? onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Column(
+      children: [
+        Icon(icon, color: _getPrimaryColor(condition, temperature), size: 24),
+        Text(
+          label,
+          style: TextStyle(
+            color: _getSecondaryColor(condition, temperature),
+            fontSize: 12,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: _getSecondaryColor(condition, temperature),
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildWeatherAdvice() {
+  return Container(
+    margin: const EdgeInsets.only(top: 16),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 136, 132, 132).withOpacity(0.2),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: const Color.fromARGB(255, 184, 175, 175).withOpacity(0.3),
+        width: 1,
+      ),
+    ),
+    child: Row(
+      children: [
+        const Icon(
+          Icons.lightbulb_outline,
+          color: Colors.white,
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            advice,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }
 }

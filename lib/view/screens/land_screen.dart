@@ -12,37 +12,215 @@ import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
 import 'package:pim_project/view/screens/Components/home_cart.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:pim_project/model/services/UserPreferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class LandScreen extends StatelessWidget {
-  const LandScreen({super.key});
+class LandScreen extends StatefulWidget {
+  final String userId;
+
+  const LandScreen({super.key, required this.userId});
+
+  @override
+  State<LandScreen> createState() => _LandScreenState();
+}
+
+class _LandScreenState extends State<LandScreen> {
+  String _username = '';
+  bool _isLoading = true;
+  String _selectedFilter = 'all'; 
+  String _selectedLocation = 'all';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _username = data['fullname'] ?? '';
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('❌ [LandScreen] Erreur lors de la récupération des données utilisateur: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     Future.microtask(() {
-      Provider.of<LandViewModel>(context, listen: false).fetchLandsByUserId(MyApp.userId);
+      Provider.of<LandViewModel>(context, listen: false).fetchLandsByUserId(widget.userId);
     });
 
     final TextEditingController searchController = TextEditingController();
     final FocusNode searchFocusNode = FocusNode();
 
-    void _unfocus() {
+    void unfocus() {
       if (searchFocusNode.hasFocus) {
         searchFocusNode.unfocus();
       }
+        String _username = '';
+    bool _isLoading = true;
+    }
+    
+    void showFilterDialog(BuildContext context) {
+      final landViewModel = Provider.of<LandViewModel>(context, listen: false);
+      final locations = ['all', ...landViewModel.lands.map((land) => land.cordonate).toSet()];
+      
+      showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.filterOptions,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Rent Status Filter
+                      Text(l10n.rentStatus),
+                      Column(
+                        children: [
+                          RadioListTile(
+                            title: Text(l10n.allLocations),
+                            value: 'all',
+                            groupValue: _selectedFilter,
+                            onChanged: (value) {
+                              setState(() => _selectedFilter = value.toString());
+                            },
+                          ),
+                          RadioListTile(
+                            title: Text(l10n.forRent),
+                            value: 'forRent',
+                            groupValue: _selectedFilter,
+                            onChanged: (value) {
+                              setState(() => _selectedFilter = value.toString());
+                            },
+                          ),
+                          RadioListTile(
+                            title: Text(l10n.notForRent),
+                            value: 'notForRent',
+                            groupValue: _selectedFilter,
+                            onChanged: (value) {
+                              setState(() => _selectedFilter = value.toString());
+                            },
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Location Filter
+                      Text(l10n.location),
+                      DropdownButtonFormField<String>(
+                        value: _selectedLocation,
+                        items: locations.map((location) {
+                          return DropdownMenuItem(
+                            value: location,
+                            child: Text(location == 'all' ? l10n.allLocations : location),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() => _selectedLocation = value!);
+                        },
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(l10n.cancel),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              setState(() {});
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
+                            child: Text(l10n.apply),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
     }
 
-    void _showAddLandPopup(BuildContext context) {
-      File? _selectedImage;
+    List<Land> applyFilters(List<Land> lands) {
+      // Apply search filter first
+      var filtered = lands.where((land) =>
+        land.name.toLowerCase().contains(searchController.text.toLowerCase()) ||
+        land.cordonate.toLowerCase().contains(searchController.text.toLowerCase())
+      ).toList();
+
+      // Apply rent status filter
+      if (_selectedFilter == 'forRent') {
+        filtered = filtered.where((land) => land.forRent).toList();
+      } else if (_selectedFilter == 'notForRent') {
+        filtered = filtered.where((land) => !land.forRent).toList();
+      }
+
+      // Apply location filter
+      if (_selectedLocation != 'all') {
+        filtered = filtered.where((land) => land.cordonate == _selectedLocation).toList();
+      }
+
+      return filtered;
+    }
+
+    void showAddLandPopup(BuildContext context) {
+      File? selectedImage;
       TextEditingController locationController = TextEditingController();
       TextEditingController landNameController = TextEditingController();
       TextEditingController spaceController = TextEditingController();
       bool isLoading = false;
 
-      Future<void> _pickImage(StateSetter setState) async {
+      Future<void> pickImage(StateSetter setState) async {
         final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
         if (pickedFile != null) {
           setState(() {
-            _selectedImage = File(pickedFile.path);
+            selectedImage = File(pickedFile.path);
           });
         }
       }
@@ -101,7 +279,7 @@ class LandScreen extends StatelessWidget {
                               icon: const Icon(Icons.map, color: Colors.blue),
                               onPressed: () async {
                                 final selectedLocation = await context.push(RouteNames.mapScreen);
-                                if (selectedLocation != null) {
+                                if (selectedLocation != null && mounted) {
                                   setState(() {
                                     locationController.text = selectedLocation as String;
                                   });
@@ -126,7 +304,7 @@ class LandScreen extends StatelessWidget {
                           children: [
                             TextButton(
                               onPressed: () async {
-                                await _pickImage(setState);
+                                await pickImage(setState);
                               },
                               child: const Text(
                                 "Upload Image",
@@ -138,7 +316,7 @@ class LandScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            if (_selectedImage != null)
+                            if (selectedImage != null)
                               const Icon(Icons.check_circle, color: Colors.green),
                           ],
                         ),
@@ -151,7 +329,8 @@ class LandScreen extends StatelessWidget {
                                     if (landNameController.text.isEmpty ||
                                         locationController.text.isEmpty ||
                                         spaceController.text.isEmpty ||
-                                        _selectedImage == null) {
+                                        selectedImage == null) {
+                                      if (!mounted) return;
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
                                           content: Text("Please fill all fields and upload an image."),
@@ -174,7 +353,8 @@ class LandScreen extends StatelessWidget {
                                       rentPrice: 0,
                                     );
                                     final landViewModel = Provider.of<LandViewModel>(context, listen: false);
-                                    await landViewModel.addLand(land: newLand, image: _selectedImage!).then((response) {
+                                    await landViewModel.addLand(land: newLand, image: selectedImage!).then((response) {
+                                      if (!mounted) return;
                                       if (response.status == Status.COMPLETED) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(
@@ -192,6 +372,7 @@ class LandScreen extends StatelessWidget {
                                         );
                                       }
                                     });
+                                    if (!mounted) return;
                                     setState(() {
                                       isLoading = false;
                                     });
@@ -220,16 +401,16 @@ class LandScreen extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: _unfocus,
+      onTap: unfocus,
       child: Scaffold(
         body: Column(
           children: [
             const Padding(padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12)),
-            const Header(
-              profileImage: "assets/images/profile.png",
-              greetingText: "Haaa! ",
-              username: "Mahamed",
-            ),
+           Header(
+                greetingText: 'Bonjour ',
+                username: _username,
+                userId: widget.userId,
+              ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -239,8 +420,8 @@ class LandScreen extends StatelessWidget {
                     custom.SearchBar(
                       controller: searchController,
                       focusNode: searchFocusNode,
-                      onFilterTap: () {},
-                      onChanged: (query) { // New: Pass query to view model
+                      onFilterTap: () => showFilterDialog(context),
+                      onChanged: (query) {
                         Provider.of<LandViewModel>(context, listen: false).searchLands(query);
                       },
                     ),
@@ -248,14 +429,14 @@ class LandScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Your Greenhouses",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        Text(
+                          l10n.yourGreenhouses,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Consumer<LandViewModel>(
                           builder: (context, viewModel, child) {
                             return Text(
-                              "${viewModel.filteredLands.length} Places", // Use filteredLands
+                              "${viewModel.filteredLands.length} ${l10n.places}",
                               style: const TextStyle(
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold,
@@ -284,9 +465,9 @@ class LandScreen extends StatelessWidget {
           height: 50,
           child: FloatingActionButton(
             onPressed: () {
-              _showAddLandPopup(context);
+              showAddLandPopup(context);
             },
-            backgroundColor: Colors.green.withOpacity(0.75),
+            backgroundColor: Colors.green.withAlpha(191),
             child: const Icon(
               Icons.add,
               color: Colors.white,
@@ -300,14 +481,16 @@ class LandScreen extends StatelessWidget {
   }
 
   Widget _buildLandList(LandViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (viewModel.landsResponse.status == Status.LOADING) {
       return const Center(child: CircularProgressIndicator());
     } else if (viewModel.landsResponse.status == Status.ERROR) {
-      return Center(child: Text("Error: ${viewModel.landsResponse.message}"));
+      return Center(child: Text("${l10n.error}: ${viewModel.landsResponse.message}"));
     } else if (viewModel.filteredLands.isEmpty && viewModel.lands.isEmpty) {
-      return const Center(child: Text("No lands available."));
+      return Center(child: Text(l10n.noLandsAvailable));
     } else if (viewModel.filteredLands.isEmpty) {
-      return const Center(child: Text("No lands match your search."));
+      return Center(child: Text(l10n.noLandsMatchSearch));
     }
 
     return ListView.builder(
@@ -319,7 +502,7 @@ class LandScreen extends StatelessWidget {
           child: HomeCart(
             title: land.name,
             location: land.cordonate,
-            description: "Surface: ${land.surface}m² • ${land.forRent ? 'For Rent' : 'Not Available'}",
+            description: "${l10n.surface}: ${land.surface}m² • ${land.forRent ? l10n.forRent : l10n.notAvailable}",
             imageUrl: land.image.isNotEmpty ? AppConstants.imagesbaseURL + land.image : 'assets/images/placeholder.png',
             id: land.id,
             onDetailsTap: () {

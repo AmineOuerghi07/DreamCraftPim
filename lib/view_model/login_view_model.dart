@@ -22,12 +22,14 @@ class LoginViewModel with ChangeNotifier {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
+    print('🔐 Login attempt with email: $email, Remember Me: $rememberMe');
 
     try {
       final response = await userRepository.login(email, password);
 
       if (response.status == Status.COMPLETED && response.data != null) {
         currentUser = response.data;
+        print('✅ Login successful for user ID: ${response.data!.userId}');
         
         // Save user data and update MyApp.userId
         await UserPreferences.setUserId(response.data!.userId);
@@ -35,12 +37,15 @@ class LoginViewModel with ChangeNotifier {
         
         // Save additional user data if remember me is checked
         if (rememberMe) {
+          print('💾 Saving user credentials with Remember Me enabled');
           await UserPreferences.setUser(response.data!);
           await UserPreferences.setRememberMe(true);
         } else {
+          print('🧹 Remember Me disabled, clearing saved credentials');
           // If remember me is not checked, only keep the current session data
           await UserPreferences.clear();
           await UserPreferences.setUserId(response.data!.userId); // Keep the current session ID
+          await UserPreferences.setRememberMe(false);
         }
         
         return true;
@@ -62,18 +67,27 @@ class LoginViewModel with ChangeNotifier {
   // Check if user is already logged in
   Future<bool> checkLoginStatus() async {
     try {
+      print('🔍 Checking login status...');
       final rememberMe = await UserPreferences.getRememberMe();
+      print('🔐 Remember Me status: $rememberMe');
+      
       if (rememberMe) {
+        print('🔄 Remember Me is enabled, attempting to retrieve saved user');
         final savedUser = await UserPreferences.getUser();
         if (savedUser != null) {
+          print('✅ Auto-login successful for user ID: ${savedUser.userId}');
           currentUser = savedUser;
           notifyListeners();
           return true;
+        } else {
+          print('⚠️ No saved user found despite Remember Me being enabled');
         }
+      } else {
+        print('ℹ️ Remember Me is disabled, no auto-login attempted');
       }
       return false;
     } catch (e) {
-      print("Error checking login status: $e");
+      print("❌ Error checking login status: $e");
       return false;
     }
   }
@@ -100,6 +114,16 @@ class LoginViewModel with ChangeNotifier {
 
       if (response.status == Status.COMPLETED && response.data != null) {
         currentUser = response.data;
+        
+        // Save user data and update MyApp.userId
+        await UserPreferences.setUserId(response.data!.userId);
+        await UserPreferences.setToken(googleToken); // Save the token
+        MyApp.userId = response.data!.userId;
+        
+        // Always save user data for Google sign-in
+        await UserPreferences.setUser(response.data!);
+        await UserPreferences.setRememberMe(true);
+        
         return true;
       } else {
         errorMessage = response.message ?? "Échec de la connexion avec Google";
