@@ -80,6 +80,7 @@ class WeatherCard extends StatelessWidget {
  required this.city,
  }) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     final Color primaryColor = _getPrimaryColor(condition, temperature);
