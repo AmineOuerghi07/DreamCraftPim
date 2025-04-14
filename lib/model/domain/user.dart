@@ -45,9 +45,6 @@ class User {
     );
   }
 
-  get status => null;
-
-  get message => null;
 
   Map<String, dynamic> toJson() {
     return {

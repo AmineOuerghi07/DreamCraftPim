@@ -417,10 +417,10 @@ Widget _buildWeatherAdvice() {
     margin: const EdgeInsets.only(top: 16),
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.2),
+      color: const Color.fromARGB(255, 136, 132, 132).withOpacity(0.2),
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
-        color: Colors.white.withOpacity(0.3),
+        color: const Color.fromARGB(255, 184, 175, 175).withOpacity(0.3),
         width: 1,
       ),
     ),

@@ -70,5 +70,18 @@
   "pleaseUploadImage": "الرجاء رفع صورة",
   "landAddedSuccess": "تمت إضافة الأرض بنجاح",
   "failedToAddLand": "فشل في إضافة الأرض",
-  "search": "بحث"
-} 
+  "search": "بحث",
+  "profileUpdatedSuccess": "تم تحديث الملف الشخصي بنجاح",
+  "requestTimeout": "انتهت مهلة الطلب. يرجى التحقق من اتصالك بالإنترنت.",
+  "passwordTooShort": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  "noChangesMessage": "لا توجد تغييرات للحفظ",
+  "ok": "موافق",
+
+  "changePassword": "تغيير كلمة المرور",
+  "newPassword": "كلمة المرور الجديدة",
+  "pleaseEnterPassword": "الرجاء إدخال كلمة المرور",
+  "pleaseConfirmPassword": "الرجاء تأكيد كلمة المرور",
+  "pleaseEnterName": "الرجاء إدخال الاسم",
+  "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+  "ok": "موافق"
+}

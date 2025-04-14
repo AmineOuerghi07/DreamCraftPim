@@ -2,6 +2,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:pim_project/model/domain/user.dart';
+import 'dart:developer' as developer;
 
 class UserPreferences {
   static const String _userIdKey = 'userId';
@@ -21,7 +22,8 @@ class UserPreferences {
     return prefs.getString(_userIdKey);
   }
 
-  // Save token
+ 
+ // Save token
   static Future<void> setToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
@@ -33,11 +35,13 @@ class UserPreferences {
     return prefs.getString(_tokenKey);
   }
 
+
   // Save user object
   static Future<void> setUser(User user) async {
     final prefs = await SharedPreferences.getInstance();
     final userJson = json.encode(user.toJson());
     await prefs.setString(_userKey, userJson);
+    developer.log('User data saved to preferences for user ID: ${user.userId}', name: 'UserPreferences');
   }
 
   // Get user object
@@ -45,8 +49,11 @@ class UserPreferences {
     final prefs = await SharedPreferences.getInstance();
     final userJson = prefs.getString(_userKey);
     if (userJson != null) {
-      return User.fromJson(json.decode(userJson));
+      final user = User.fromJson(json.decode(userJson));
+      developer.log('Retrieved user data from preferences for user ID: ${user.userId}', name: 'UserPreferences');
+      return user;
     }
+    developer.log('No saved user data found in preferences', name: 'UserPreferences');
     return null;
   }
 
@@ -54,13 +61,16 @@ class UserPreferences {
   static Future<void> setRememberMe(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_rememberMeKey, value);
+    developer.log('Remember Me preference set to: $value', name: 'UserPreferences');
   }
 
-  // Get remember me preference
-  static Future<bool> getRememberMe() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_rememberMeKey) ?? false;
-  }
+ static Future<bool> getRememberMe() async {
+  final prefs = await SharedPreferences.getInstance();
+  final value = prefs.getBool(_rememberMeKey) ?? false;
+  developer.log('Retrieved Remember Me preference: $value', name: 'UserPreferences');
+  return value;
+}
+
 
   // Clear all stored data (e.g., on logout)
   static Future<void> clear() async {
@@ -69,5 +79,6 @@ class UserPreferences {
     await prefs.remove(_tokenKey);
     await prefs.remove(_userKey);
     await prefs.remove(_rememberMeKey);
+    developer.log('All user preferences cleared (logout)', name: 'UserPreferences');
   }
 }

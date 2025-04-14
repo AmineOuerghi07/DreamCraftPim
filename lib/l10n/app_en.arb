@@ -65,5 +65,10 @@
   "pleaseEnterPassword": "Please enter your password",
   "pleaseConfirmPassword": "Please confirm your password",
   "pleaseEnterName": "Please enter your name",
-  "passwordsDoNotMatch": "Passwords do not match"
-} 
+  "passwordsDoNotMatch": "Passwords do not match",
+  "profileUpdatedSuccess": "Profile updated successfully",
+  "requestTimeout": "Request timed out. Please check your connection.",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "noChangesMessage": "No changes to save",
+  "ok": "OK"
+}

@@ -211,7 +211,7 @@ class UserService {
   }
 
   // Update user profile
-  Future<ApiResponse<User>> updateUserProfile(
+Future<ApiResponse<User>> updateUserProfile(
   String userId,
   Map<String, dynamic> updates,
   File? imageFile,
@@ -235,23 +235,25 @@ class UserService {
         imageFile.path,
       ));
 
-      // Add authorization
+      // Add authorization header
       final token = await UserPreferences.getToken();
       if (token != null) {
         request.headers['Authorization'] = 'Bearer $token';
       }
 
+      // Send request
       final response = await request.send();
       final responseData = await response.stream.bytesToString();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Handle successful response
         return ApiResponse.completed(User.fromJson(json.decode(responseData)));
       } else {
         final error = json.decode(responseData);
         return ApiResponse.error(error['message'] ?? 'Update failed');
       }
     } else {
-      // Regular JSON update when no image
+      // Regular JSON update when no image is provided
       return await _apiClient.put(
         'account/update/$userId',
         updates,
@@ -259,9 +261,11 @@ class UserService {
       );
     }
   } catch (e) {
+    // Handle any errors that occur
     return ApiResponse.error('Error: ${e.toString()}');
   }
 }
+
 
   // Reset password
   Future<ApiResponse<bool>> resetPassword(String userId, String newPassword, String confirmPassword) async {

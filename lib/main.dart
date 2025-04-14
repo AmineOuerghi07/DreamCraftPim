@@ -70,17 +70,17 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   Future<String> _getInitialRoute() async {
-    final rememberMe = await UserPreferences.getRememberMe();
-    final userId = await UserPreferences.getUserId();
-    final token = await UserPreferences.getToken();
+  final rememberMe = await UserPreferences.getRememberMe();
+  final userId = await UserPreferences.getUserId();
+  final token = await UserPreferences.getToken();
 
-    if (rememberMe && userId != null && token != null) {
-      MyApp.userId = userId;
-      return RouteNames.home;
-    } else {
-      return RouteNames.login;
-    }
+  if (rememberMe && userId != null && token != null) {
+    MyApp.userId = userId;
+    return RouteNames.home;
+  } else {
+    return RouteNames.login;
   }
+}
 
   @override
   Widget build(BuildContext context) {

@@ -61,11 +61,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: _profileData != null && _profileData!['image'] != null
                   ? ClipOval(
                       child: Image.network(
-                        '${AppConstants.imagesbaseURL}/${_profileData!['image']}',
+                        // Vérifier si l'image contient déjà l'URL complète
+                        _profileData!['image'].startsWith('http')
+                            ? _profileData!['image']
+                            : '${AppConstants.imagesbaseURL}${_profileData!['image']}',
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
+                          print('❌ Erreur de chargement d\'image: $error');
                           return const Icon(Icons.error, color: Colors.red);
                         },
                       ),
