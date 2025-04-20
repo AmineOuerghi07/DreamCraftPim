@@ -1,4 +1,6 @@
 // model/repositories/user_repository.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/user.dart';
 import 'package:pim_project/model/services/api_client.dart';
@@ -55,13 +57,32 @@ class UserRepository extends ChangeNotifier {
   }
 
   // Update user profile
-  Future<ApiResponse<User>> updateUserProfile(String userId, Map<String, dynamic> updates) async {
-    try {
-      return await userService.updateUserProfile(userId, updates);
-    } catch (e) {
-      return ApiResponse.error('Repository error updating profile: $e');
+  Future<ApiResponse<User>> updateUserProfile(
+  String userId, 
+  Map<String, dynamic> updates,
+  File? imageFile,
+) async {
+  try {
+    // If there's an image file, use the multipart update method
+    if (imageFile != null) {
+      return await userService.updateUserProfile(
+        userId,
+        Map<String, String>.from(updates.map((key, value) => 
+          MapEntry(key, value.toString()))),
+        imageFile,
+      );
     }
+    // Otherwise use the regular update method
+    return await userService.updateUserProfile(
+      userId,
+      Map<String, String>.from(updates
+          .map((key, value) => MapEntry(key, value.toString()))),
+      null,
+    );
+  } catch (e) {
+    return ApiResponse.error('Repository error updating profile: ${e.toString()}');
   }
+}
 
   // Reset password
   Future<ApiResponse<bool>> resetPassword(String userId, String newPassword, String confirmPassword) async {

@@ -8,6 +8,8 @@ import 'package:pim_project/routes/routes.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/login_view_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pim_project/model/services/UserPreferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,6 +25,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize remember me state from preferences
+    _loadRememberMePreference();
+  }
+
+  Future<void> _loadRememberMePreference() async {
+    print('🔍 Loading Remember Me preference...');
+    final rememberMeValue = await UserPreferences.getRememberMe();
+    print('📋 Remember Me preference loaded: $rememberMeValue');
+    setState(() {
+      rememberMe = rememberMeValue;
+    });
+  }
+
   void togglePasswordVisibility() {
     setState(() {
       obscureText = !obscureText;
@@ -30,7 +48,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> login() async {
-    String email = emailController.text.trim();
+    print('🔐 Login button pressed');
+    print('📝 Remember Me state: $rememberMe');
+    String email = emailController.text;
     String password = passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
@@ -79,7 +99,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final success = await loginViewModel.signInWithGoogle(googleAuth.accessToken ?? '');
 
       if (success && mounted) {
-        context.go(RouteNames.home);
+        final userId = loginViewModel.currentUser?.userId ?? MyApp.userId;
+        if (userId.isNotEmpty) {
+          context.go(RouteNames.home, extra: userId);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erreur: ID utilisateur non trouvé')),
+          );
+        }
       }
     } catch (error) {
       if (!mounted) return;
@@ -92,6 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final loginViewModel = context.watch<LoginViewModel>();
+    final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       backgroundColor: Colors.white,
@@ -149,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         icon: const Icon(Icons.email, color: Color(0xFF777777)),
                         border: InputBorder.none,
-                        hintText: "Email",
+                        hintText: l10n.email,
                         hintStyle: GoogleFonts.roboto(
                           fontSize: 16,
                           fontWeight: FontWeight.w300,
@@ -203,6 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Checkbox(
                               value: rememberMe,
                               onChanged: (value) {
+                                print('✓ Remember Me checkbox toggled: ${value}');
                                 setState(() {
                                   rememberMe = value!;
                                 });
@@ -272,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        "Or continue with",
+                        l10n.orContinueWith,
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           fontWeight: FontWeight.w300,

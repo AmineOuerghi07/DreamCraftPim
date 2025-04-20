@@ -7,6 +7,7 @@ class User {
   final String address;
   final String role;
   final String phone;
+  final String? image;
 
   User({
     required this.userId,
@@ -17,12 +18,22 @@ class User {
     required this.password,
     required this.role,
     required this.phone,
+    this.image,
   });
 
   // Convert JSON response to User object
   factory User.fromJson(Map<String, dynamic> json) {
+    print('👤 [User] Conversion des données JSON:');
+    print('   - Données reçues: $json');
+    
+    final userId = json['_id']?.toString() ?? json['id']?.toString() ?? json['userId']?.toString() ?? '';
+    final image = json['image']?.toString();
+    
+    print('   - ID extrait: $userId');
+    print('   - Image extraite: $image');
+    
     return User(
-      userId: json['_id']?.toString() ?? json['id']?.toString() ?? json['userId']?.toString() ?? '',
+      userId: userId,
       fullname: json['fullname']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phonenumber: json['phonenumber']?.toString() ?? '',
@@ -30,12 +41,10 @@ class User {
       password: json['password']?.toString() ?? '',
       role: json['role']?.toString() ?? '',
       phone: json['phonenumber']?.toString() ?? '',
+      image: image,
     );
   }
 
-  get status => null;
-
-  get message => null;
 
   Map<String, dynamic> toJson() {
     return {
@@ -47,6 +56,7 @@ class User {
       'password': password,
       'role': role,
       'phonenumber': phone,
+      'image': image,
     };
   }
 }

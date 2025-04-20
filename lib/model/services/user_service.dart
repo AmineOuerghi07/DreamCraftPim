@@ -1,6 +1,8 @@
 // model/services/user_service.dart
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/user.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
@@ -192,6 +194,7 @@ class UserService {
           password: '', // We don't store the password
           role: tokenData['roles']?.isNotEmpty == true ? tokenData['roles'][0] : '',
           phone: tokenData['phone'] ?? '',
+          image: tokenData['image']?? '',
         );
 
         // Store the user data
@@ -208,17 +211,61 @@ class UserService {
   }
 
   // Update user profile
-  Future<ApiResponse<User>> updateUserProfile(String userId, Map<String, dynamic> updates) async {
-    try {
+Future<ApiResponse<User>> updateUserProfile(
+  String userId,
+  Map<String, dynamic> updates,
+  File? imageFile,
+) async {
+  try {
+    if (imageFile != null) {
+      // Use multipart request for image upload
+      final uri = Uri.parse('${_apiClient.baseUrl}/account/update/$userId');
+      final request = http.MultipartRequest('PUT', uri);
+
+      // Add text fields
+      updates.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      // Add image file
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+      ));
+
+      // Add authorization header
+      final token = await UserPreferences.getToken();
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      // Send request
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Handle successful response
+        return ApiResponse.completed(User.fromJson(json.decode(responseData)));
+      } else {
+        final error = json.decode(responseData);
+        return ApiResponse.error(error['message'] ?? 'Update failed');
+      }
+    } else {
+      // Regular JSON update when no image is provided
       return await _apiClient.put(
-        'account/profile/$userId',
+        'account/update/$userId',
         updates,
         (json) => User.fromJson(json),
       );
-    } catch (e) {
-      return ApiResponse.error('Error updating user profile: $e');
     }
+  } catch (e) {
+    // Handle any errors that occur
+    return ApiResponse.error('Error: ${e.toString()}');
   }
+}
+
 
   // Reset password
   Future<ApiResponse<bool>> resetPassword(String userId, String newPassword, String confirmPassword) async {

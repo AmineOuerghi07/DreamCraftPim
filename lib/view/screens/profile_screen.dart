@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:pim_project/routes/routes.dart';
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:pim_project/routes/routes.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -17,179 +17,154 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _isLoading = true;
   Map<String, dynamic>? _profileData;
-  bool _isPushNotificationEnabled = true; // Add this line
+  bool _isPushNotificationEnabled = true;
 
   @override
   void initState() {
     super.initState();
-    print("📌 ProfileScreen initialized with userId: ${widget.userId}");
     if (widget.userId.isNotEmpty) {
       fetchUserProfile(widget.userId);
-    } else {
-      print("🚨 Error: userId is empty in ProfileScreen!");
     }
   }
 
   Future<void> fetchUserProfile(String userId) async {
-  if (userId.isEmpty) {
-    print("🚨 Error: User ID is empty! Not making request.");
-    return;
-  }
-
-  final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
-  print("🔵 Sending request to: $url");
-
-  try {
-    final response = await http.get(url);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      if (mounted) {
-        setState(() {
-          _profileData = data;
-          _isLoading = false;
-        });
+    final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _profileData = data;
+          });
+        }
       }
-    } else {
-      print('🔴 Error: Status Code ${response.statusCode}');
-      print('🔴 Response Body: ${response.body}');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  } catch (e) {
-    print('🔴 Exception while fetching profile: $e');
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+    } catch (e) {
+      print('❌ Error: $e');
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
-   // final userId = MyApp.userId;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 60.0, bottom: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Profile Avatar
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : CircleAvatar(
-                      radius: 50,
-                      backgroundImage: _profileData != null &&
-                              _profileData!['photos'] != null &&
-                              _profileData!['photos'].isNotEmpty
-                          ? NetworkImage(_profileData!['photos'][0])
-                          : AssetImage('assets/images/gatous.png') as ImageProvider,
-                    ),
-              SizedBox(height: 12),
-              // Name and Email
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : Text(
-                      _profileData?['fullname'] ?? 'Name not available',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : Text(
-                      _profileData?['email'] ?? 'Email not available',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : _profileData?['address'] != null
-                      ? Text(
-                          'Address: ${_profileData!['address']}',
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      : Container(),
-              SizedBox(height: 12),
-              // Edit Profile Button
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to Edit Profile
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text('Edit Profile', style: TextStyle(color: Colors.white)),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 60.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Profile Avatar
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.green.shade100,
+              child: _profileData != null && _profileData!['image'] != null
+                  ? ClipOval(
+                      child: Image.network(
+                        // Vérifier si l'image contient déjà l'URL complète
+                        _profileData!['image'].startsWith('http')
+                            ? _profileData!['image']
+                            : '${AppConstants.imagesbaseURL}${_profileData!['image']}',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('❌ Erreur de chargement d\'image: $error');
+                          return const Icon(Icons.error, color: Colors.red);
+                        },
+                      ),
+                    )
+                  : const Icon(Icons.person, size: 50, color: Colors.green),
+            ),
+            const SizedBox(height: 12),
+            // Name and Email
+            Text(
+              _profileData?['fullname'] ?? l10n.nameNotAvailable,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              _profileData?['email'] ?? l10n.emailNotAvailable,
+              style: const TextStyle(color: Colors.grey),
+            ),
+            if (_profileData?['address'] != null)
+              Text(
+                '${l10n.address}: ${_profileData!['address']}',
+                style: const TextStyle(color: Colors.grey),
               ),
-              SizedBox(height: 15),
-              // Inventories Section
-              _buildSectionTitle('Inventories'),
-              _buildListItem(
-                icon: Icons.receipt_long,
-                title: 'My Billings',
-                onTap: () {
-                  // Handle My Billings tap
-                },
-              ),
-              _buildListItem(
-                icon: Icons.support_agent,
-                title: 'Contact Support',
-                onTap: () {
-                  // Handle Contact Support tap
-                },
-              ),
-              SizedBox(height: 15),
-              // Preferences Section
-              _buildSectionTitle('Preferences'),
-              _buildListItem(
-                icon: Icons.notifications,
-                title: 'Push Notification',
-                trailing: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Switch(
-                    value: _isPushNotificationEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _isPushNotificationEnabled = value;
-                      });
-                    },
-                    activeColor: Colors.green,
-                  ),
+            const SizedBox(height: 12),
+            // Edit Profile
+            ElevatedButton(
+              onPressed: () {
+                if (_profileData != null) {
+                  context.push(RouteNames.editProfile, extra: _profileData);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              _buildListItem(
-                icon: Icons.info,
-                title: 'About',
-                onTap: () {
-                  // Handle About tap
+              child: Text(l10n.editProfile, style: const TextStyle(color: Colors.white)),
+            ),
+            const SizedBox(height: 15),
+            // Inventories
+            _buildSectionTitle('Inventories'),
+            _buildListItem(
+              icon: Icons.receipt_long,
+              title: l10n.myBillings,
+              onTap: () {},
+            ),
+            _buildListItem(
+              icon: Icons.support_agent,
+              title: l10n.contactSupport,
+              onTap: () {
+                context.push(RouteNames.contact);
+              },
+            ),
+            const SizedBox(height: 15),
+            // Preferences
+            _buildSectionTitle(l10n.preferences),
+            _buildListItem(
+              icon: Icons.notifications,
+              title: l10n.pushNotification,
+              trailing: Switch(
+                value: _isPushNotificationEnabled,
+                onChanged: (value) {
+                  setState(() {
+                    _isPushNotificationEnabled = value;
+                  });
                 },
+                activeColor: Colors.green,
               ),
-              _buildListItem(
-                icon: Icons.language,
-                title: 'Change Language',
-                onTap: () {
-                  // Handle Change Language tap
-                },
-              ),
-              _buildListItem(
-                icon: Icons.logout,
-                title: 'Logout',
-                textColor: Colors.red,
-                onTap: () async {
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  await prefs.remove('userId'); // Clear saved user data
-                  context.go(RouteNames.login); 
-                },
-              ),
-            ],
-          ),
+            ),
+            _buildListItem(
+              icon: Icons.info,
+              title: l10n.about,
+              onTap: () {
+                context.push(RouteNames.about);
+              },
+            ),
+            _buildListItem(
+              icon: Icons.language,
+              title: l10n.changeLanguage,
+              onTap: () {
+                context.go(RouteNames.languageScreen);
+              },
+            ),
+            _buildListItem(
+              icon: Icons.logout,
+              title: l10n.logout,
+              textColor: Colors.red,
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.remove('userId');
+                if (context.mounted) {
+                  context.go(RouteNames.login);
+                }
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -228,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           color: textColor ?? Colors.black,
         ),
       ),
-      trailing: trailing ?? Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onTap,
     );
   }
