@@ -1,25 +1,33 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/view_model/chat_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final Map<String, dynamic>? initialData;
+  const ChatScreen({super.key, this.initialData});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateMixin {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin { // Changed to TickerProviderStateMixin
   late AnimationController _animationController;
   final TextEditingController _controller = TextEditingController();
   final AudioRecorder _audioRecorder = AudioRecorder();
   String? _currentAudioPath;
   bool _isRecording = false;
   final ScrollController _scrollController = ScrollController();
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedImage;
+
+  late AnimationController _loadingController;
 
   @override
   void initState() {
@@ -28,14 +36,44 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    _loadingController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+      if (widget.initialData != null) {
+        final image = widget.initialData!['image'] as File?;
+        final prediction = widget.initialData!['prediction'] as String?;
+        if (image != null && prediction != null) {
+          setState(() => _selectedImage = image);
+          _controller.text = "How do I treat $prediction?";
+          _sendInitialMessage();
+        }
+      }
+    });
+  }
+
+  void _sendInitialMessage() {
+    final chatViewModel = Provider.of<ChatViewModel>(context, listen: false);
+    chatViewModel.sendMessage(
+      _controller.text,
+      imageFile: _selectedImage,
+      detectedDisease: widget.initialData!['prediction'] as String?,
+    );
+    _controller.clear();
+    setState(() => _selectedImage = null);
+    _scrollToBottom();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _loadingController.dispose();
     _audioRecorder.dispose();
     _scrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -54,6 +92,15 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
     }
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
   Future<void> _toggleRecording(ChatViewModel chatViewModel) async {
     try {
       if (_isRecording) {
@@ -64,11 +111,12 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
         if (path != null && await File(path).exists()) {
           final audioFile = File(path);
           if (await audioFile.length() > 1024) {
-            await chatViewModel.sendAudioFile(
+            await chatViewModel.sendAudioMessage(
               audioFile,
-              detectedDisease: "Tomato Blight",
+              imageFile: _selectedImage,
             );
             _scrollToBottom();
+            setState(() => _selectedImage = null);
           }
         }
       } else {
@@ -113,15 +161,11 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
               itemBuilder: (context, index) {
                 final message = chatViewModel.messages[index];
                 return Align(
-                  alignment: message.isUser 
-                      ? Alignment.centerRight 
-                      : Alignment.centerLeft,
+                  alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                     child: Row(
-                      mainAxisAlignment: message.isUser 
-                          ? MainAxisAlignment.end 
-                          : MainAxisAlignment.start,
+                      mainAxisAlignment: message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         if (!message.isUser) ...[
@@ -138,25 +182,22 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                               vertical: 10.0,
                             ),
                             decoration: BoxDecoration(
-                              color: message.isUser 
-                                  ? Colors.blue[600] 
-                                  : Colors.grey[300],
+                              color: message.isUser ? Colors.blue[600] : Colors.grey[300],
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(20),
                                 topRight: const Radius.circular(20),
-                                bottomLeft: message.isUser 
-                                    ? const Radius.circular(20) 
-                                    : const Radius.circular(4),
-                                bottomRight: message.isUser 
-                                    ? const Radius.circular(4) 
-                                    : const Radius.circular(20),
+                                bottomLeft: message.isUser ? const Radius.circular(20) : const Radius.circular(4),
+                                bottomRight: message.isUser ? const Radius.circular(4) : const Radius.circular(20),
                               ),
                             ),
-                            child: Text(
-                              message.text,
-                              style: TextStyle(
-                                color: message.isUser ? Colors.white : Colors.black,
-                                fontSize: 16
+                            child: MarkdownBody(
+                              data: message.text,
+                              styleSheet: MarkdownStyleSheet(
+                                h2: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: message.isUser ? Colors.white : Colors.green),
+                                h3: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: message.isUser ? Colors.white : Colors.blue),
+                                strong: TextStyle(fontWeight: FontWeight.bold, color: message.isUser ? Colors.white : Colors.black),
+                                p: TextStyle(fontSize: 16, color: message.isUser ? Colors.white : Colors.black),
+                                listBullet: TextStyle(fontSize: 16, color: message.isUser ? Colors.white : Colors.black),
                               ),
                             ),
                           ),
@@ -173,9 +214,36 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
             ),
           ),
           if (chatViewModel.isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: AnimatedBuilder(
+                      animation: _loadingController,
+                      builder: (context, child) {
+                        return CustomPaint(
+                          painter: GrowingPlantPainter(_loadingController.value),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.eco, color: Colors.green, size: 20),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Aam Hssan is writing a message',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
             ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -208,31 +276,84 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                   ),
                 ),
                 IconButton(
+                  icon: const Icon(Icons.image),
+                  onPressed: _pickImage,
+                ),
+                IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: () {
                     final question = _controller.text.trim();
                     if (question.isNotEmpty) {
                       chatViewModel.sendMessage(
                         question,
-                        detectedDisease: "Tomato Blight",
+                        imageFile: _selectedImage,
                       );
                       _controller.clear();
                       _scrollToBottom();
+                      setState(() => _selectedImage = null);
                     }
                   },
                 ),
               ],
             ),
           ),
+          if (_selectedImage != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.file(_selectedImage!, height: 100),
+            ),
         ],
       ),
     );
   }
 }
 
-class Message {
-  final String text;
-  final bool isUser;
+class GrowingPlantPainter extends CustomPainter {
+  final double progress;
 
-  Message({required this.text, required this.isUser});
+  GrowingPlantPainter(this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.green
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    // Draw stem
+    final stemHeight = size.height * progress;
+    canvas.drawLine(
+      Offset(size.width / 2, size.height),
+      Offset(size.width / 2, size.height - stemHeight),
+      paint,
+    );
+
+    // Draw leaves
+    if (progress > 0.3) {
+      final leafProgress = (progress - 0.3) / 0.7;
+      final leafSize = size.width * 0.4 * leafProgress;
+      final leafY = size.height - stemHeight * 0.5;
+
+      // Left leaf
+      final leftLeafPath = Path()
+        ..moveTo(size.width / 2, leafY)
+        ..quadraticBezierTo(
+          size.width / 2 - leafSize, leafY - leafSize * 0.5,
+          size.width / 2 - leafSize * 0.8, leafY + leafSize * 0.2,
+        );
+      canvas.drawPath(leftLeafPath, paint);
+
+      // Right leaf
+      final rightLeafPath = Path()
+        ..moveTo(size.width / 2, leafY)
+        ..quadraticBezierTo(
+          size.width / 2 + leafSize, leafY - leafSize * 0.5,
+          size.width / 2 + leafSize * 0.8, leafY + leafSize * 0.2,
+        );
+      canvas.drawPath(rightLeafPath, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

@@ -24,140 +24,168 @@ class SmartRegionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Base background color based on switchValue
-    Color baseColor = switchValue ? const Color(0xFF204D4F) : Colors.grey;
+    Color baseColor = switchValue ? const Color(0xFF204D4F) : const Color(0xFF505050);
 
-    // Define highlight styles
+    // Define highlight styles without border colors
     BoxDecoration cardDecoration;
-    Color subtitleColor;
     switch (highlightLevel) {
       case HighlightLevel.normal:
         cardDecoration = BoxDecoration(
           color: baseColor,
           borderRadius: BorderRadius.circular(12),
         );
-        subtitleColor = Colors.white70;
         break;
       case HighlightLevel.medium:
         cardDecoration = BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              baseColor,
-              Colors.yellow.withOpacity(0.3), // Subtle yellow tint
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: baseColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.yellow, width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.yellow.withOpacity(0.1),
-              blurRadius: 4,
-              spreadRadius: 1,
-            ),
-          ],
         );
-        subtitleColor = Colors.yellow[200]!; // Lighter yellow for readability
         break;
       case HighlightLevel.danger:
         cardDecoration = BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              baseColor,
-              Colors.red.withOpacity(0.4), // Subtle red tint
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: baseColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.red.withOpacity(0.1),
-              blurRadius: 4,
-              spreadRadius: 2,
-            ),
-          ],
         );
-        subtitleColor = Colors.red[300]!; // Lighter red for readability
         break;
+    }
+
+    // Determine subtitle color based on highlightLevel and title
+    Color getSubtitleColor() {
+      switch (highlightLevel) {
+        case HighlightLevel.medium:
+          return const Color(0xFFEAA31F); // Warning color
+        case HighlightLevel.danger:
+          return const Color(0xFFCF2F2F); // Danger color
+        case HighlightLevel.normal:
+          if (title == "Irrigation") {
+            return const Color(0xFF4968FF); // Water safe color
+          } else if (title == "Soil") {
+            return const Color(0xFFB95C00); // Growth color
+          } else {
+            return const Color(0xFFB9A900); // Default safe color
+          }
+      }
     }
 
     return Card(
       elevation: 4,
+      margin: const EdgeInsets.all(4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         decoration: cardDecoration,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: SizedBox(
+            height: 140, // Fixed height to prevent overflow
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  height: 46,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        width: 45,
-                        height: 45,
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(50, 222, 219, 219),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          icon,
-                          size: 30,
-                          color: iconColor,
-                        ),
-                      ),
-                      Transform.scale(
-                        scale: 0.8,
-                        child: Switch(
-                          value: switchValue,
-                          onChanged: onSwitchChanged,
-                          activeColor: Colors.white,
-                          activeTrackColor: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Column(
+                // Top row with value and icon
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    // Value Container (left side)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: getSubtitleColor(),
+                        ),
+                      ),
+                    ),
+                    
+                    // Icon Container (right side)
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 22,
+                        color: iconColor,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                // Expanded space for center alignment
+                Expanded(
+                  child: Center(
+                    // Center text
+                    child: Text(
                       title,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: subtitleColor,
-                        fontWeight: highlightLevel == HighlightLevel.danger
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        shadows: highlightLevel != HighlightLevel.normal
-                            ? [
-                                Shadow(
-                                  color: subtitleColor.withOpacity(0.6),
-                                  blurRadius: 2,
-                                  offset: const Offset(1, 1),
-                                ),
-                              ]
-                            : null,
+                  ),
+                ),
+                
+                // Bottom switch with elegant design
+                Center(
+                  child: GestureDetector(
+                    onTap: () => onSwitchChanged(!switchValue),
+                    child: Container(
+                      width: 62,
+                      height: 32,
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: switchValue 
+                          ? Colors.green.withOpacity(0.3) 
+                          : Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: switchValue 
+                            ? Colors.green.shade400 
+                            : Colors.grey.shade400,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: AnimatedAlign(
+                        duration: const Duration(milliseconds: 200),
+                        alignment: switchValue 
+                          ? Alignment.centerRight 
+                          : Alignment.centerLeft,
+                        child: Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: switchValue 
+                              ? Colors.green.shade500 
+                              : Colors.grey.shade500,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 2,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Icon(
+                              switchValue ? Icons.check : Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),

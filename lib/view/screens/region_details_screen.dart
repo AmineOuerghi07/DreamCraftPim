@@ -3,21 +3,23 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
+import 'package:pim_project/view/screens/components/region_detail_text.dart';
+import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
 
 class RegionDetailsScreen extends StatelessWidget {
   final String id;
-  const RegionDetailsScreen({required this.id, super.key});
+  final LandDetailsViewModel? landDetailsViewModel;
+  const RegionDetailsScreen({required this.id,this.landDetailsViewModel, super.key});
 
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
-
+    final landVM = landDetailsViewModel ?? context.read<LandDetailsViewModel>();
     if (viewModel.region == null || viewModel.region!.id != id) {
       Future.microtask(() {
         viewModel.getRegionById(id);
@@ -25,7 +27,7 @@ class RegionDetailsScreen extends StatelessWidget {
     }
 
     return Consumer<RegionDetailsViewModel>(
-      builder: (context, viewModel, child) {
+      builder: (contextRegionDetailsViewModel, viewModel, child) {
         final regionResponse = viewModel.regionResponse;
 
         if (regionResponse?.status == Status.LOADING || regionResponse == null) {
@@ -72,57 +74,14 @@ class RegionDetailsScreen extends StatelessWidget {
                     regionCount: region.plants.length.toString(),
                     cultivationType: region.name,
                     location: viewModel.land?.cordonate ?? "Loading...",
-                    onAddRegion: () => _navigateToAddPlantScreen(context, region, viewModel),
-                    buttonText: "Add Plant",
+onAddRegion: () => _navigateToAddPlantScreen(contextRegionDetailsViewModel, region, viewModel, landVM),                    buttonText: "Add Plant",
                     showRegionCount: false,
                     onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 150,
-                    child: Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 4,
-                      margin: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              RegionDetailInfocard(
-                                title: "Expanse",
-                                value: "${region.surface.toStringAsFixed(0)}m²",
-                                imageName: "square_foot.png",
-                              ),
-                              RegionDetailInfocard(
-                                title: "Temperature",
-                                value: "N/A",
-                                imageName: "thermostat_arrow_up.png",
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              RegionDetailInfocard(
-                                title: "Humidity",
-                                value: "N/A",
-                                imageName: "humidity.png",
-                              ),
-                              RegionDetailInfocard(
-                                title: "Irrigation",
-                                value: "N/A",
-                                imageName: "humidity_high.png",
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+ RegionInformationSection(
+        description: "On This Region we find a lot of Plants that dependes on a lot of sensors like the tempreatrue and the lighting including the lighting, soil and we can customie the irragation for the needed thin!",
+      ),
+      
                   const TabBar(
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.grey,
@@ -132,7 +91,7 @@ class RegionDetailsScreen extends StatelessWidget {
                       Tab(text: "Plants"),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  
                   Expanded(
                     child: TabBarView(
                       children: [
@@ -161,13 +120,24 @@ class RegionDetailsScreen extends StatelessWidget {
     }
   }
 
- void _navigateToAddPlantScreen(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
-  context.push('${RouteNames.addplantScreen}/${region.id}').then((result) {
+void _navigateToAddPlantScreen(
+  BuildContext context,
+  Region region,
+  RegionDetailsViewModel regionVM,
+  LandDetailsViewModel landVM,
+) {
+  context.push('${RouteNames.addplantScreen}/${region.id}').then((result) async {
     if (result != null && result is Map<String, int>) {
-      // Pass the result directly to addSelectedPlantsToRegion
-      viewModel.addSelectedPlantsToRegion(region.id, selectedPlants: result);
+      await regionVM.addSelectedPlantsToRegion(region.id, selectedPlants: result);
+      print('Navigation ViewModel instance: $landVM, hash: ${landVM.hashCode}');
+      
+    //  await Future.delayed(const Duration(seconds: 2)); // Keep 2s delay
+      await landVM.fetchPlantsForLand(region.land.id);
+      
+      print('Fetch completed for landId: ${region.land.id}, quantity: ${landVM.plants.isNotEmpty ? landVM.plants.first.totalQuantity : "none"}');
     }
   });
+}
 }
 
   void _showUpdateRegionDialog(BuildContext context, RegionDetailsViewModel viewModel) {
@@ -237,6 +207,7 @@ class RegionDetailsScreen extends StatelessWidget {
                             land: region.land,
                             sensors: region.sensors,
                             plants: region.plants,
+                            isConnected: region.isConnected,
                           );
                           print('Sending update payload: ${updatedRegion.toJson()}');
                           final response = await viewModel.updateRegion(updatedRegion);
@@ -309,4 +280,3 @@ class RegionDetailsScreen extends StatelessWidget {
       ),
     );
   }
-}

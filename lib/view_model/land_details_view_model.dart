@@ -30,6 +30,18 @@ class LandDetailsViewModel with ChangeNotifier {
   List<PlantWithQuantity> _plants = [];
   List<PlantWithQuantity> get plants => _plants;
 
+LandDetailsViewModel(String landId) {
+    _initialize(landId);
+  }
+
+  // Private async method to handle initialization
+  Future<void> _initialize(String landId) async {
+    await Future.wait([
+      fetchLandById(landId),
+      fetchRegionsForLand(landId),
+      fetchPlantsForLand(landId),
+    ]);
+  }
   // Reset plant data when switching lands
   void resetPlants() {
     _plants = [];
@@ -164,22 +176,26 @@ class LandDetailsViewModel with ChangeNotifier {
   }
 
   Future<void> fetchPlantsForLand(String landId) async {
-    _plantsResponse = ApiResponse.loading('Loading plants...');
-    _plants = []; // Clear previous plants
-    notifyListeners();
+  _plantsResponse = ApiResponse.loading('Loading plants...');
+  _plants = [];
+  print('Fetching plants for landId: $landId, plants cleared');
+  notifyListeners();
 
-    try {
-      final response = await _landService.getPlantsByLandId(landId);
-      if (response.status == Status.COMPLETED && response.data != null) {
-        _plants = response.data!;
-        _plantsResponse = ApiResponse.completed(_plants);
-      } else {
-        _plantsResponse = ApiResponse.error(response.message ?? 'Failed to fetch plants');
-      }
-    } catch (e) {
-      _plantsResponse = ApiResponse.error('Failed to fetch plants: ${e.toString()}');
-    } finally {
-      notifyListeners();
+  try {
+    final response = await _landService.getPlantsByLandId(landId);
+    print('API response: ${response.status}, data: ${response.data}');
+    if (response.status == Status.COMPLETED && response.data != null) {
+      _plants = response.data!;
+      _plantsResponse = ApiResponse.completed(_plants);
+      print('Plants updated: ${_plants.length} items');
+    } else {
+      _plantsResponse = ApiResponse.error(response.message ?? 'Failed to fetch plants');
     }
+  } catch (e) {
+    _plantsResponse = ApiResponse.error('Failed to fetch plants: ${e.toString()}');
+  } finally {
+    print('Notifying listeners, plants: ${_plants.length}');
+    notifyListeners();
   }
+}
 }

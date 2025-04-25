@@ -33,7 +33,7 @@ class RegionInfo extends StatelessWidget {
             // Conditionally show region count or "Add Sensors" button
             showRegionCount
                 ? Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(50, 68, 206, 155),
                       borderRadius: BorderRadius.circular(16),

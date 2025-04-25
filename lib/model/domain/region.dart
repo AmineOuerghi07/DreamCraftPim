@@ -10,14 +10,17 @@ class Region {
   final double surface;
   final List<String> sensors;
   final List<PlantWithQuantity> plants;
+  final bool isConnected;
 
   Region({
     required this.id,
     required this.name,
     required this.land,
-    required this.surface,
+    required this.surface,  
     List<String>? sensors,
+    
     List<PlantWithQuantity>? plants,
+    required this.isConnected,
   })  : sensors = sensors ?? [],
         plants = plants ?? [];
 
@@ -35,6 +38,7 @@ class Region {
                 surface: 0.0,
                 image: '',
                 regions: [],
+                rentPrice: 0.0,
               )
             : Land.fromJson(json['land'] as Map<String, dynamic>),
         surface: (json['surface'] as num?)?.toDouble() ?? 0.0,
@@ -46,6 +50,7 @@ class Region {
                 ?.map((p) => PlantWithQuantity.fromJson(p is String ? {'plant': p} : p))
                 .toList() ??
             [],
+            isConnected: json['isConnected'] as bool? ?? false,
       );
     } catch (e, stack) {
       print('Error parsing Region: $e\n$stack');
@@ -54,11 +59,13 @@ class Region {
   }
 
   Map<String, dynamic> toJson() => {
+  
         'name': name,
         'land': land.toJson(),
         'surface': surface,
         'sensors': sensors,
         'plants': plants.map((p) => p.toJson()).toList(),
+        'isConnected': isConnected,
       };
 
   Region copyWith({
@@ -68,6 +75,8 @@ class Region {
     double? surface,
     List<String>? sensors,
     List<PlantWithQuantity>? plants, // Fixed type
+    bool? isConnected,
+    
   }) {
     return Region(
       id: id ?? this.id,
@@ -76,6 +85,7 @@ class Region {
       surface: surface ?? this.surface,
       sensors: sensors ?? this.sensors,
       plants: plants ?? this.plants,
+      isConnected: isConnected ?? this.isConnected,
     );
   }
 }

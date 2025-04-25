@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/region.dart';
+import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view_model/land_details_view_model.dart';
+import 'package:provider/provider.dart';
 
 class LandRegionsGrid extends StatelessWidget {
-  final String landId;
+  final String ?landId;
   final List<Region> regions;
 
   const LandRegionsGrid({
@@ -33,7 +36,16 @@ class LandRegionsGrid extends StatelessWidget {
             final region = regions[index];
             return GestureDetector(
               onTap: () {
-                GoRouter.of(context).push('/region-details/${region.id}');
+                if (landId != null) {
+        final landDetailsVM = context.read<LandDetailsViewModel>();
+        context.push(
+          '${RouteNames.regionDetails}/${region.id}',
+          extra: landDetailsVM,
+        );
+      } else {
+        context.push('${RouteNames.regionDetails}/${region.id}');
+      }
+    
               },
               child: Card(
                 shape: RoundedRectangleBorder(
@@ -54,7 +66,7 @@ class LandRegionsGrid extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        region.name, // Use actual region name
+                        region.name,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -80,17 +92,17 @@ class LandRegionsGrid extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${region.sensors.length} Sensors", // Use actual sensor count
+                                "${region.sensors.length} Sensors",
                                 style: const TextStyle(fontSize: 14),
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                "${region.plants.length} Plants", // Use actual plant count
+                                "${region.plants.length} Plants",
                                 style: const TextStyle(fontSize: 14),
                               ),
                               const SizedBox(height: 12),
                               const Text(
-                                "60% Irrigation", // You can update this if you have irrigation data
+                                "60% Irrigation",
                                 style: TextStyle(fontSize: 14),
                               ),
                             ],
