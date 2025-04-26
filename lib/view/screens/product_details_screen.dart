@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:pim_project/model/product.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
@@ -22,6 +23,7 @@ class ProductDetailsScreen extends StatelessWidget {
           }
 
           final product = provider.product;
+          final relatedProducts = provider.relatedProducts;
 
           if (product == null) {
             return const Scaffold(
@@ -35,7 +37,6 @@ class ProductDetailsScreen extends StatelessWidget {
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
-
               ),
               actions: [
                 IconButton(
@@ -50,14 +51,14 @@ class ProductDetailsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Image.network(
-  "${AppConstants.baseUrl}/uploads/${product.image}",
-  height: 200,
-  errorBuilder: (context, error, stackTrace) {
-    return const Text('Error loading image'); // Debug image loading issues
-  },
-)
-                  ),
+                      child: Image.network(
+                    "${AppConstants.baseUrl}/uploads/${product.image}",
+                    height: 200,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Text(
+                          'Error loading image'); // Debug image loading issues
+                    },
+                  )),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -91,7 +92,8 @@ class ProductDetailsScreen extends StatelessWidget {
                       Column(
                         children: [
                           Text('${product.price}DT / pcs',
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                           Row(
                             children: [
                               IconButton(
@@ -102,7 +104,8 @@ class ProductDetailsScreen extends StatelessWidget {
                                 },
                               ),
                               Text('${provider.quantity} pcs',
-                                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
                               IconButton(
                                 icon: const Icon(Icons.add_circle,
                                     color: Colors.lightGreen),
@@ -121,7 +124,6 @@ class ProductDetailsScreen extends StatelessWidget {
                   const Text(
                     'Description',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-
                   ),
                   const SizedBox(height: 8),
                   Text(product.description ?? 'No description available'),
@@ -140,18 +142,26 @@ class ProductDetailsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             RegionDetailInfocard(
-                                title: "Expanse", value: "3000m²", imageName: "square_foot.png"),
+                                title: "Expanse",
+                                value: "3000m²",
+                                imageName: "square_foot.png"),
                             RegionDetailInfocard(
-                                title: "Temperature", value: "25°C", imageName: "thermostat_arrow_up.png"),
+                                title: "Temperature",
+                                value: "25°C",
+                                imageName: "thermostat_arrow_up.png"),
                           ],
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             RegionDetailInfocard(
-                                title: "Humidity", value: "20%", imageName: "humidity.png"),
+                                title: "Humidity",
+                                value: "20%",
+                                imageName: "humidity.png"),
                             RegionDetailInfocard(
-                                title: "Irrigation", value: "50%", imageName: "humidity_high.png"),
+                                title: "Irrigation",
+                                value: "50%",
+                                imageName: "humidity_high.png"),
                           ],
                         ),
                       ],
@@ -167,11 +177,31 @@ class ProductDetailsScreen extends StatelessWidget {
                     height: 100,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 6,
+                      itemCount: relatedProducts?.length ?? 0,
                       itemBuilder: (context, index) {
-                        return Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          child: Image.asset('../assets/images/pepper.png'),
+                        if (relatedProducts == null) return const SizedBox();
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailsScreen(
+                                  id: relatedProducts[index].id,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            child: Image.network(
+                              "${AppConstants.baseUrl}/uploads/${relatedProducts[index].image}",
+                              height: 200,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Text(
+                                    'Error loading image'); // Debug image loading issues
+                              },
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -180,19 +210,18 @@ class ProductDetailsScreen extends StatelessWidget {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        
-                       provider.checkSharedPref(product);
+                        provider.checkSharedPref(product);
 
                         Navigator.pop(context);
-                       // Add to cart
-                       
+                        // Add to cart
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 23, 106, 26),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
                       ),
                       child: const Text(
                         "Add To Cart",

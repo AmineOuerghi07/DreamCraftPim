@@ -29,7 +29,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> fetchUserProfile(String userId) async {
-    final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
+    final url =
+        Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -105,15 +106,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text(l10n.editProfile, style: const TextStyle(color: Colors.white)),
+              child: Text(l10n.editProfile,
+                  style: const TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 15),
             // Inventories
             _buildSectionTitle('Inventories'),
             _buildListItem(
               icon: Icons.receipt_long,
-              title: l10n.myBillings,
-              onTap: () {},
+              title: 'My Billings',
+              onTap: () {
+                context.push(RouteNames.billingScreen);
+              },
             ),
             _buildListItem(
               icon: Icons.support_agent,

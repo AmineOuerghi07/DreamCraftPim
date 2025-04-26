@@ -8,14 +8,16 @@ import 'package:provider/provider.dart';
 class CartBottomSheet extends StatefulWidget {
   final VoidCallback onPaymentComplete;
 
-  const CartBottomSheet({required this.onPaymentComplete, Key? key}) : super(key: key);
+  const CartBottomSheet({required this.onPaymentComplete, Key? key})
+      : super(key: key);
 
   static void show(BuildContext context, VoidCallback onPaymentComplete) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Makes it expandable
       backgroundColor: Colors.transparent,
-      builder: (context) => CartBottomSheet(onPaymentComplete: onPaymentComplete),
+      builder: (context) =>
+          CartBottomSheet(onPaymentComplete: onPaymentComplete),
     );
   }
 
@@ -30,7 +32,10 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
       Provider.of<CartProvider>(context, listen: false)
           .cartItems
           .where((product) => !removedItems.contains(product.id))
-          .fold(0, (sum, product) => sum + (product.price) * (product.quantity as int));
+          .fold(
+              0,
+              (sum, product) =>
+                  sum + (product.price) * (product.quantity as int));
 
   @override
   void initState() {
@@ -67,7 +72,8 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
               ),
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     IconButton(
@@ -86,14 +92,16 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                       IconButton(
                         icon: const Icon(Icons.check, color: Colors.green),
                         onPressed: () {
-                          Provider.of<FactureProvider>(context, listen: false).toggleEditMode();
+                          Provider.of<FactureProvider>(context, listen: false)
+                              .toggleEditMode();
                         },
                       )
                     else
                       IconButton(
                         icon: const Icon(Icons.edit, color: Colors.black87),
                         onPressed: () {
-                          Provider.of<FactureProvider>(context, listen: false).toggleEditMode();
+                          Provider.of<FactureProvider>(context, listen: false)
+                              .toggleEditMode();
                         },
                       ),
                   ],
@@ -119,7 +127,8 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
 
                     return ListView.separated(
                       controller: scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       itemCount: visibleProducts.length,
                       separatorBuilder: (context, index) => const Divider(),
                       itemBuilder: (context, index) {
@@ -138,8 +147,9 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                 ),
                                 child: product.image.isNotEmpty
                                     ? Image.network(
-  "${AppConstants.baseUrl}/uploads/${product.image}")
-                                    : Icon(Icons.image, color: Colors.grey[400], size: 24),
+                                        "${AppConstants.baseUrl}/uploads/${product.image}")
+                                    : Icon(Icons.image,
+                                        color: Colors.grey[400], size: 24),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -164,9 +174,11 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                   ],
                                 ),
                               ),
-                              if (Provider.of<FactureProvider>(context).editMode)
+                              if (Provider.of<FactureProvider>(context)
+                                  .editMode)
                                 IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                  icon: const Icon(Icons.delete_outline,
+                                      color: Colors.red),
                                   onPressed: () {
                                     setState(() {
                                       removedItems.add(product.id);
@@ -257,13 +269,21 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                             width: double.infinity,
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: Provider.of<FactureProvider>(context).editMode
+                              onPressed: Provider.of<FactureProvider>(context)
+                                      .editMode
                                   ? () {
                                       // Apply removals
                                       for (var id in removedItems) {
-                                        final product = cartProvider.cartItems.firstWhere(
+                                        final product =
+                                            cartProvider.cartItems.firstWhere(
                                           (p) => p.id == id,
-                                          orElse: () => Product(id: '', name: '', price: 0, quantity: 0, stockQuantity: 0, image: ''),
+                                          orElse: () => Product(
+                                              id: '',
+                                              name: '',
+                                              price: 0,
+                                              quantity: 0,
+                                              stockQuantity: 0,
+                                              image: ''),
                                         );
                                         if (product.id.isNotEmpty) {
                                           cartProvider.removeItem(product);
@@ -272,20 +292,30 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                                       setState(() {
                                         removedItems.clear();
                                       });
-                                      Provider.of<FactureProvider>(context, listen: false).toggleEditMode();
+                                      Provider.of<FactureProvider>(context,
+                                              listen: false)
+                                          .toggleEditMode();
                                     }
                                   : cartProvider.isConfirmed
                                       ? () {
-                                          Navigator.pop(context); // Close the bottom sheet
+                                          Navigator.pop(
+                                              context); // Close the bottom sheet
+
+                                          Provider.of<FactureProvider>(context,
+                                                  listen: false)
+                                              .createOrder(context,
+                                                  calculateTotalPrice(context));
                                           widget.onPaymentComplete();
                                         }
                                       : null,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Provider.of<FactureProvider>(context).editMode
-                                    ? Colors.blue
-                                    : cartProvider.isConfirmed
-                                        ? Colors.orange
-                                        : Colors.grey,
+                                backgroundColor:
+                                    Provider.of<FactureProvider>(context)
+                                            .editMode
+                                        ? Colors.blue
+                                        : cartProvider.isConfirmed
+                                            ? Colors.orange
+                                            : Colors.grey,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
