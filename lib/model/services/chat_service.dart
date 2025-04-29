@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:pim_project/main.dart';
+import 'package:pim_project/model/domain/chat_conversation.dart';
 import 'package:pim_project/model/services/api_client.dart';
 
 class ChatService {
@@ -14,7 +16,7 @@ class ChatService {
         'POST',
         Uri.parse('${_apiClient.baseUrl}/api/v1/chat'),
       );
-
+      request.fields['user_id'] = MyApp.userId ;
       request.fields['question'] = question;
       if (detectedDisease != null) {
         request.fields['detected_disease'] = detectedDisease;
@@ -45,7 +47,7 @@ class ChatService {
         'POST',
         Uri.parse('${_apiClient.baseUrl}/api/v1/chat/audio'),
       );
-
+       request.fields['user_id'] = MyApp.userId  ;
       request.files.add(await http.MultipartFile.fromPath(
         'audio_file',
         audioFile.path,
@@ -74,4 +76,23 @@ class ChatService {
       return ApiResponse.error('Error sending audio message: $e');
     }
   }
+
+  Future<ApiResponse<List<ChatConversation>>> getConversations() async {
+    try {
+      final userId = MyApp.userId ?? 'default_user';
+      final response = await _apiClient.get(
+        'api/v1/conversations/$userId',
+        (json) => (json as List<dynamic>).map((item) => ChatConversation.fromJson(item as Map<String, dynamic>)).toList(),
+      );
+
+      if (response.status == Status.COMPLETED) {
+        return ApiResponse.completed(response.data as List<ChatConversation>);
+      } else {
+        return ApiResponse.error('Failed to fetch conversations: ${response.message}');
+      }
+    } catch (e) {
+      return ApiResponse.error('Error fetching conversations: $e');
+    }
+  }
+
 }

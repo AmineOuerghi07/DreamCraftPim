@@ -7,7 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
-import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatScreen extends StatefulWidget {
   final Map<String, dynamic>? initialData;
@@ -17,7 +18,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin { // Changed to TickerProviderStateMixin
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   final TextEditingController _controller = TextEditingController();
   final AudioRecorder _audioRecorder = AudioRecorder();
@@ -39,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _loadingController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -146,10 +147,88 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final chatViewModel = Provider.of<ChatViewModel>(context);
+    debugPrint('Rendering ChatScreen, isLoading: ${chatViewModel.isLoading}');
+
+    if (chatViewModel.isLoading && !_loadingController.isAnimating) {
+      _loadingController.repeat(reverse: true);
+      debugPrint('Started loading animation');
+    } else if (!chatViewModel.isLoading && _loadingController.isAnimating) {
+      _loadingController.stop();
+      _loadingController.reset();
+      debugPrint('Stopped loading animation');
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plant Disease Chat'),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.green[700],
+              ),
+              child: const Center(
+                child: Text(
+                  'Conversations',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.add, color: Colors.green),
+              title: const Text('Start a New Conversation With Uncle Hsaan'),
+              onTap: () {
+                chatViewModel.startNewConversation();
+                Navigator.pop(context);
+              },
+            ),
+            const Divider(),
+            Expanded(
+              child: chatViewModel.conversations.isEmpty
+                  ? const Center(child: Text('No conversations yet'))
+                  : ListView.builder(
+                      itemCount: chatViewModel.conversations.length,
+                      itemBuilder: (context, index) {
+                        final conversation = chatViewModel.conversations[index];
+                        debugPrint('Rendering conversation $index: ${conversation.question}');
+                        return ListTile(
+                          title: Text(
+                            conversation.question,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            DateFormat('MMM d, yyyy – HH:mm').format(conversation.timestamp),
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          selected: chatViewModel.selectedConversation == conversation,
+                          selectedTileColor: Colors.green[100],
+                          onTap: () {
+                            chatViewModel.selectConversation(conversation);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -226,6 +305,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     child: AnimatedBuilder(
                       animation: _loadingController,
                       builder: (context, child) {
+                        debugPrint('Rendering loading animation, value: ${_loadingController.value}');
                         return CustomPaint(
                           painter: GrowingPlantPainter(_loadingController.value),
                         );
@@ -287,7 +367,20 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                       chatViewModel.sendMessage(
                         question,
                         imageFile: _selectedImage,
-                      );
+                      ).then((_) {
+                        // Check for errors in messages
+                        if (chatViewModel.messages.last.text.startsWith('Error fetching conversations')) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to update conversations. Please try again.'),
+                              action: SnackBarAction(
+                                label: 'Retry',
+                                onPressed: () => chatViewModel.fetchConversations(),
+                              ),
+                            ),
+                          );
+                        }
+                      });
                       _controller.clear();
                       _scrollToBottom();
                       setState(() => _selectedImage = null);
@@ -320,7 +413,6 @@ class GrowingPlantPainter extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    // Draw stem
     final stemHeight = size.height * progress;
     canvas.drawLine(
       Offset(size.width / 2, size.height),
@@ -328,27 +420,28 @@ class GrowingPlantPainter extends CustomPainter {
       paint,
     );
 
-    // Draw leaves
     if (progress > 0.3) {
       final leafProgress = (progress - 0.3) / 0.7;
       final leafSize = size.width * 0.4 * leafProgress;
       final leafY = size.height - stemHeight * 0.5;
 
-      // Left leaf
       final leftLeafPath = Path()
         ..moveTo(size.width / 2, leafY)
         ..quadraticBezierTo(
-          size.width / 2 - leafSize, leafY - leafSize * 0.5,
-          size.width / 2 - leafSize * 0.8, leafY + leafSize * 0.2,
+          size.width / 2 - leafSize,
+          leafY - leafSize * 0.5,
+          size.width / 2 - leafSize * 0.8,
+          leafY + leafSize * 0.2,
         );
       canvas.drawPath(leftLeafPath, paint);
 
-      // Right leaf
       final rightLeafPath = Path()
         ..moveTo(size.width / 2, leafY)
         ..quadraticBezierTo(
-          size.width / 2 + leafSize, leafY - leafSize * 0.5,
-          size.width / 2 + leafSize * 0.8, leafY + leafSize * 0.2,
+          size.width / 2 + leafSize,
+          leafY - leafSize * 0.5,
+          size.width / 2 + leafSize * 0.8,
+          leafY + leafSize * 0.2,
         );
       canvas.drawPath(rightLeafPath, paint);
     }
