@@ -6,10 +6,12 @@ import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
+import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
 import 'package:pim_project/view/screens/components/region_detail_text.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegionDetailsScreen extends StatelessWidget {
   final String id;
@@ -18,6 +20,7 @@ class RegionDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
     final landVM = landDetailsViewModel ?? context.read<LandDetailsViewModel>();
     if (viewModel.region == null || viewModel.region!.id != id) {
@@ -53,13 +56,13 @@ class RegionDetailsScreen extends StatelessWidget {
                   icon: const Icon(Icons.more_vert, color: Colors.black),
                   onSelected: (value) => _handleMenuSelection(value, context, viewModel),
                   itemBuilder: (BuildContext context) => [
-                    const PopupMenuItem<String>(
+                    PopupMenuItem<String>(
                       value: 'update',
-                      child: ListTile(leading: Icon(Icons.edit), title: Text('Update Region')),
+                      child: ListTile(leading: const Icon(Icons.edit), title: Text(l10n.updateRegion)),
                     ),
-                    const PopupMenuItem<String>(
+                    PopupMenuItem<String>(
                       value: 'delete',
-                      child: ListTile(leading: Icon(Icons.delete), title: Text('Delete Region')),
+                      child: ListTile(leading: const Icon(Icons.delete), title: Text(l10n.deleteRegion)),
                     ),
                   ],
                 ),
@@ -74,21 +77,64 @@ class RegionDetailsScreen extends StatelessWidget {
                     regionCount: region.plants.length.toString(),
                     cultivationType: region.name,
                     location: viewModel.land?.cordonate ?? "Loading...",
-onAddRegion: () => _navigateToAddPlantScreen(contextRegionDetailsViewModel, region, viewModel, landVM),                    buttonText: "Add Plant",
+                    onAddRegion: () => _navigateToAddPlantScreen(contextRegionDetailsViewModel, region, viewModel, landVM),
+                    buttonText: l10n.addPlant,
                     showRegionCount: false,
                     onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
                   ),
- RegionInformationSection(
-        description: "On This Region we find a lot of Plants that dependes on a lot of sensors like the tempreatrue and the lighting including the lighting, soil and we can customie the irragation for the needed thin!",
-      ),
-      
-                  const TabBar(
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 150,
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 4,
+                      margin: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              RegionDetailInfocard(
+                                title: l10n.expanse,
+                                value: "${region.surface.toStringAsFixed(0)}m²",
+                                imageName: "square_foot.png",
+                              ),
+                              RegionDetailInfocard(
+                                title: l10n.temperature,
+                                value: "N/A",
+                                imageName: "thermostat_arrow_up.png",
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              RegionDetailInfocard(
+                                title: l10n.humidity,
+                                value: "N/A",
+                                imageName: "humidity.png",
+                              ),
+                              RegionDetailInfocard(
+                                title: l10n.irrigation,
+                                value: "N/A",
+                                imageName: "humidity_high.png",
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TabBar(
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.grey,
                     indicatorColor: Colors.green,
                     tabs: [
-                      Tab(text: "Smart Region"),
-                      Tab(text: "Plants"),
+                      Tab(text: l10n.smartRegion),
+                      Tab(text: l10n.plants),
                     ],
                   ),
                   
@@ -120,31 +166,28 @@ onAddRegion: () => _navigateToAddPlantScreen(contextRegionDetailsViewModel, regi
     }
   }
 
-void _navigateToAddPlantScreen(
-  BuildContext context,
-  Region region,
-  RegionDetailsViewModel regionVM,
-  LandDetailsViewModel landVM,
-) {
-  context.push('${RouteNames.addplantScreen}/${region.id}').then((result) async {
-    if (result != null && result is Map<String, int>) {
-      await regionVM.addSelectedPlantsToRegion(region.id, selectedPlants: result);
-      print('Navigation ViewModel instance: $landVM, hash: ${landVM.hashCode}');
-      
-    //  await Future.delayed(const Duration(seconds: 2)); // Keep 2s delay
-      await landVM.fetchPlantsForLand(region.land.id);
-      
-      print('Fetch completed for landId: ${region.land.id}, quantity: ${landVM.plants.isNotEmpty ? landVM.plants.first.totalQuantity : "none"}');
-    }
-  });
-}
-}
+  void _navigateToAddPlantScreen(
+    BuildContext context,
+    Region region,
+    RegionDetailsViewModel regionVM,
+    LandDetailsViewModel landVM,
+  ) {
+    context.push('${RouteNames.addplantScreen}/${region.id}').then((result) async {
+      if (result != null && result is Map<String, int>) {
+        await regionVM.addSelectedPlantsToRegion(region.id, selectedPlants: result);
+        print('Navigation ViewModel instance: $landVM, hash: ${landVM.hashCode}');
+        await landVM.fetchPlantsForLand(region.land.id);
+        print('Fetch completed for landId: ${region.land.id}, quantity: ${landVM.plants.isNotEmpty ? landVM.plants.first.totalQuantity : "none"}');
+      }
+    });
+  }
 
   void _showUpdateRegionDialog(BuildContext context, RegionDetailsViewModel viewModel) {
     final region = viewModel.region!;
     TextEditingController nameController = TextEditingController(text: region.name);
     TextEditingController surfaceController = TextEditingController(text: region.surface.toString());
     bool isLoading = false;
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
@@ -152,24 +195,24 @@ void _navigateToAddPlantScreen(
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Update Region'),
+              title: Text(l10n.updateRegion),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: "Region Name",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.regionName,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: surfaceController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Surface Area (m²)",
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.surfaceArea,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ],
@@ -177,7 +220,7 @@ void _navigateToAddPlantScreen(
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                 ),
                 ElevatedButton(
                   onPressed: isLoading
@@ -185,7 +228,7 @@ void _navigateToAddPlantScreen(
                       : () async {
                           if (nameController.text.isEmpty || surfaceController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Please fill all fields"), backgroundColor: Colors.red),
+                              SnackBar(content: Text(l10n.pleaseFillAllRequiredFields), backgroundColor: Colors.red),
                             );
                             return;
                           }
@@ -193,7 +236,7 @@ void _navigateToAddPlantScreen(
                           final surface = double.tryParse(surfaceController.text);
                           if (surface == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Invalid surface value"), backgroundColor: Colors.red),
+                              SnackBar(content: Text(l10n.invalidSurfaceValue), backgroundColor: Colors.red),
                             );
                             return;
                           }
@@ -218,14 +261,14 @@ void _navigateToAddPlantScreen(
                             Navigator.of(dialogContext).pop();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(response.message ?? "Update failed"), backgroundColor: Colors.red),
+                              SnackBar(content: Text(response.message ?? l10n.updateFailed), backgroundColor: Colors.red),
                             );
                           }
                         },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700),
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Update'),
+                      : Text(l10n.update),
                 ),
               ],
             );
@@ -236,15 +279,16 @@ void _navigateToAddPlantScreen(
   }
 
   void _showDeleteConfirmationDialog(BuildContext context, RegionDetailsViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this region?'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.confirmDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -254,11 +298,11 @@ void _navigateToAddPlantScreen(
                 context.go(RouteNames.land);
               } else if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(response.message ?? 'Delete failed'), backgroundColor: Colors.red),
+                  SnackBar(content: Text(response.message ?? l10n.deleteFailed), backgroundColor: Colors.red),
                 );
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -266,17 +310,19 @@ void _navigateToAddPlantScreen(
   }
 
   void _showAddSensorsDialog(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Sensors'),
-        content: const Text('This feature is coming soon!'),
+        title: Text(l10n.addSensors),
+        content: Text(l10n.comingSoon),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
     );
   }
+}

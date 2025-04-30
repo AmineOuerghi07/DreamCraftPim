@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/view/screens/home_screen/components/components_animations.dart';
 import 'package:pim_project/view/screens/humidity_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Color _getPrimaryColor(String condition, String temperature) {
   // Extract numeric temperature value
@@ -67,43 +68,49 @@ class WeatherCard extends StatelessWidget {
   final String soilCondition;
   final Map<String, String> parameters;
   final String city;
+  final double latitude;
+  final double longitude;
 
   const WeatherCard({
-  Key? key,
-  this.temperature = '18°C',
-  required this.condition, 
-  this.humidity = 'N/A',
-  this.advice = 'Aucun conseil disponible',
-  this.precipitation = '0%',
-  this.soilCondition = 'N/A',
-  this.parameters = const {},
- required this.city,
- }) : super(key: key);
+    Key? key,
+    this.temperature = '18°C',
+    required this.condition, 
+    this.humidity = 'N/A',
+    this.advice = 'Aucun conseil disponible',
+    this.precipitation = '0%',
+    this.soilCondition = 'N/A',
+    this.parameters = const {},
+    required this.city,
+    required this.latitude,
+    required this.longitude,
+  }) : super(key: key);
 
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
     final Color primaryColor = _getPrimaryColor(condition, temperature);
     final Color secondaryColor = _getSecondaryColor(condition, temperature);
     
     // Créer les paramètres à partir des valeurs individuelles
     final Map<String, String> displayParameters = {
-      'Humidité': humidity,
-      'Précipitation': precipitation,
-      'Soil': soilCondition,
+      l10n.humidity: humidity,
+      l10n.precipitation: precipitation,
+      l10n.soilCondition: soilCondition,
     };
     
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.center,
-          end: Alignment.bottomRight,
+          begin: isRTL ? Alignment.centerRight : Alignment.centerLeft,
+          end: isRTL ? Alignment.bottomLeft : Alignment.bottomRight,
           colors: [
-            primaryColor,   // Dynamic primary color
-            secondaryColor, // Dynamic secondary color
+            primaryColor,
+            secondaryColor,
           ],
-          stops: [0.0, 0.6],
+          stops: const [0.0, 0.6],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -115,20 +122,32 @@ class WeatherCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  temperature,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                if (isRTL) ...[
+                  _buildWeatherIcon(condition),
+                  const Spacer(),
+                  Text(
+                    temperature,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                _buildWeatherIcon(),
+                ] else ...[
+                  Text(
+                    temperature,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  _buildWeatherIcon(condition),
+                ],
               ],
             ),
             Text(
               condition,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -137,127 +156,52 @@ class WeatherCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: displayParameters.entries.map((entry) {
-                // If the parameter is "Humidity", make it clickable
-                if (entry.key == "Humidité") {
+                if (entry.key == l10n.humidity) {
                   return GestureDetector(
                     onTap: () {
-                      print('🟢 Clic sur l\'humidité détecté');
-                      print('📊 Valeur de l\'humidité: ${entry.value}');
-                      print('🌆 Ville actuelle: Tunis');
-                      
-                      try {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HumidityScreen(
-                              humidity: entry.value,
-                              city: city,
-                            ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HumidityScreen(
+                            latitude: latitude,
+                            longitude: longitude,
+                            humidity: humidity,
                           ),
-                        );
-                        print('✅ Navigation vers HumidityScreen réussie');
-                      } catch (e) {
-                        print('❌ Erreur lors de la navigation: $e');
-                      }
+                        ),
+                      );
                     },
                     child: _buildWeatherParameter(entry.key, entry.value),
                   );
                 }
-                // Otherwise, just display normally
                 return _buildWeatherParameter(entry.key, entry.value);
               }).toList(),
             ),
-            // Ajouter le conseil météo
-            if (advice.isNotEmpty && advice != 'Aucun conseil disponible')
+            if (advice.isNotEmpty && advice != l10n.noAdviceAvailable)
               _buildWeatherAdvice(),
           ],
         ),
       ),
     );
   }
-   Widget _buildWeatherIcon() {
-  // Determine which icons to show based on condition
-  if (condition.toLowerCase().contains('sunny') || condition.toLowerCase().contains('clear')) {
-    double temp = double.tryParse(temperature.replaceAll('°C', '').trim()) ?? 18;
-    if (temp > 30) {
-      // Hot sunny
-      return Icon(Icons.wb_sunny, color: Colors.orange, size: 38);
+   Widget _buildWeatherIcon(String condition) {
+    condition = condition.toLowerCase();
+    final hour = DateTime.now().hour;
+    final isNight = hour < 6 || hour > 18;
+    
+    if (condition.contains('01n') || (isNight && (condition.contains('clear') || condition.contains('sunny')))) {
+      return const MoonAnimation(size: 50);
+    } else if (condition.contains('01d') || (!isNight && (condition.contains('clear') || condition.contains('sunny')))) {
+      return const SunAnimation(size: 50);
+    } else if (condition.contains('cloud')) {
+      return const CloudAnimation(size: 60);
+    } else if (condition.contains('rain')) {
+      return const RainDropsAnimation();
+    } else if (condition.contains('snow')) {
+      return const SnowflakesAnimation();
     } else {
-      // Normal sunny
-      return Icon(Icons.wb_sunny, color: Colors.amber, size: 32);
+      return isNight ? const MoonAnimation(size: 50) : const SunAnimation(size: 50);
     }
-  } else if (condition.toLowerCase().contains('cloud')) {
-    if (condition.toLowerCase().contains('partly')) {
-      // Partly cloudy
-      return Row(
-        children: [
-          Icon(Icons.cloud, color: Colors.white, size: 28),
-          const SizedBox(width: 4),
-          Icon(Icons.wb_sunny, color: Colors.amber, size: 24),
-        ],
-      );
-    } else {
-      // Fully cloudy
-      return Icon(Icons.cloud, color: Colors.white, size: 32);
-    }
-  } else if (condition.toLowerCase().contains('rain')) {
-    // Rain animation
-    return _buildRainAnimation();
-  } else if (condition.toLowerCase().contains('snow')) {
-    // Snow animation
-    return _buildSnowAnimation();
-  } else if (condition.toLowerCase().contains('thunder')) {
-    // Thunder
-    return Icon(Icons.flash_on, color: Colors.yellow, size: 32);
-  } else {
-    // Default fallback
-    return Row(
-      children: [
-        Icon(Icons.cloud, color: Colors.white, size: 28),
-        const SizedBox(width: 8),
-        Icon(Icons.wb_sunny, color: Colors.amber, size: 28),
-      ],
-    );
   }
-}
-
-Widget _buildRainAnimation() {
-  return Stack(
-    children: [
-      // Cloud on top
-      Icon(Icons.cloud, color: Colors.white, size: 32),
-      
-      // Rain drops
-      Positioned(
-        bottom: 0,
-        child: SizedBox(
-          height: 24,
-          width: 32,
-          child: RainDropsAnimation(),
-        ),
-      )
-    ],
-  );
-}
-
-Widget _buildSnowAnimation() {
-  return Stack(
-    children: [
-      // Cloud on top
-      Icon(Icons.cloud, color: Colors.white, size: 32),
-      
-      // Snow flakes
-      Positioned(
-        bottom: 0,
-        child: SizedBox(
-          height: 24,
-          width: 32,
-          child: SnowflakesAnimation(),
-        ),
-      )
-    ],
-  );
-}
 
  Widget _buildWeatherParameter(String label, String value) {
   // Determine text color based on current weather condition
@@ -276,7 +220,6 @@ Widget _buildSnowAnimation() {
   }
 
   // Get the appropriate background color for the value container
- // Get the appropriate background color for the value container
   Color getValueBgColor() {
     // Subtle background color that complements the main background
     if (condition.toLowerCase().contains('sunny') || condition.toLowerCase().contains('clear')) {
@@ -352,15 +295,25 @@ Widget _buildWeatherParameters(BuildContext context) {
         'Humidité',
         '$humidity%',
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HumidityScreen(
-                city: city,
-                humidity: humidity,
+          print('🟢 Clic sur l\'humidité détecté');
+          print('📊 Valeur de l\'humidité: $humidity');
+          print('🌆 Ville actuelle: $city');
+          
+          try {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HumidityScreen(
+                  latitude: latitude,
+                  longitude: longitude,
+                  humidity: humidity,
+                ),
               ),
-            ),
-          );
+            );
+            print('✅ Navigation vers HumidityScreen réussie');
+          } catch (e) {
+            print('❌ Erreur lors de la navigation: $e');
+          }
         },
       ),
       _buildParameterItem(

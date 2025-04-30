@@ -142,22 +142,7 @@ class UserService {
     } catch (e) {
       return ApiResponse.error('Error sending OTP: $e');
     }
-  }
-
-  // Google login
-  Future<ApiResponse<User>> googleLogin(String googleToken) async {
-    try {
-      return await _apiClient.post(
-        'account/google-login',
-        {'google_token': googleToken},
-        (json) => User.fromJson(json),
-      );
-    } catch (e) {
-      return ApiResponse.error('Error during Google login: $e');
-    }
-  }
-
-  // Get user profile
+  }  // Get user profile
   Future<ApiResponse<User>> getUserProfile(String userId) async {
     try {
       // Get stored user data
@@ -211,61 +196,60 @@ class UserService {
   }
 
   // Update user profile
-Future<ApiResponse<User>> updateUserProfile(
-  String userId,
-  Map<String, dynamic> updates,
-  File? imageFile,
-) async {
-  try {
-    if (imageFile != null) {
-      // Use multipart request for image upload
-      final uri = Uri.parse('${_apiClient.baseUrl}/account/update/$userId');
-      final request = http.MultipartRequest('PUT', uri);
+  Future<ApiResponse<User>> updateUserProfile(
+    String userId,
+    Map<String, dynamic> updates,
+    File? imageFile,
+  ) async {
+    try {
+      if (imageFile != null) {
+        // Use multipart request for image upload
+        final uri = Uri.parse('${_apiClient.baseUrl}/account/update/$userId');
+        final request = http.MultipartRequest('PUT', uri);
 
-      // Add text fields
-      updates.forEach((key, value) {
-        if (value != null) {
-          request.fields[key] = value.toString();
+        // Add text fields
+        updates.forEach((key, value) {
+          if (value != null) {
+            request.fields[key] = value.toString();
+          }
+        });
+
+        // Add image file
+        request.files.add(await http.MultipartFile.fromPath(
+          'file',
+          imageFile.path,
+        ));
+
+        // Add authorization header
+        final token = await UserPreferences.getToken();
+        if (token != null) {
+          request.headers['Authorization'] = 'Bearer $token';
         }
-      });
 
-      // Add image file
-      request.files.add(await http.MultipartFile.fromPath(
-        'file',
-        imageFile.path,
-      ));
+        // Send request
+        final response = await request.send();
+        final responseData = await response.stream.bytesToString();
 
-      // Add authorization header
-      final token = await UserPreferences.getToken();
-      if (token != null) {
-        request.headers['Authorization'] = 'Bearer $token';
-      }
-
-      // Send request
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // Handle successful response
-        return ApiResponse.completed(User.fromJson(json.decode(responseData)));
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          // Handle successful response
+          return ApiResponse.completed(User.fromJson(json.decode(responseData)));
+        } else {
+          final error = json.decode(responseData);
+          return ApiResponse.error(error['message'] ?? 'Update failed');
+        }
       } else {
-        final error = json.decode(responseData);
-        return ApiResponse.error(error['message'] ?? 'Update failed');
+        // Regular JSON update when no image is provided
+        return await _apiClient.put(
+          'account/update/$userId',
+          updates,
+          (json) => User.fromJson(json),
+        );
       }
-    } else {
-      // Regular JSON update when no image is provided
-      return await _apiClient.put(
-        'account/update/$userId',
-        updates,
-        (json) => User.fromJson(json),
-      );
+    } catch (e) {
+      // Handle any errors that occur
+      return ApiResponse.error('Error: ${e.toString()}');
     }
-  } catch (e) {
-    // Handle any errors that occur
-    return ApiResponse.error('Error: ${e.toString()}');
   }
-}
-
 
   // Reset password
   Future<ApiResponse<bool>> resetPassword(String userId, String newPassword, String confirmPassword) async {
@@ -296,6 +280,42 @@ Future<ApiResponse<User>> updateUserProfile(
       return response;
     } catch (e) {
       return ApiResponse.error('Error verifying OTP: $e');
+    }
+  }
+
+  // Google login
+  Future<ApiResponse<User>> googleLogin(String googleToken, String email, String fullname, String? photoUrl) async {
+    try {
+      final response = await _apiClient.post(
+        'account/google-login',
+        {
+          'token': googleToken,
+          'email': email,
+          'fullname': fullname,
+          'image': photoUrl
+        },
+        (json) {
+          final userData = json['user'] as Map<String, dynamic>;
+          final token = json['token'] as String;
+          
+          return User(
+            userId: userData['_id'].toString(),
+            email: userData['email'],
+            fullname: userData['fullname'],
+            phonenumber: userData['phonenumber'] ?? '',
+            address: userData['address'] ?? '',
+            password: '',
+            role: (userData['roles'] as List?)?.isNotEmpty == true ? userData['roles'][0] : '',
+            phone: userData['phonenumber'] ?? '',
+            image: userData['image'],
+            token: token
+          );
+        },
+      );
+      
+      return response;
+    } catch (e) {
+      return ApiResponse.error('Error during Google login: $e');
     }
   }
 }

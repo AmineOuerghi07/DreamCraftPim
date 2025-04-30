@@ -4,6 +4,7 @@ import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LandRegionsGrid extends StatelessWidget {
   final String ?landId;
@@ -17,8 +18,9 @@ class LandRegionsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (regions.isEmpty) {
-      return const Center(child: Text("No regions found"));
+      return Center(child: Text(l10n.noRegionsFound));
     }
 
     return SingleChildScrollView(
@@ -37,15 +39,14 @@ class LandRegionsGrid extends StatelessWidget {
             return GestureDetector(
               onTap: () {
                 if (landId != null) {
-        final landDetailsVM = context.read<LandDetailsViewModel>();
-        context.push(
-          '${RouteNames.regionDetails}/${region.id}',
-          extra: landDetailsVM,
-        );
-      } else {
-        context.push('${RouteNames.regionDetails}/${region.id}');
-      }
-    
+                  final landDetailsVM = context.read<LandDetailsViewModel>();
+                  context.push(
+                    '${RouteNames.regionDetails}/${region.id}',
+                    extra: landDetailsVM,
+                  );
+                } else {
+                  context.push('${RouteNames.regionDetails}/${region.id}');
+                }
               },
               child: Card(
                 shape: RoundedRectangleBorder(
@@ -92,18 +93,18 @@ class LandRegionsGrid extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${region.sensors.length} Sensors",
+                                "${region.sensors.length} ${l10n.sensors}",
                                 style: const TextStyle(fontSize: 14),
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                "${region.plants.length} Plants",
+                                "${region.plants.length} ${l10n.plants}",
                                 style: const TextStyle(fontSize: 14),
                               ),
                               const SizedBox(height: 12),
-                              const Text(
-                                "60% Irrigation",
-                                style: TextStyle(fontSize: 14),
+                              Text(
+                                "60% ${l10n.irrigation}",
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ],
                           ),

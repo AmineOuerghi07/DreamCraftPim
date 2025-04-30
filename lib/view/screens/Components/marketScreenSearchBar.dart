@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class Marketscreensearchbar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
   final VoidCallback onFilterTap; // ✅ Add this
+  final AppLocalizations l10n;
 
-  const Marketscreensearchbar({
+
+  const Marketscreensearchbar({ 
     required this.controller,
     required this.focusNode,
     required this.onChanged,
     required this.onFilterTap, // ✅ Ensure it's required
+    required this.l10n,
     super.key,
   });
 
@@ -28,7 +33,7 @@ class Marketscreensearchbar extends StatelessWidget {
             focusNode: focusNode,
             onChanged: onChanged,
             decoration: InputDecoration(
-              hintText: "Search...",
+              hintText: l10n.search,
               hintStyle: const TextStyle(color: Colors.black54),
               prefixIcon: const Icon(Icons.search, color: Colors.black54),
               filled: true,

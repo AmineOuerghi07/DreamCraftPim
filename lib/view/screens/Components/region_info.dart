@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegionInfo extends StatelessWidget {
   final String regionCount;
@@ -22,6 +23,7 @@ class RegionInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +41,7 @@ class RegionInfo extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      "$regionCount Regions",
+                      "$regionCount ${l10n.regions}",
                       style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.w500,
@@ -54,9 +56,9 @@ class RegionInfo extends StatelessWidget {
                         color: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Text(
-                        "Add Sensors",
-                        style: TextStyle(
+                      child: Text(
+                        l10n.addSensors,
+                        style: const TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
                         ),
@@ -100,7 +102,7 @@ class RegionInfo extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  buttonText,
+                  l10n.addRegion,
                   style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onFilterTap;
   final ValueChanged<String>? onChanged; // Already included, just needs to be used
+  final AppLocalizations l10n;
 
   const SearchBar({
     required this.controller,
@@ -12,6 +14,7 @@ class SearchBar extends StatelessWidget {
     required this.onFilterTap,
     super.key,
     this.onChanged,
+    required this.l10n,
   });
 
   @override
@@ -24,7 +27,7 @@ class SearchBar extends StatelessWidget {
             controller: controller,
             focusNode: focusNode,
             decoration: InputDecoration(
-              hintText: "Search...",
+              hintText: l10n.search,
               hintStyle: TextStyle(color: Colors.black54),
               prefixIcon: Icon(Icons.search, color: Colors.black54),
               filled: true,

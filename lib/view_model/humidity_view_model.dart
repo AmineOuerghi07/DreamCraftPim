@@ -3,30 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/model/services/humidity_service.dart';
 
 class HumidityViewModel with ChangeNotifier {
+  final HumidityService _humidityService = HumidityService();
   Map<String, dynamic>? _humidityData;
   bool _isLoading = false;
   String? _error;
-  final HumidityService _humidityService = HumidityService();
 
-  HumidityViewModel(); 
-
-  // Getters for UI
   Map<String, dynamic>? get humidityData => _humidityData;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Method to fetch humidity data
-  Future<void> fetchHumidityData(String city) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-    
+  Future<void> fetchHumidityDataByCoordinates(double latitude, double longitude) async {
     try {
-      _humidityData = await _humidityService.getHumidityDetails(city);
-      if (_humidityData == null) {
-        _error = 'Aucune donnée d\'humidité disponible';
-      }
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      print('🌡️ [HumidityViewModel] Récupération des données d\'humidité pour les coordonnées: $latitude, $longitude');
+      _humidityData = await _humidityService.getHumidityByCoordinates(latitude, longitude);
+      print('✅ [HumidityViewModel] Données d\'humidité récupérées avec succès');
     } catch (e) {
+      print('❌ [HumidityViewModel] Erreur: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
@@ -243,8 +244,12 @@ final GoRouter router = GoRouter(
       path: '${RouteNames.humidity}/:humidity',
       builder: (context, state) {
         final humidity = state.pathParameters['humidity']!;
-        final city = (state.extra as Map<String, dynamic>?)?['city'] ?? 'Tunis';
-        return HumidityScreen(humidity: humidity, city: city);
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        return HumidityScreen(
+          humidity: humidity,
+          latitude: extra['latitude'] ?? 0.0,
+          longitude: extra['longitude'] ?? 0.0,
+        );
       },
     ),
     GoRoute(
@@ -279,9 +284,24 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future<void> _checkAndRedirect() async {
-    final route = await widget.onLoaded();
-    if (mounted) {
-      GoRouter.of(context).go(route);
+    try {
+      final route = await widget.onLoaded();
+      if (mounted) {
+        // Vérifier si l'ID utilisateur est toujours présent
+        final userId = await UserPreferences.getUserId();
+        if (userId != null && userId.isNotEmpty) {
+          MyApp.userId = userId;
+          print('✅ [LoadingScreen] ID utilisateur restauré: $userId');
+        } else {
+          print('⚠️ [LoadingScreen] Aucun ID utilisateur trouvé');
+        }
+        GoRouter.of(context).go(route);
+      }
+    } catch (e) {
+      print('❌ [LoadingScreen] Erreur lors de la redirection: $e');
+      if (mounted) {
+        GoRouter.of(context).go(RouteNames.login);
+      }
     }
   }
 

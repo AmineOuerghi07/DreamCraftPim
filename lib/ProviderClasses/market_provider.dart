@@ -97,7 +97,7 @@ class MarketProvider extends ChangeNotifier {
 }
 
 class ApiService {
-  final String baseUrl = "http://192.168.43.232:3000";
+  final String baseUrl = "http://127.0.0.1:3000";
 
   Future<List<Product>> fetchProducts() async {
     final response = await http.get(Uri.parse("$baseUrl/product"));

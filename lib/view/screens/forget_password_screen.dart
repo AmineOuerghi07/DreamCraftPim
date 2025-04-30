@@ -1,13 +1,14 @@
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:flutter/material.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -22,7 +23,7 @@ class ForgotPasswordScreen extends StatelessWidget {
           children: [
             SizedBox(height: 20),
             Text(
-              "Forgot Password",
+              l10n.forgetPassword,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -31,7 +32,7 @@ class ForgotPasswordScreen extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              "Select which contact should we use to reset your password",
+              l10n.selectContact,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -60,10 +61,10 @@ class ForgotPasswordScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Email",
+                        Text(l10n.email,
                             style: TextStyle(
                                 fontSize: 16, color: Color(0xFF5B5A5A))),
-                        Text("Send to your email",
+                        Text(l10n.sendToEmail,
                             style: TextStyle(
                                 fontSize: 14, color: Color(0xFF777777))),
                       ],
@@ -93,10 +94,10 @@ class ForgotPasswordScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Phone Number",
+                        Text(l10n.phoneNumber,
                             style: TextStyle(
                                 fontSize: 16, color: Color(0xFF5B5A5A))),
-                        Text("Send to your phone number",
+                        Text(l10n.sendToPhone,
                             style: TextStyle(
                                 fontSize: 14, color: Color(0xFF777777))),
                       ],
@@ -111,7 +112,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Expanded(child: Divider(thickness: 1, endIndent: 10)),
-                Text("or",
+                Text("ou",
                     style: TextStyle(color: Colors.black54, fontSize: 14)),
                 const Expanded(child: Divider(thickness: 1, indent: 10)),
               ],
@@ -123,7 +124,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               },
               child: Text.rich(
                 TextSpan(
-                  text: "Did you remember your password? ",
+                  text: l10n.didYouRemember,
                   style: GoogleFonts.roboto(
                     fontSize: 14,
                     fontWeight: FontWeight.w300,
@@ -131,7 +132,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: "Sign In",
+                      text: l10n.signIn,
                       style: GoogleFonts.roboto(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,

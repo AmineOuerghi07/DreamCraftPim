@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/login_view_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
+import 'package:pim_project/constants/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,17 +20,20 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
   bool rememberMe = false;
   bool obscureText = true;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize remember me state from preferences
     _loadRememberMePreference();
+    _initializeGoogleSignIn();
   }
 
   Future<void> _loadRememberMePreference() async {
@@ -39,6 +43,55 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       rememberMe = rememberMeValue;
     });
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      print('🔐 [LoginScreen] Initialisation de Google Sign-In');
+      final GoogleSignInAccount? currentUser = await _googleSignIn.signInSilently();
+      if (currentUser != null) {
+        print('✅ [LoginScreen] Utilisateur déjà connecté: ${currentUser.email}');
+        await _handleGoogleSignIn(currentUser);
+      }
+    } catch (error) {
+      print('❌ [LoginScreen] Erreur lors de l\'initialisation: $error');
+    }
+  }
+
+  Future<void> _handleGoogleSignIn(GoogleSignInAccount googleUser) async {
+    try {
+      print('🔐 [LoginScreen] Début de la connexion Google');
+      print('👤 Utilisateur Google sélectionné: ${googleUser.email}');
+      
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      print('🔑 Authentification Google réussie');
+      
+      if (googleAuth.accessToken == null) {
+        print('❌ [LoginScreen] Pas de token d\'accès');
+        throw Exception('Pas de token d\'accès');
+      }
+
+      final loginViewModel = context.read<LoginViewModel>();
+      final success = await loginViewModel.signInWithGoogle(
+        googleAuth.accessToken!,
+        googleUser.email,
+        googleUser.displayName ?? '',
+        googleUser.photoUrl ?? ''
+      );
+
+      if (success && mounted) {
+        final userId = loginViewModel.currentUser?.userId ?? MyApp.userId;
+        if (userId.isNotEmpty) {
+          context.go(RouteNames.home, extra: userId);
+        }
+      }
+    } catch (error) {
+      print('❌ [LoginScreen] Erreur: $error');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $error')),
+      );
+    }
   }
 
   void togglePasswordVisibility() {
@@ -60,13 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email invalide')),
-      );
-      return;
-    }
-
     final loginViewModel = context.read<LoginViewModel>();
     final success = await loginViewModel.login(email, password, rememberMe);
 
@@ -82,44 +128,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _googleSignInMethod() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Connexion Google annulée')),
-        );
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final loginViewModel = context.read<LoginViewModel>();
-      
-      final success = await loginViewModel.signInWithGoogle(googleAuth.accessToken ?? '');
-
-      if (success && mounted) {
-        final userId = loginViewModel.currentUser?.userId ?? MyApp.userId;
-        if (userId.isNotEmpty) {
-          context.go(RouteNames.home, extra: userId);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Erreur: ID utilisateur non trouvé')),
-          );
-        }
-      }
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $error')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final loginViewModel = context.watch<LoginViewModel>();
     final l10n = AppLocalizations.of(context)!;
+    final isRTL = Localizations.localeOf(context).languageCode == 'ar';
     
     return Scaffold(
       backgroundColor: Colors.white,
@@ -147,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "Welcome back",
+                    l10n.welcomeBack,
                     style: GoogleFonts.roboto(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
@@ -155,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   Text(
-                    "Login to your account",
+                    l10n.loginToAccount,
                     style: GoogleFonts.roboto(
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
@@ -174,8 +187,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: TextField(
                       controller: emailController,
+                      textCapitalization: TextCapitalization.none,
+                      keyboardType: TextInputType.emailAddress,
+                      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                       decoration: InputDecoration(
-                        icon: const Icon(Icons.email, color: Color(0xFF777777)),
+                        icon: Icon(
+                          Icons.email,
+                          color: const Color(0xFF777777),
+                          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                        ),
                         border: InputBorder.none,
                         hintText: l10n.email,
                         hintStyle: GoogleFonts.roboto(
@@ -199,10 +219,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextField(
                       controller: passwordController,
                       obscureText: obscureText,
+                      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                       decoration: InputDecoration(
-                        icon: const Icon(Icons.lock, color: Color(0xFF777777)),
+                        icon: Icon(
+                          Icons.lock,
+                          color: const Color(0xFF777777),
+                          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                        ),
                         border: InputBorder.none,
-                        hintText: "Password",
+                        hintText: l10n.password,
                         hintStyle: GoogleFonts.roboto(
                           fontSize: 16,
                           fontWeight: FontWeight.w300,
@@ -231,7 +256,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             Checkbox(
                               value: rememberMe,
                               onChanged: (value) {
-                                print('✓ Remember Me checkbox toggled: ${value}');
                                 setState(() {
                                   rememberMe = value!;
                                 });
@@ -240,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               activeColor: const Color(0xFF4F6656),
                             ),
                             Text(
-                              "Remember me",
+                              l10n.rememberMe,
                               style: GoogleFonts.roboto(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -252,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextButton(
                           onPressed: () => context.push(RouteNames.forgetPassword),
                           child: Text(
-                            "Forget password?",
+                            l10n.forgetPassword,
                             style: GoogleFonts.roboto(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -279,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       child: Text(
-                        loginViewModel.isLoading ? "Connexion..." : "Login",
+                        loginViewModel.isLoading ? l10n.connexion : l10n.login,
                         style: GoogleFonts.roboto(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -322,22 +346,35 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      InkWell(
-                        onTap: _googleSignInMethod,
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xFFDAE5DD),
-                            ),
-                            borderRadius: BorderRadius.circular(8),
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: const Color(0xFFDAE5DD),
                           ),
-                          child: const Center(
-                            child: FaIcon(
-                              FontAwesomeIcons.google,
-                              color: Color(0xFF777777),
-                            ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          onPressed: () async {
+                            try {
+                              final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+                              if (googleUser != null) {
+                                await _handleGoogleSignIn(googleUser);
+                              }
+                            } catch (error) {
+                              print('❌ [LoginScreen] Erreur: $error');
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Erreur: $error')),
+                              );
+                            }
+                          },
+                          icon: const FaIcon(
+                            FontAwesomeIcons.google,
+                            color: Color(0xFF777777),
+                            size: 20,
                           ),
                         ),
                       ),
@@ -350,7 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account? ",
+                        l10n.dontHaveAccount,
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           fontWeight: FontWeight.w300,
@@ -360,7 +397,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextButton(
                         onPressed: () => context.push(RouteNames.signup),
                         child: Text(
-                          "Sign up",
+                          l10n.signUp,
                           style: GoogleFonts.roboto(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,

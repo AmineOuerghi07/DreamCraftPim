@@ -3,9 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key});
+  final Map<String, dynamic>? arguments;
+  
+  const LoadingScreen({Key? key, this.arguments}) : super(key: key);
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -15,13 +18,48 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    _redirectAfterDelay();
+    _initializeApp();
   }
 
-  Future<void> _redirectAfterDelay() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    context.go(RouteNames.home);
+  Future<void> _initializeApp() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Récupérer l'état précédent
+      final previousState = widget.arguments?['previousState'] as String?;
+      
+      if (previousState == 'language_change') {
+        // Si c'est un changement de langue, retourner à la page précédente
+        if (mounted) {
+          context.pop();
+        }
+        return;
+      }
+      
+      // Vérifier si l'utilisateur est connecté
+      final userId = await prefs.getString('user_id');
+      final token = await prefs.getString('token');
+      final rememberMe = await prefs.getBool('remember_me') ?? false;
+      
+      // Attendre un court délai pour montrer l'animation
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted) {
+        if (rememberMe && userId != null && token != null) {
+          // L'utilisateur est connecté, rediriger vers l'écran d'accueil
+          context.go(RouteNames.home);
+        } else {
+          // L'utilisateur n'est pas connecté, rediriger vers l'écran de connexion
+          context.go(RouteNames.login);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de l\'initialisation: $e')),
+        );
+      }
+    }
   }
 
   @override

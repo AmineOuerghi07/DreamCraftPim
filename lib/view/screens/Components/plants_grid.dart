@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PlantsGrid extends StatelessWidget {
   final String ? landId;
@@ -10,6 +11,7 @@ class PlantsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final vm = Provider.of<LandDetailsViewModel>(context, listen: false);
     print('PlantsGrid ViewModel instance: $vm');
     return Consumer<LandDetailsViewModel>(
@@ -30,7 +32,7 @@ class PlantsGrid extends StatelessWidget {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => viewModel.fetchPlantsForLand(landId!),
-                  child: const Text('Retry'),
+                  child: Text(l10n.retry),
                 ),
               ],
             ),
@@ -38,7 +40,7 @@ class PlantsGrid extends StatelessWidget {
         }
 
         if (plants.isEmpty) {
-          return const Center(child: Text('No plants found for this land'));
+          return Center(child: Text(l10n.noPlantsFound));
         }
 
         return ListView.builder(
@@ -49,7 +51,7 @@ class PlantsGrid extends StatelessWidget {
             final plant = plantWithQty.plant;
             print('Building card for ${plant.name}, quantity: ${plantWithQty.totalQuantity}');
             return Card(
-              key: ValueKey('${plant.id}_${plantWithQty.totalQuantity}'), // Unique key
+              key: ValueKey('${plant.id}_${plantWithQty.totalQuantity}'),
               margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -91,9 +93,9 @@ class PlantsGrid extends StatelessWidget {
                             color: const Color.fromARGB(49, 228, 161, 85),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Text(
-                            "Plant",
-                            style: TextStyle(
+                          child: Text(
+                            l10n.plant,
+                            style: const TextStyle(
                               color: Color.fromARGB(255, 246, 125, 3),
                               fontWeight: FontWeight.w500,
                             ),
@@ -108,7 +110,7 @@ class PlantsGrid extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "${plantWithQty.totalQuantity} plants",
+                          "${plantWithQty.totalQuantity} ${l10n.plants}",
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
