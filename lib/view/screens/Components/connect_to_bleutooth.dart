@@ -4,6 +4,7 @@ import 'package:pim_project/model/domain/irrigation_device.dart';
 import 'package:pim_project/view/screens/components/device_discovery_dialog.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ConnectToBluetooth extends StatelessWidget {
   const ConnectToBluetooth({super.key});
@@ -12,6 +13,8 @@ class ConnectToBluetooth extends StatelessWidget {
   Widget build(BuildContext context) {
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
     
+
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
         child: Padding(
@@ -26,6 +29,7 @@ class ConnectToBluetooth extends StatelessWidget {
                 "Want to connect Your Irrigation System?",
                 textAlign: TextAlign.center,
                 style: TextStyle(
+
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -97,6 +101,7 @@ class ConnectToBluetooth extends StatelessWidget {
                       ),
                     ],
                   ),
+
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -132,6 +137,7 @@ class ConnectToBluetooth extends StatelessWidget {
                     "Connect Your Device",
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
+
                 ),
               ],
             ],

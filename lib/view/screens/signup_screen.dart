@@ -1,24 +1,23 @@
-// view/screens/signup_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
-import 'package:pim_project/routes/routes.dart'; // Import Dio for HTTP requests
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; 
+import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignupScreen extends StatefulWidget {
-  
   const SignupScreen({super.key});
-
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }
 
 class _SignupScreenState extends State<SignupScreen> {
   bool isChecked = false;
-  final Dio dio = Dio(); // Initialize Dio instance for HTTP requests
+  final Dio dio = Dio();
 
-  // Controllers for the form fields
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -28,159 +27,113 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 60),
-
-              // Title: Create Account
-              Text(
-                "Create account",
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 60),
+            Text(l10n.createAccount,
                 style: GoogleFonts.roboto(
                   fontSize: 28,
-                  fontWeight: FontWeight.w600, // SemiBold
+                  fontWeight: FontWeight.w600,
                   color: const Color(0xFF3E754E),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              // Subtitle
-              Text(
-                "Create your new account",
+                )),
+            const SizedBox(height: 8),
+            Text( l10n.createNewAccount,
                 style: GoogleFonts.roboto(
                   fontSize: 16,
-                  fontWeight: FontWeight.w300, // Light
-                  color: const Color(0xB0777777), // 67% opacity
+                  fontWeight: FontWeight.w300,
+                  color: const Color(0xB0777777),
+                )),
+            const SizedBox(height: 24),
+            CustomTextField(controller: fullNameController, label: l10n.fullName, icon: Icons.person),
+            CustomTextField(controller: emailController, label: l10n.email, icon: Icons.email),
+            CustomTextField(controller: passwordController, label: l10n.password, icon: Icons.lock, isPassword: true),
+            CustomTextField(controller: confirmPasswordController, label: l10n.confirmPassword, icon: Icons.lock, isPassword: true),
+            CustomTextField(controller: phoneController, label: l10n.phoneNumber, icon: Icons.phone),
+            CustomTextField(controller: addressController, label: l10n.address, icon: Icons.home),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Theme(
+                  data: ThemeData(
+                    checkboxTheme: CheckboxThemeData(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                  ),
+                  child: Checkbox(
+                    value: isChecked,
+                    onChanged: (value) => setState(() => isChecked = value!),
+                    activeColor: const Color(0xFF3E754E),
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Input Fields
-              CustomTextField(controller: fullNameController, label: "Full Name", icon: Icons.person),
-              CustomTextField(controller: emailController, label: "Email", icon: Icons.email),
-              CustomTextField(controller: passwordController, label: "Password", icon: Icons.lock, isPassword: true),
-              CustomTextField(controller: confirmPasswordController, label: "Confirm Password", icon: Icons.lock, isPassword: true),
-              CustomTextField(controller: phoneController, label: "Phone Number", icon: Icons.phone),
-              CustomTextField(controller: addressController, label: "Address", icon: Icons.home),
-
-              const SizedBox(height: 14),
-
-              // Terms & Policy Checkbox
-              Row(
-                children: [
-                  Theme(
-                    data: ThemeData(
-                      checkboxTheme: CheckboxThemeData(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20), // Circular Checkbox
+                RichText(
+                  text: TextSpan(
+                    text: l10n.understoodTerms,
+                    style: GoogleFonts.roboto(fontSize: 14, color: const Color(0xFF777777)),
+                    children: [
+                      TextSpan(
+                        text: l10n.termsPolicy,
+                        style: GoogleFonts.roboto(
+                          fontSize: 14,
+                          color: const Color(0xFF3E754E),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                    child: Checkbox(
-                      value: isChecked,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isChecked = value!;
-                        });
-                      },
-                      activeColor: const Color(0xFF3E754E),
-                    ),
+                    ],
                   ),
-                  RichText(
-                    text: TextSpan(
-                      text: "I understood the ",
-                      style: GoogleFonts.roboto(
-                        fontSize: 14,
-                        color: const Color(0xFF777777),
-                      ),
-                      children: [
-                        TextSpan(
-                          text: "terms & policy.",
-                          style: GoogleFonts.roboto(
-                            fontSize: 14,
-                            color: const Color(0xFF3E754E),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: signUp,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3E754E),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                ),
+                child: Text(l10n.signUp,
+                    style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
               ),
-
-              const SizedBox(height: 16),
-
-              // Sign Up Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: signUp,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3E754E),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(l10n.alreadyHaveAccount,
+                    style: GoogleFonts.roboto(fontSize: 14, fontWeight: FontWeight.w400, color: const Color(0xFF909090))),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: () => context.push(RouteNames.login),
                   child: Text(
-                    "Sign Up",
-                    style: GoogleFonts.roboto(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600, // SemiBold
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Already have an account? Sign In
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Already have an account?",
+                    l10n.signIn,
                     style: GoogleFonts.roboto(
                       fontSize: 14,
-                      fontWeight: FontWeight.w400, // Regular
-                      color: const Color(0xFF909090),
+                      color: const Color(0xFF3E754E),
+                      fontWeight: FontWeight.w400,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  GestureDetector(
-                    onTap: () {
-                      context.push(RouteNames.login);                    
-                    },
-                    child: Text(
-                      "Sign in",
-                      style: GoogleFonts.roboto(
-                        fontSize: 14,
-                        color: const Color(0xFF3E754E),
-                        fontWeight: FontWeight.w400, // Regular
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
   }
 
   Future<void> signUp() async {
+    final l10n = AppLocalizations.of(context)!;
     String fullname = fullNameController.text.trim();
     String email = emailController.text.trim();
     String password = passwordController.text;
@@ -188,39 +141,24 @@ class _SignupScreenState extends State<SignupScreen> {
     String phone = phoneController.text.trim();
     String address = addressController.text.trim();
 
-    // Validate input fields
-    if (fullname.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty ||
-        phone.isEmpty ||
-        address.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all the fields')),
-      );
+    if ([fullname, email, password, confirmPassword, phone, address].any((e) => e.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.pleaseFillFields)));
       return;
     }
 
-    // Validate if password and confirm password match
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.passwordsDoNotMatch)));
       return;
     }
 
-    // Validate email format
     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid email address')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.invalidEmail)));
       return;
     }
 
     try {
-      // Send POST request to the signup endpoint
       final response = await dio.post(
-        '${AppConstants.baseUrl}/account/sign-up', // Your IP address here
+        '${AppConstants.baseUrl}/account/sign-up',
         data: {
           'fullname': fullname,
           'email': email,
@@ -231,29 +169,14 @@ class _SignupScreenState extends State<SignupScreen> {
         },
       );
 
-      // Check the response status code
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Signup successful: ${response.data}');
-        
-        // You could save user data locally if needed (e.g., in SharedPreferences)
-        
-        // Navigate to login screen after successful signup
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Signup successful! Please login.')),
-        );
-        context.push(RouteNames.login);  // Redirect to login screen
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.signUpSuccess)));
+        context.push(RouteNames.login);
       } else {
-        print('Signup failed: ${response.statusCode}, ${response.data}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Signup failed')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.signupFailed)));
       }
     } catch (e) {
-      // Handle error during signup
-      print('Error during signup: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${l10n.error}: $e")));
     }
   }
 }

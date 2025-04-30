@@ -12,8 +12,11 @@ class AppConstants {
  static const String  chatBaseUrl = "http://192.168.43.232:8000";
   //static const String  chatBaseUrl = "http://127.0.0.1:8000";
   
-  static const String baseUrl = "http://192.168.43.232:3000"; 
-  //static const String baseUrl = "http://127.0.0.1:3000"; 
+  //static const String baseUrl = "http://192.168.43.232:3000"; 
+  static const String baseUrl = 'http://127.0.0.1:3000';
+  static const String apiVersion = 'v1';
+  static const String apiUrl = '$baseUrl/api/$apiVersion';
+
  
 
 

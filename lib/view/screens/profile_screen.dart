@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pim_project/view_model/login_view_model.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -42,6 +44,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       print('❌ Error: $e');
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      final loginViewModel = context.read<LoginViewModel>();
+      await loginViewModel.logout();
+      
+      if (mounted) {
+        // Forcer la navigation vers l'écran de connexion
+        context.go(RouteNames.login);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de la déconnexion: $e')),
+        );
+      }
     }
   }
 
@@ -109,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 15),
             // Inventories
-            _buildSectionTitle('Inventories'),
+            _buildSectionTitle(AppLocalizations.of(context)!.inventories),
             _buildListItem(
               icon: Icons.receipt_long,
               title: l10n.myBillings,
@@ -156,13 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.logout,
               title: l10n.logout,
               textColor: Colors.red,
-              onTap: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.remove('userId');
-                if (context.mounted) {
-                  context.go(RouteNames.login);
-                }
-              },
+              onTap: _handleLogout,
             ),
           ],
         ),

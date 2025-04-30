@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String userId;
@@ -30,26 +31,27 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _resetPassword() async {
+    final l10n = AppLocalizations.of(context)!;
     String password = _passwordController.text.trim();
     String confirmPassword = _confirmPasswordController.text.trim();
 
     if (password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
+        SnackBar(content: Text(l10n.pleaseFillFields)),
       );
       return;
     }
 
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Password must be at least 6 characters")),
+        SnackBar(content: Text(l10n.passwordTooShort)),
       );
       return;
     }
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
+        SnackBar(content: Text(l10n.passwordsDoNotMatch)),
       );
       return;
     }
@@ -71,12 +73,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password reset successful!")),
+          SnackBar(content: Text(l10n.signUpSuccess)),
         );
         // Navigate to LoginScreen after successful password reset
         context.go(RouteNames.login);
       } else {
-        String errorMessage = "Failed to reset password";
+        String errorMessage = l10n.signupFailed;
         try {
           final decodedResponse = json.decode(response.body);
           errorMessage = decodedResponse["message"] ?? errorMessage;
@@ -89,7 +91,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Network error: ${e.toString()}")),
+        SnackBar(content: Text("${l10n.error}: ${e.toString()}")),
       );
     } finally {
       setState(() {
@@ -136,6 +138,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -146,19 +149,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 50),
-              const Text(
-                "Reset Password",
-                style: TextStyle(
+              Text(
+                l10n.resetPassword,
+                style: const TextStyle(
                   color: Color(0xFF3E754E),
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                "Set new password",
+              Text(
+                l10n.setNewPassword,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF777777),
                   fontSize: 16,
                 ),
@@ -166,7 +169,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               const SizedBox(height: 20),
               _buildPasswordField(
                 controller: _passwordController,
-                hintText: "Password",
+                hintText: l10n.password,
                 obscureText: _obscurePassword,
                 onToggle: () {
                   setState(() {
@@ -177,7 +180,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               const SizedBox(height: 15),
               _buildPasswordField(
                 controller: _confirmPasswordController,
-                hintText: "Confirm Password",
+                hintText: l10n.confirmPassword,
                 obscureText: _obscureConfirmPassword,
                 onToggle: () {
                   setState(() {
@@ -198,9 +201,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         minimumSize: const Size(double.infinity, 50),
                       ),
                       onPressed: _resetPassword,
-                      child: const Text(
-                        "Save",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      child: Text(
+                        l10n.save,
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
               const SizedBox(height: 20),
@@ -211,19 +214,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 },
                 child: Text.rich(
                   TextSpan(
-                    text: "Did you remember your password? ",
+                    text: "${l10n.didYouRemember} ",
                     style: GoogleFonts.roboto(
                       fontSize: 14,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFF777777),
+                      color: const Color(0xFF777777),
                     ),
                     children: [
                       TextSpan(
-                        text: "Sign In",
+                        text: l10n.signIn,
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF3E754E),
+                          color: const Color(0xFF3E754E),
                         ),
                       ),
                     ],

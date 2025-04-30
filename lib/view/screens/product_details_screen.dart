@@ -3,6 +3,7 @@ import 'package:pim_project/constants/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final String id;
@@ -31,7 +32,7 @@ class ProductDetailsScreen extends StatelessWidget {
 
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Details'),
+              title: Text(AppLocalizations.of(context)!.details),
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
@@ -70,14 +71,14 @@ class ProductDetailsScreen extends StatelessWidget {
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           if (product.stockQuantity > 0)
-                            const Text(
-                              'Available in stock',
-                              style: TextStyle(color: Colors.green),
+                            Text(
+                              AppLocalizations.of(context)!.available,
+                              style: const TextStyle(color: Colors.green),
                             )
                           else
-                            const Text(
-                              'Out of stock',
-                              style: TextStyle(color: Colors.red),
+                            Text(
+                              AppLocalizations.of(context)!.notAvailable,
+                              style: const TextStyle(color: Colors.red),
                             ),
                           const Row(
                             children: [
@@ -118,20 +119,19 @@ class ProductDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Description',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-
+                  Text(
+                    AppLocalizations.of(context)!.description,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
-                  Text(product.description ?? 'No description available'),
+                  Text(product.description ?? AppLocalizations.of(context)!.description),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Environment',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    AppLocalizations.of(context)!.features,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
-                  const Card(
+                  Card(
                     elevation: 4,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,27 +140,27 @@ class ProductDetailsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             RegionDetailInfocard(
-                                title: "Expanse", value: "3000m²", imageName: "square_foot.png"),
+                                title: AppLocalizations.of(context)!.expanse, value: "3000m²", imageName: "square_foot.png"),
                             RegionDetailInfocard(
-                                title: "Temperature", value: "25°C", imageName: "thermostat_arrow_up.png"),
+                                title: AppLocalizations.of(context)!.temperature, value: "25°C", imageName: "thermostat_arrow_up.png"),
                           ],
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             RegionDetailInfocard(
-                                title: "Humidity", value: "20%", imageName: "humidity.png"),
+                                title: AppLocalizations.of(context)!.humidity, value: "20%", imageName: "humidity.png"),
                             RegionDetailInfocard(
-                                title: "Irrigation", value: "50%", imageName: "humidity_high.png"),
+                                title: AppLocalizations.of(context)!.irrigation, value: "50%", imageName: "humidity_high.png"),
                           ],
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Related Products',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    AppLocalizations.of(context)!.seeAll,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
@@ -194,9 +194,9 @@ class ProductDetailsScreen extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       ),
-                      child: const Text(
-                        "Add To Cart",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      child: Text(
+                        AppLocalizations.of(context)!.addRegion,
+                        style: const TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),
