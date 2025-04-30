@@ -85,6 +85,7 @@ class WeatherCard extends StatelessWidget {
     required this.longitude,
   }) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

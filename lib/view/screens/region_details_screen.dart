@@ -3,10 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
 import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
+import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
+import 'package:pim_project/view/screens/components/region_detail_text.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
@@ -136,7 +137,7 @@ class RegionDetailsScreen extends StatelessWidget {
                       Tab(text: l10n.plants),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  
                   Expanded(
                     child: TabBarView(
                       children: [
