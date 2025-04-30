@@ -11,6 +11,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -29,14 +31,27 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
     _loadUserData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getCurrentLocation();
+  }
+
   Future<void> _getCurrentLocation() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       print('📍 [HomeScreen] Début de la récupération de la position');
       
+      // Vérifier si le service de localisation est activé
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() => _error = 'Le service de localisation est désactivé');
+        return;
+      }
+
       // Vérifier les permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -61,8 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
       
       // Charger les données météo avec les coordonnées
       if (_currentPosition != null) {
-        // Utiliser la ville par défaut pour le moment
-        Provider.of<HomeViewModel>(context, listen: false).fetchWeather('Tunis');
+        final viewModel = Provider.of<HomeViewModel>(context, listen: false);
+        await viewModel.fetchWeatherByCoordinates(
+          _currentPosition!.latitude,
+          _currentPosition!.longitude,
+        );
       }
     } catch (e) {
       print('❌ [HomeScreen] Erreur lors de la récupération de la position: $e');
@@ -79,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final data = jsonDecode(response.body);
         if (mounted) {
           setState(() {
-            _username = data['fullname'] ?? 'Mohamed';
+            _username = data['fullname'] ?? 'Utilisateur';
           });
         }
       }
@@ -90,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     print('🏠 [HomeScreen] Construction de l\'écran d\'accueil');
     print('👤 [HomeScreen] ID utilisateur: ${widget.userId}');
 
@@ -112,23 +131,17 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Header
               Header(
-                greetingText: 'Bonjour ',
+                greetingText: l10n.hello,
                 username: _username,
                 userId: widget.userId,
               ),
             
-
               // Search Bar
               const SizedBox(height: 16),
               
               // Weather Card
               Consumer<HomeViewModel>(
                 builder: (context, viewModel, child) {
-                  print('🔄 [HomeScreen] Mise à jour de la carte météo');
-                  print('⏳ [HomeScreen] État de chargement: ${viewModel.isLoading}');
-                  print('❌ [HomeScreen] Erreur: ${viewModel.error}');
-                  print('📊 [HomeScreen] Données météo: ${viewModel.weatherData}');
-
                   if (_error != null) {
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -159,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.refresh),
-                            label: const Text('Réessayer'),
+                            label: Text(l10n.tryAgain),
                           ),
                         ],
                       ),
@@ -167,7 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   if (viewModel.isLoading) {
-                    print('⏳ [HomeScreen] Affichage de l\'indicateur de chargement');
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
@@ -187,7 +199,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   if (viewModel.error.isNotEmpty) {
-                    print('❌ [HomeScreen] Affichage du message d\'erreur: ${viewModel.error}');
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -209,8 +220,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 16),
                           ElevatedButton.icon(
                             onPressed: () {
-                              print('🔄 [HomeScreen] Tentative de rechargement des données météo');
-                              viewModel.fetchWeather('Tunis');
+                              if (_currentPosition != null) {
+                                viewModel.fetchWeatherByCoordinates(
+                                  _currentPosition!.latitude,
+                                  _currentPosition!.longitude,
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
@@ -220,29 +235,44 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.refresh),
-                            label: const Text('Réessayer'),
+                            label: Text(l10n.tryAgain),
                           ),
                         ],
                       ),
                     );
                   }
 
-                  print('✅ [HomeScreen] Affichage de la carte météo avec les données');
-                 return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-           child: WeatherCard(
-    temperature: viewModel.weatherData?['temperature'] ?? 'N/A',
-    condition: viewModel.weatherData?['weather'] ?? 'N/A',
-    humidity: viewModel.weatherData?['humidity'] ?? 'N/A',
-    advice: viewModel.weatherData?['advice'] ?? 'Aucun conseil disponible',
-    precipitation: viewModel.weatherData?['precipitation'] ?? '0%',
-    soilCondition: viewModel.weatherData?['soilCondition'] ?? 'N/A',
-  city: viewModel.weatherData?['city'] ?? 'Ville inconnue',
-  ),
-);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: WeatherCard(
+                      temperature: viewModel.weatherData?['temperature'] ?? 'N/A',
+                      condition: viewModel.weatherData?['weather'] ?? 'N/A',
+                      humidity: viewModel.weatherData?['humidity'] ?? 'N/A',
+                      advice: viewModel.weatherData?['advice'] ?? l10n.noAdviceAvailable,
+                      precipitation: viewModel.weatherData?['precipitation'] ?? '0%',
+                      soilCondition: viewModel.weatherData?['soilCondition'] ?? 'N/A',
+                      city: viewModel.weatherData?['city'] ?? l10n.unknownCity,
+                      latitude: _currentPosition?.latitude ?? 0.0,
+                      longitude: _currentPosition?.longitude ?? 0.0,
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 20),
+
+              // Field Management Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  l10n.fieldManagement,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Field Management Grid Component
               Padding(

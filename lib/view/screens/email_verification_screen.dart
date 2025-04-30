@@ -5,12 +5,14 @@ import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmailVerificationScreen extends StatelessWidget {
   const EmailVerificationScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final TextEditingController _emailController = TextEditingController();
 
     return Scaffold(
@@ -30,7 +32,7 @@ class EmailVerificationScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 80),
                   Text(
-                    "Forgot Password",
+                    l10n.forgetPassword,
                     style: GoogleFonts.roboto(
                       color: const Color(0xFF3E754E),
                       fontSize: 28,
@@ -39,7 +41,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Set your email here",
+                    l10n.setEmailHere,
                     style: GoogleFonts.roboto(
                       color: const Color(0xFF777777),
                       fontSize: 16,
@@ -50,7 +52,7 @@ class EmailVerificationScreen extends StatelessWidget {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      hintText: "Email",
+                      hintText: l10n.email,
                       hintStyle: GoogleFonts.roboto(
                         fontSize: 16,
                         fontWeight: FontWeight.w300,
@@ -80,9 +82,7 @@ class EmailVerificationScreen extends StatelessWidget {
 
                         if (email.isEmpty || !email.contains('@')) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Please enter a valid email address')),
+                            SnackBar(content: Text(l10n.pleaseEnterValidEmailAddress)),
                           );
                           return;
                         }
@@ -97,7 +97,7 @@ class EmailVerificationScreen extends StatelessWidget {
                         if (response.statusCode == 200 || response.statusCode == 201) {
                           // OTP sent successfully, show alert and navigate to OTP verification
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('OTP sent successfully')),
+                            SnackBar(content: Text(l10n.otpSentSuccessfully)),
                           );
                           Navigator.push(
                             context,
@@ -108,12 +108,12 @@ class EmailVerificationScreen extends StatelessWidget {
                         } else {
                           // Show alert if email not found
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Email not found')),
+                            SnackBar(content: Text(l10n.emailNotFound)),
                           );
                         }
                       },
                       child: Text(
-                        "Send",
+                        l10n.send,
                         style: GoogleFonts.roboto(
                           color: Colors.white,
                           fontSize: 16,

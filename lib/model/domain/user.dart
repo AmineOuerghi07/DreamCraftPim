@@ -8,6 +8,7 @@ class User {
   final String role;
   final String phone;
   final String? image;
+  final String? token;
 
   User({
     required this.userId,
@@ -19,6 +20,7 @@ class User {
     required this.role,
     required this.phone,
     this.image,
+    this.token,
   });
 
   // Convert JSON response to User object
@@ -28,9 +30,11 @@ class User {
     
     final userId = json['_id']?.toString() ?? json['id']?.toString() ?? json['userId']?.toString() ?? '';
     final image = json['image']?.toString();
+    final token = json['token']?.toString();
     
     print('   - ID extrait: $userId');
     print('   - Image extraite: $image');
+    print('   - Token extrait: $token');
     
     return User(
       userId: userId,
@@ -42,9 +46,9 @@ class User {
       role: json['role']?.toString() ?? '',
       phone: json['phonenumber']?.toString() ?? '',
       image: image,
+      token: token,
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -57,6 +61,7 @@ class User {
       'role': role,
       'phonenumber': phone,
       'image': image,
+      'token': token,
     };
   }
 }

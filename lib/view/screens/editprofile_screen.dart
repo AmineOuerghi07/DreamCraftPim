@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/main.dart';
 import 'dart:io';
-import 'dart:async';  // Ajout de l'import pour TimeoutException
+import 'dart:async'; 
 import 'package:pim_project/model/services/user_service.dart';
 import 'package:pim_project/model/domain/user.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
@@ -15,6 +15,7 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
 import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view/screens/profile_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -250,7 +251,12 @@ void initState() {
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) {
             print('🔄 Redirection vers le profil');
-            context.go(RouteNames.profile, extra: {'userId': userId});
+             Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileScreen(userId: userId),
+                            ),
+                          );
           }
         });
       } else {

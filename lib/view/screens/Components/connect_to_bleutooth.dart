@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ConnectToBluetooth extends StatelessWidget {
   const ConnectToBluetooth({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
         child: Padding(
@@ -15,26 +17,26 @@ class ConnectToBluetooth extends StatelessWidget {
             children: [
               const Image(image: AssetImage("assets/images/graph_3.png")),
               const SizedBox(height: 12),
-              const Text(
-                "Want to connect Your Device with Your System?",
+              Text(
+                l10n.connectDeviceTitle,
                 textAlign: TextAlign.center, // Center the text
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Text(
-                "Make sure to enable the Permission of",
+              Text(
+                l10n.enableBluetoothPermission,
                 textAlign: TextAlign.center, // Center the text
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Text(
-                "Bluetooth",
+              Text(
+                l10n.bluetooth,
                 textAlign: TextAlign.center, // Center the text
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -49,9 +51,9 @@ class ConnectToBluetooth extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
-                child: const Text(
-                  "Connect Your Device",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Text(
+                  l10n.connectDevice,
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ],

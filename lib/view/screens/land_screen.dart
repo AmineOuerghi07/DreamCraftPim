@@ -407,7 +407,7 @@ class _LandScreenState extends State<LandScreen> {
           children: [
             const Padding(padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12)),
            Header(
-                greetingText: 'Bonjour ',
+                greetingText: '${l10n.hello} ',
                 username: _username,
                 userId: widget.userId,
               ),
@@ -424,6 +424,7 @@ class _LandScreenState extends State<LandScreen> {
                       onChanged: (query) {
                         Provider.of<LandViewModel>(context, listen: false).searchLands(query);
                       },
+                      l10n: l10n,
                     ),
                     const SizedBox(height: 16),
                     Row(

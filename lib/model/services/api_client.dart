@@ -65,16 +65,26 @@ class ApiClient {
   }
 
   // POST request
-  Future<ApiResponse<T>> post<T>(String endpoint, dynamic body, T Function(dynamic) fromJson) async {
+  Future<ApiResponse<T>> post<T>(String endpoint, dynamic data, T Function(dynamic) fromJson) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/$endpoint'),
-        headers: _headers,
-        body: jsonEncode(body),
+        headers: {
+          'Content-Type': 'application/json',
+          if (_authToken != null) 'Authorization': 'Bearer $_authToken',
+        },
+        body: json.encode(data),
       );
-      return _handleResponse(response, fromJson);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonResponse = json.decode(response.body);
+        return ApiResponse.completed(fromJson(jsonResponse));
+      } else {
+        final error = json.decode(response.body);
+        return ApiResponse.error(error['message'] ?? 'Request failed');
+      }
     } catch (e) {
-      return ApiResponse.error('Error during POST request: $e');
+      return ApiResponse.error('Error: ${e.toString()}');
     }
   }
 

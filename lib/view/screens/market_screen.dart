@@ -89,7 +89,7 @@ class _MarketScreenState extends State<MarketScreen> {
             children: [
               const SizedBox(height: 12),
                Header(
-                greetingText: 'Bonjour ',
+                greetingText: l10n.hello,
                 username: _username,
                 userId: widget.userId,
               ),
@@ -99,6 +99,7 @@ class _MarketScreenState extends State<MarketScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     custom.Marketscreensearchbar(
+                      l10n: l10n,
                       controller: searchController,
                       focusNode: searchFocusNode,
                       onFilterTap: () {
@@ -130,8 +131,7 @@ class _MarketScreenState extends State<MarketScreen> {
                     }
 
                     if (provider.categories.isEmpty) {
-                      return const Center(
-                          child: Text("No categories available"));
+                      return Center(child: Text(l10n.noCategories));
                     }
 
                     // Use a GridView for category display

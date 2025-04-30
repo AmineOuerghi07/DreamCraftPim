@@ -14,6 +14,7 @@ import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/plants_grid.dart';
 import 'package:pim_project/view/screens/components/region_info.dart';
 import 'components/info_card.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LandDetailsScreen extends StatelessWidget {
   final String id;
@@ -21,7 +22,9 @@ class LandDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   return Consumer<LandDetailsViewModel>(
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Consumer<LandDetailsViewModel>(
       builder: (context, viewModel, child) {
         // Schedule fetch after the build is complete
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -145,27 +148,26 @@ void _showUpdateLandPopup(BuildContext parentContext, Land land) {
                     ),
                     Center(
                       child: Text(
-                        "Update Land",
+                        AppLocalizations.of(context)!.updateLand,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green.shade700,
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: landNameController,
-                      decoration: const InputDecoration(
-                        labelText: "Land Name",
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.landName,
                         border: UnderlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: locationController,
-                      decoration: const InputDecoration(
-                        labelText: "Location",
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.location,
                         border: UnderlineInputBorder(),
                       ),
                     ),
@@ -183,7 +185,7 @@ void _showUpdateLandPopup(BuildContext parentContext, Land land) {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("For Rent:",
+                        Text(AppLocalizations.of(context)!.forRent,
                             style: TextStyle(fontSize: 16)),
                         ToggleButtons(
                           isSelected: [_isForRent, !_isForRent],
@@ -192,13 +194,13 @@ void _showUpdateLandPopup(BuildContext parentContext, Land land) {
                               _isForRent = index == 0;
                             });
                           },
-                          children: const [
+                          children: [
                             Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Text("Yes")),
+                                child: Text(AppLocalizations.of(context)!.yes)),
                             Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Text("No")),
+                                child: Text(AppLocalizations.of(context)!.no)),
                           ],
                           borderColor: Colors.grey,
                           selectedBorderColor: Colors.green,

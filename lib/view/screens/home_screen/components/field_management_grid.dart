@@ -9,6 +9,7 @@ import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:provider/provider.dart';
 import 'feature_card.dart';
 import 'package:pim_project/model/services/api_client.dart'; // For Status
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FieldManagementGrid extends StatefulWidget {
   final Function(String) onFeatureSelected;
@@ -29,6 +30,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
   bool _showRentLands = false;
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer2<ConnectedRegionViewModel,LandForRentViewModel>(
              builder: (context, regionVM, landVM, child) {
           return SizedBox(
@@ -58,24 +60,19 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
   }
 
   Widget _buildGridView(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       key: const ValueKey('grid'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Manage your fields',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: FeatureCard(
-                  title: 'My Connected\nRegions',
+                  title: l10n.myConnectedRegions,
                   icon: Icons.cloud_outlined,
                   iconBgColor: Colors.blue[100]!,
                   onTap: () {
@@ -89,7 +86,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
              const SizedBox(width: 16),
               Expanded(
                 child: FeatureCard(
-                  title: 'Rent\nLands',
+                  title: l10n.rentLands,
                   icon: Icons.eco_outlined,
                   iconBgColor: Colors.green[100]!,
                   onTap: () {
@@ -110,7 +107,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
             children: [
               Expanded(
                 child: FeatureCard(
-                  title: 'Inventory',
+                  title: l10n.inventory,
                   icon: Icons.inventory_2_outlined,
                   iconBgColor: Colors.orange[100]!,
                   onTap: () => widget.onFeatureSelected('inventory'),
@@ -119,7 +116,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
               const SizedBox(width: 16),
               Expanded(
                 child: FeatureCard(
-                  title: 'Balance',
+                  title: l10n.balance,
                   icon: Icons.account_balance_wallet_outlined,
                   iconBgColor: Colors.yellow[100]!,
                   onTap: () => widget.onFeatureSelected('balance'),
@@ -133,6 +130,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
   }
 
   Widget _buildRegionsView(BuildContext context, ConnectedRegionViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       key: const ValueKey('regions'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,8 +142,8 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
               onPressed: () => setState(() => _showRegions = false),
             ),
             Text(
-              'My Connected Regions',
-              style: TextStyle(
+              l10n.myConnectedRegions,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -161,26 +159,28 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
   }
 
   Widget _buildContentBasedOnStatus(BuildContext context, ConnectedRegionViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
     switch (viewModel.status) {
       case Status.LOADING:
-        return Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator());
       case Status.ERROR:
-        return Center(child: Text(viewModel.message ?? 'An error occurred'));
+        return Center(child: Text(viewModel.message ?? l10n.anErrorOccurred));
       case Status.COMPLETED:
         final regions = viewModel.connectedRegions;
         if (regions == null || regions.isEmpty) {
-          return Center(child: Text('No regions available'));
+          return Center(child: Text(l10n.noRegionsAvailable));
         }
         return LandRegionsGrid(
-          landId: widget.landId, // Removed ! operator
+          landId: widget.landId,
           regions: regions,
         );
       case Status.INITIAL:
       default:
-        return Center(child: Text('Tap to load regions'));
+        return Center(child: Text(l10n.tapToLoadRegions));
     }
   }
   Widget _buildRentLandsView(BuildContext context, LandForRentViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       key: const ValueKey('rent_lands'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,8 +194,8 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
               }),
             ),
             Text(
-              'Lands for Rent',
-              style: TextStyle(
+              l10n.landsForRent,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -211,15 +211,16 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
   }
 
   Widget _buildRentLandsContent(BuildContext context, LandForRentViewModel viewModel) {
+    final l10n = AppLocalizations.of(context)!;
     switch (viewModel.status) {
       case Status.LOADING:
-        return Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator());
       case Status.ERROR:
-        return Center(child: Text(viewModel.message ?? 'An error occurred'));
+        return Center(child: Text(viewModel.message ?? l10n.anErrorOccurred));
       case Status.COMPLETED:
         final lands = viewModel.landsForRent;
         if (lands == null || lands.isEmpty) {
-          return Center(child: Text('No lands available for rent'));
+          return Center(child: Text(l10n.noLandsForRent));
         }
         return ListView.builder(
           itemCount: lands.length,
@@ -231,7 +232,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
                 title: land.name,
                 location: land.cordonate,
                 description:
-                    "Surface: ${land.surface}m² • ${land.forRent ? 'For Rent' : 'Not Available'}",
+                    "${l10n.surface}: ${land.surface}m² • ${land.forRent ? l10n.forRent : l10n.notAvailable}",
                 imageUrl: land.image.isNotEmpty
                     ? AppConstants.imagesbaseURL + land.image
                     : 'assets/images/placeholder.png',
@@ -245,7 +246,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
         );
       case Status.INITIAL:
       default:
-        return Center(child: Text('Tap to load lands for rent'));
+        return Center(child: Text(l10n.tapToLoadLands));
     }
   }
 
