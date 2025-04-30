@@ -1,3 +1,4 @@
+// view/screens/components/SmartRegionCard.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/highlight_level.dart';
 
@@ -9,6 +10,7 @@ class SmartRegionCard extends StatelessWidget {
   final bool switchValue;
   final ValueChanged<bool> onSwitchChanged;
   final HighlightLevel highlightLevel;
+  final bool isDisabled;
 
   const SmartRegionCard({
     Key? key,
@@ -19,12 +21,18 @@ class SmartRegionCard extends StatelessWidget {
     required this.switchValue,
     required this.onSwitchChanged,
     required this.highlightLevel,
+    required this.isDisabled,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Base background color based on switchValue
-    Color baseColor = switchValue ? const Color(0xFF204D4F) : const Color(0xFF505050);
+    // Base background color based on switchValue and isDisabled
+    Color baseColor;
+    if (isDisabled) {
+      baseColor = const Color(0xFF9E9E9E); // Disabled grey color
+    } else {
+      baseColor = switchValue ? const Color(0xFF204D4F) : const Color(0xFF505050);
+    }
 
     // Define highlight styles without border colors
     BoxDecoration cardDecoration;
@@ -51,6 +59,10 @@ class SmartRegionCard extends StatelessWidget {
 
     // Determine subtitle color based on highlightLevel and title
     Color getSubtitleColor() {
+      if (isDisabled) {
+        return Colors.white70; // Disabled text color
+      }
+      
       switch (highlightLevel) {
         case HighlightLevel.medium:
           return const Color(0xFFEAA31F); // Warning color
@@ -96,7 +108,6 @@ class SmartRegionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          
                           color: getSubtitleColor(),
                         ),
                       ),
@@ -113,7 +124,7 @@ class SmartRegionCard extends StatelessWidget {
                       child: Icon(
                         icon,
                         size: 22,
-                        color: iconColor,
+                        color: isDisabled ? Colors.white70 : iconColor,
                       ),
                     ),
                   ],
@@ -125,10 +136,10 @@ class SmartRegionCard extends StatelessWidget {
                     // Center text
                     child: Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: isDisabled ? Colors.white70 : Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -138,20 +149,24 @@ class SmartRegionCard extends StatelessWidget {
                 // Bottom switch with elegant design
                 Center(
                   child: GestureDetector(
-                    onTap: () => onSwitchChanged(!switchValue),
+                    onTap: isDisabled ? null : () => onSwitchChanged(!switchValue),
                     child: Container(
                       width: 62,
                       height: 32,
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: switchValue 
-                          ? Colors.green.withOpacity(0.3) 
-                          : Colors.grey.withOpacity(0.3),
+                        color: isDisabled
+                          ? Colors.grey.withOpacity(0.3)
+                          : (switchValue 
+                              ? Colors.green.withOpacity(0.3) 
+                              : Colors.grey.withOpacity(0.3)),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: switchValue 
-                            ? Colors.green.shade400 
-                            : Colors.grey.shade400,
+                          color: isDisabled
+                            ? Colors.grey.shade400
+                            : (switchValue 
+                                ? Colors.green.shade400 
+                                : Colors.grey.shade400),
                           width: 1.5,
                         ),
                       ),
@@ -164,9 +179,11 @@ class SmartRegionCard extends StatelessWidget {
                           width: 26,
                           height: 26,
                           decoration: BoxDecoration(
-                            color: switchValue 
-                              ? Colors.green.shade500 
-                              : Colors.grey.shade500,
+                            color: isDisabled
+                              ? Colors.grey.shade500
+                              : (switchValue 
+                                  ? Colors.green.shade500 
+                                  : Colors.grey.shade500),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
