@@ -96,6 +96,7 @@ class SmartRegionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
+                          
                           color: getSubtitleColor(),
                         ),
                       ),
