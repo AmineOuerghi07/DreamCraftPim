@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String userId;
@@ -20,7 +21,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false; // Add a loading state
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,32 +31,33 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _resetPassword() async {
+    final l10n = AppLocalizations.of(context)!;
     String password = _passwordController.text.trim();
     String confirmPassword = _confirmPasswordController.text.trim();
 
     if (password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
+        SnackBar(content: Text(l10n.pleaseFillFields)),
       );
       return;
     }
 
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Password must be at least 6 characters")),
+        SnackBar(content: Text(l10n.passwordTooShort)),
       );
       return;
     }
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
+        SnackBar(content: Text(l10n.passwordsDoNotMatch)),
       );
       return;
     }
 
     setState(() {
-      _isLoading = true; // Show loading indicator
+      _isLoading = true;
     });
 
     try {
@@ -71,12 +73,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password reset successful!")),
+          SnackBar(content: Text(l10n.signUpSuccess)),
         );
-        // Navigate to LoginScreen after successful password reset
         context.go(RouteNames.login);
       } else {
-        String errorMessage = "Failed to reset password";
+        String errorMessage = l10n.signupFailed;
         try {
           final decodedResponse = json.decode(response.body);
           errorMessage = decodedResponse["message"] ?? errorMessage;
@@ -89,11 +90,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Network error: ${e.toString()}")),
+        SnackBar(content: Text("${l10n.error}: ${e.toString()}")),
       );
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
     }
   }
@@ -136,101 +137,144 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Get screen size
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
+    
+    // Determine if we're on a tablet or phone based on width
+    final bool isTablet = screenWidth > 600;
+    
+    // Responsive sizing
+    final double horizontalPadding = screenWidth * 0.05;
+    final double maxContentWidth = isTablet ? 500.0 : screenWidth * 0.9;
+    
+    // Responsive text sizing
+    final double titleFontSize = isTablet ? 32.0 : 24.0;
+    final double subtitleFontSize = isTablet ? 18.0 : 16.0;
+    final double buttonFontSize = isTablet ? 18.0 : 16.0;
+    
+    // Responsive spacing
+    final double topSpacing = screenHeight * 0.08;
+    final double widgetSpacing = screenHeight * 0.02;
+    
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 50),
-              const Text(
-                "Reset Password",
-                style: TextStyle(
-                  color: Color(0xFF3E754E),
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: maxContentWidth,
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: 20.0,
                 ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Set new password",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF777777),
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildPasswordField(
-                controller: _passwordController,
-                hintText: "Password",
-                obscureText: _obscurePassword,
-                onToggle: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
-              ),
-              const SizedBox(height: 15),
-              _buildPasswordField(
-                controller: _confirmPasswordController,
-                hintText: "Confirm Password",
-                obscureText: _obscureConfirmPassword,
-                onToggle: () {
-                  setState(() {
-                    _obscureConfirmPassword = !_obscureConfirmPassword;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              _isLoading
-                  ? const CircularProgressIndicator() // Show loading spinner
-                  : ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3E754E),
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      onPressed: _resetPassword,
-                      child: const Text(
-                        "Save",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: topSpacing),
+                    Text(
+                      l10n.resetPassword,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: const Color(0xFF3E754E),
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-              const SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
-                  // Navigate to the login page
-                  context.goNamed(RouteNames.login);
-                },
-                child: Text.rich(
-                  TextSpan(
-                    text: "Did you remember your password? ",
-                    style: GoogleFonts.roboto(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300,
-                      color: Color(0xFF777777),
+                    SizedBox(height: widgetSpacing),
+                    Text(
+                      l10n.setNewPassword,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: const Color(0xFF777777),
+                        fontSize: subtitleFontSize,
+                      ),
                     ),
-                    children: [
-                      TextSpan(
-                        text: "Sign In",
-                        style: GoogleFonts.roboto(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF3E754E),
+                    SizedBox(height: widgetSpacing * 1.5),
+                    _buildPasswordField(
+                      controller: _passwordController,
+                      hintText: l10n.password,
+                      obscureText: _obscurePassword,
+                      onToggle: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                    SizedBox(height: widgetSpacing),
+                    _buildPasswordField(
+                      controller: _confirmPasswordController,
+                      hintText: l10n.confirmPassword,
+                      obscureText: _obscureConfirmPassword,
+                      onToggle: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
+                    ),
+                    SizedBox(height: widgetSpacing * 1.5),
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF3E754E),
+                                padding: EdgeInsets.symmetric(
+                                  vertical: isTablet ? 18.0 : 15.0,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              onPressed: _resetPassword,
+                              child: Text(
+                                l10n.save,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: buttonFontSize,
+                                ),
+                              ),
+                            ),
+                          ),
+                    SizedBox(height: widgetSpacing * 1.2),
+                    GestureDetector(
+                      onTap: () {
+                        context.goNamed(RouteNames.login);
+                      },
+                      child: Text.rich(
+                        TextSpan(
+                          text: "${l10n.didYouRemember} ",
+                          style: GoogleFonts.roboto(
+                            fontSize: isTablet ? 16.0 : 14.0,
+                            fontWeight: FontWeight.w300,
+                            color: const Color(0xFF777777),
+                          ),
+                          children: [
+                            TextSpan(
+                              text: l10n.signIn,
+                              style: GoogleFonts.roboto(
+                                fontSize: isTablet ? 16.0 : 14.0,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF3E754E),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: isTablet ? 40.0 : 20.0),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

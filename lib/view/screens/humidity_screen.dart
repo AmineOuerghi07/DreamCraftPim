@@ -1,278 +1,342 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/humidity_view_model.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'dart:math';
 
 class HumidityScreen extends StatelessWidget {
-  final String city;
+  final double latitude;
+  final double longitude;
   final String humidity;
   
   const HumidityScreen({
     Key? key, 
-    required this.city,
+    required this.latitude,
+    required this.longitude,
     required this.humidity,
   }) : super(key: key);
   
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => HumidityViewModel()..fetchHumidityData(city),
-      child: _HumidityScreenContent(city: city, humidity: humidity),
+      create: (_) => HumidityViewModel()..fetchHumidityDataByCoordinates(latitude, longitude),
+      child: _HumidityScreenContent(latitude: latitude, longitude: longitude, humidity: humidity),
     );
   }
 }
 
-class _HumidityScreenContent extends StatelessWidget {
-  final String city;
+class _HumidityScreenContent extends StatefulWidget {
+  final double latitude;
+  final double longitude;
   final String humidity;
   
   const _HumidityScreenContent({
     Key? key, 
-    required this.city,
+    required this.latitude,
+    required this.longitude,
     required this.humidity,
   }) : super(key: key);
-  
+
+  @override
+  State<_HumidityScreenContent> createState() => _HumidityScreenContentState();
+}
+
+class _HumidityScreenContentState extends State<_HumidityScreenContent> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _slideAnimation;
+  final List<Star> _stars = [];
+  bool _isNight = false;
+  bool _starsInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeIn,
+      ),
+    );
+    _slideAnimation = Tween<double>(begin: 50, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    // Vérifier l'heure pour déterminer si c'est la nuit
+    final hour = DateTime.now().hour;
+    _isNight = hour < 6 || hour > 18;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_starsInitialized) {
+      _initializeStars();
+      _starsInitialized = true;
+    }
+  }
+
+  void _initializeStars() {
+    if (!mounted) return;
+    
+    _stars.clear();
+    for (int i = 0; i < 50; i++) {
+      _stars.add(Star(
+        x: Random().nextDouble() * MediaQuery.of(context).size.width,
+        y: Random().nextDouble() * MediaQuery.of(context).size.height * 0.5,
+        size: Random().nextDouble() * 2 + 1,
+        twinkle: Random().nextBool(),
+      ));
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Color _getBackgroundColor(String condition) {
+    if (_isNight) {
+      return const Color(0xFF1A237E);
+    }
+    
+    switch (condition.toLowerCase()) {
+      case 'clouds':
+      case 'cloudy':
+        return const Color(0xFF78909C);
+      case 'sunny':
+      case 'clear':
+        return const Color(0xFFFFB300);
+      case 'rainy':
+      case 'rain':
+        return const Color(0xFF42A5F5);
+      case 'snow':
+      case 'snowy':
+        return const Color(0xFF90CAF9);
+      case 'storm':
+      case 'thunderstorm':
+        return const Color(0xFF37474F);
+      case 'fog':
+      case 'mist':
+        return const Color(0xFF9E9E9E);
+      case 'windy':
+      case 'breezy':
+        return const Color(0xFF80DEEA);
+      case 'hazy':
+      case 'smoky':
+        return const Color(0xFFB0BEC5);
+      default:
+        return const Color(0xFF2196F3);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Humidité - $city',
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
       body: Consumer<HumidityViewModel>(
         builder: (context, viewModel, child) {
-          print('🔄 Mise à jour de l\'interface avec le ViewModel');
-          print('⏳ État de chargement: ${viewModel.isLoading}');
-          print('❌ Erreur: ${viewModel.error}');
-          print('📊 Données: ${viewModel.humidityData != null ? "Présentes" : "Absentes"}');
-          
-          if (viewModel.humidityData != null) {
-            print('📦 Données d\'humidité: ${viewModel.humidityData}');
+          if (viewModel.isLoading) {
+            return const Center(child: CircularProgressIndicator());
           }
 
-          if (viewModel.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF29B6F6)),
-              ),
-            );
-          }
-          
           if (viewModel.error != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    color: Colors.red,
-                    size: 48,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    viewModel.error!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => viewModel.fetchHumidityData(city),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF29B6F6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('Réessayer'),
-                  ),
-                ],
-              ),
-            );
+            return Center(child: Text(viewModel.error!));
           }
-          
+
           final humidityData = viewModel.humidityData;
           if (humidityData == null) {
-            return const Center(
-              child: Text('Aucune donnée disponible'),
-            );
+            return const Center(child: Text('Aucune donnée disponible'));
           }
-          
-         return SingleChildScrollView(
-  child: Column(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: _buildCombinedHumidityBox(humidityData),
-            ),
-            const SizedBox(width: 16),
-            /*
-            Expanded(
-              flex: 3,
-              child: _buildCombinedHumidityBox(humidityData),
-            ),
-            */
-          ],
-        ),
-      ),
-      _buildHumidityGraph(humidityData),
-      Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _buildDailySummary(humidityData),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildDailyComparison(humidityData),
-            ),
-          ],
-        ),
-      ),
-      _buildRelativeHumidity(humidityData),
-    ],
-  ),
-);
+
+          final condition = humidityData['weather']?['condition']?.toLowerCase() ?? '';
+          final backgroundColor = _getBackgroundColor(condition);
+
+          return Stack(
+            children: [
+              // Fond animé
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      backgroundColor,
+                      backgroundColor.withOpacity(0.8),
+                      backgroundColor.withOpacity(0.6),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Étoiles pour la nuit
+              if (_isNight)
+                ..._stars.map((star) => AnimatedBuilder(
+                  animation: _animation,
+                  builder: (context, child) {
+                    return Positioned(
+                      left: star.x,
+                      top: star.y + (star.twinkle ? _animation.value * 5 : 0),
+                      child: Opacity(
+                        opacity: star.twinkle ? 0.3 + (_animation.value * 0.7) : 0.7,
+                        child: Container(
+                          width: star.size,
+                          height: star.size,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                )),
+
+              // Contenu principal
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: _buildAnimatedHumidityBox(humidityData),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildAnimatedHumidityGraph(humidityData),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _buildDailySummary(humidityData),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildDailyComparison(humidityData),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildRelativeHumidity(humidityData),
+                  ],
+                ),
+              ),
+            ],
+          );
         },
       ),
     );
   }
-  ///integrer les deux box 
-Widget _buildCombinedHumidityBox(Map<String, dynamic> data) {
-  final humidity = data['humidity']?['current'] ?? '0%';
-  final dewPoint = data['humidity']?['dewPoint'] ?? 'N/A';
 
-  final dailySummary = data['dailySummary'] as Map<String, dynamic>?; 
-  final averageHumidity = dailySummary?['averageHumidity'] ?? 'N/A'; 
-  final dewPointRange = dailySummary?['dewPointRange'] ?? 'N/A';
-
-  return Container(
-  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16), // Less padding
- width: 260, // Narrower width
-  height: 280, // Smaller height to match card style
-      decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF29B6F6), Color(0xFF0288D1)],
+  Widget _buildAnimatedHumidityBox(Map<String, dynamic> data) {
+    final condition = data['weather']?['condition']?.toLowerCase() ?? '';
+    
+    return TweenAnimationBuilder(
+      duration: const Duration(milliseconds: 800),
+      tween: ColorTween(
+        begin: const Color(0xFF29B6F6),
+        end: _getBackgroundColor(condition),
       ),
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.blue.withOpacity(0.2),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(
-          Icons.water_drop,
-          color: Colors.white,
-          size: 28, // Increased icon size for more visual balance
-        ),
-        Center(
-          child: Column(
-            children: [
-              Text(
-                humidity,
-                style: const TextStyle(
-                  fontSize: 32, // Increased font size for visibility
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const Text(
-                'Humidité actuelle',
-                style: TextStyle(
-                  fontSize: 16, // Adjusted text size for a better fit
-                  color: Colors.white70,
-                ),
+      builder: (context, Color? color, child) {
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 800),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                color ?? const Color(0xFF29B6F6),
+                color?.withOpacity(0.7) ?? const Color(0xFF0288D1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: (color ?? const Color(0xFF29B6F6)).withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 12), // More space between sections
-        _buildHumidityInfoRow(Icons.thermostat, 'Point de rosée', dewPoint),
-        const Divider(height: 32, color: Colors.white30),
-        const Text(
-          'Détails journaliers',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          child: Column(
+            children: [
+              _buildWeatherIcon(condition),
+              const SizedBox(height: 12),
+              _buildCombinedHumidityBox(data),
+            ],
           ),
-        ),
-        const SizedBox(height: 8),
-        _buildHumidityInfoRow(Icons.water_drop, 'Humidité moyenne', averageHumidity),
-        const SizedBox(height: 8),
-        _buildHumidityInfoRow(Icons.thermostat_auto, 'Plage point de rosée', dewPointRange),
-      ],
-    ),
-  );
-}
+        );
+      },
+    );
+  }
 
-Widget _buildHumidityInfoRow(IconData icon, String label, String value) {
-  return Row(
-    children: [
-      Icon(icon, size: 16, color: Colors.white),
-      const SizedBox(width: 8),
-      Expanded(
-        flex: 2,
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-
-            color: Colors.white70,
+  Widget _buildWeatherIcon(String condition) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 800),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
           ),
-        ),
+        );
+      },
+      child: Icon(
+        _getWeatherIcon(condition),
+        key: ValueKey<String>(condition),
+        color: Colors.white,
+        size: 48,
       ),
-      Expanded(
-        flex: 1,
-        child: Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-             fontWeight: FontWeight.w500,
-            
-           color: Colors.white,
-          ),
-          textAlign: TextAlign.end,
-        ),
-      ),
-    ],
-  );
-}
+    );
+  }
 
-  /*
-  Widget _buildCurrentHumidity(Map<String, dynamic> data) {
+  IconData _getWeatherIcon(String condition) {
+    if (_isNight) {
+      return Icons.nightlight_round;
+    }
+    
+    switch (condition.toLowerCase()) {
+      case 'cloudy':
+        return Icons.cloud;
+      case 'sunny':
+        return Icons.wb_sunny;
+      case 'rainy':
+        return Icons.grain;
+      default:
+        return Icons.water_drop;
+    }
+  }
+
+  Widget _buildCombinedHumidityBox(Map<String, dynamic> data) {
     final humidity = data['humidity']?['current'] ?? '0%';
     final dewPoint = data['humidity']?['dewPoint'] ?? 'N/A';
-    
+
+    final dailySummary = data['dailySummary'] as Map<String, dynamic>?; 
+    final averageHumidity = dailySummary?['averageHumidity'] ?? 'N/A'; 
+    final dewPointRange = dailySummary?['dewPointRange'] ?? 'N/A';
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -288,128 +352,73 @@ Widget _buildHumidityInfoRow(IconData icon, String label, String value) {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.water_drop,
-            color: Colors.white,
-            size: 36,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            humidity,
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.water_drop,
               color: Colors.white,
+              size: 28,
             ),
-          ),
-          const Text(
-            'Humidité actuelle',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.white70,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.thermostat,
-                  color: Colors.white,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    'Point de rosée: $dewPoint',
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    humidity,
                     style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontSize: 12,
                     ),
                   ),
-                ),
-              ],
+                  const Text(
+                    'Humidité actuelle',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            _buildHumidityInfoRow(Icons.thermostat, 'Point de rosée', dewPoint),
+            const Divider(height: 32, color: Colors.white30),
+            const Text(
+              'Détails journaliers',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildHumidityInfoRow(Icons.water_drop, 'Humidité moyenne', averageHumidity),
+            const SizedBox(height: 8),
+            _buildHumidityInfoRow(Icons.thermostat_auto, 'Plage point de rosée', dewPointRange),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildHumidityDetails(Map<String, dynamic> data) {
-    final dailySummary = data['dailySummary'] as Map<String, dynamic>?;
-    final averageHumidity = dailySummary?['averageHumidity'] ?? 'N/A';
-    final dewPointRange = dailySummary?['dewPointRange'] ?? 'N/A';
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Détails',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0288D1),
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildDetailRow(
-            icon: Icons.water_drop,
-            label: 'Humidité moyenne',
-            value: averageHumidity,
-          ),
-          const SizedBox(height: 8),
-          _buildDetailRow(
-            icon: Icons.thermostat,
-            label: 'Plage point de rosée',
-            value: dewPointRange,
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
+  Widget _buildHumidityInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF0288D1)),
+        Icon(icon, size: 16, color: Colors.white),
         const SizedBox(width: 8),
         Expanded(
           flex: 2,
           child: Text(
             label,
             style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black54,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+
+              color: Colors.white70,
             ),
-            overflow: TextOverflow.ellipsis,
           ),
         ),
         Expanded(
@@ -417,17 +426,18 @@ Widget _buildHumidityInfoRow(IconData icon, String label, String value) {
           child: Text(
             value,
             style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontSize: 16,
+               fontWeight: FontWeight.w500,
+              
+             color: Colors.white,
             ),
-            overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.end,
           ),
         ),
       ],
     );
   }
-  */
+
   Widget _buildHumidityGraph(Map<String, dynamic> data) {
     final humidity = data['humidity'] as Map<String, dynamic>?;
     if (humidity == null) return const SizedBox.shrink();
@@ -706,6 +716,22 @@ Widget _buildHumidityInfoRow(IconData icon, String label, String value) {
       ),
     );
   }
+
+  Widget _buildAnimatedHumidityGraph(Map<String, dynamic> data) {
+    return TweenAnimationBuilder(
+      duration: const Duration(milliseconds: 800),
+      tween: Tween<double>(begin: 0, end: 1),
+      builder: (context, double value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Opacity(
+            opacity: value,
+            child: _buildHumidityGraph(data),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class HumidityChartPainter extends CustomPainter {
@@ -844,6 +870,18 @@ class HumidityChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
 
+class Star {
+  final double x;
+  final double y;
+  final double size;
+  final bool twinkle;
 
+  Star({
+    required this.x,
+    required this.y,
+    required this.size,
+    required this.twinkle,
+  });
 } 

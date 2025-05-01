@@ -6,6 +6,7 @@ import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pim_project/model/domain/user.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 String user_id = "";
 
@@ -14,6 +15,7 @@ class LoginViewModel with ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   User? currentUser;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   LoginViewModel({required this.userRepository});
 
@@ -67,27 +69,30 @@ class LoginViewModel with ChangeNotifier {
   // Check if user is already logged in
   Future<bool> checkLoginStatus() async {
     try {
-      print('🔍 Checking login status...');
+      print('🔍 [LoginStatus] Vérification du statut de connexion');
       final rememberMe = await UserPreferences.getRememberMe();
-      print('🔐 Remember Me status: $rememberMe');
+      final userId = await UserPreferences.getUserId();
+      final token = await UserPreferences.getToken();
       
-      if (rememberMe) {
-        print('🔄 Remember Me is enabled, attempting to retrieve saved user');
-        final savedUser = await UserPreferences.getUser();
-        if (savedUser != null) {
-          print('✅ Auto-login successful for user ID: ${savedUser.userId}');
-          currentUser = savedUser;
-          notifyListeners();
-          return true;
-        } else {
-          print('⚠️ No saved user found despite Remember Me being enabled');
-        }
+      print('📊 [LoginStatus] État actuel:');
+      print('   - Remember Me: $rememberMe');
+      print('   - User ID: $userId');
+      print('   - Token: ${token != null ? "Présent" : "Absent"}');
+      
+      if (rememberMe && userId != null && userId.isNotEmpty && token != null && token.isNotEmpty) {
+        print('✅ [LoginStatus] Utilisateur connecté');
+        currentUser = await UserPreferences.getUser();
+        MyApp.userId = userId;
+        notifyListeners();
+        return true;
       } else {
-        print('ℹ️ Remember Me is disabled, no auto-login attempted');
+        print('❌ [LoginStatus] Aucun utilisateur connecté');
+        await UserPreferences.clear();
+        return false;
       }
-      return false;
     } catch (e) {
-      print("❌ Error checking login status: $e");
+      print('❌ [LoginStatus] Erreur: $e');
+      await UserPreferences.clear();
       return false;
     }
   }
@@ -95,35 +100,51 @@ class LoginViewModel with ChangeNotifier {
   // Logout
   Future<void> logout() async {
     try {
+      print('🔐 [Logout] Début de la déconnexion');
+      
+      // Réinitialiser l'ID utilisateur global
+      MyApp.userId = "";
+      
+      // Effacer toutes les préférences utilisateur
       await UserPreferences.clear();
+      
+      // Réinitialiser l'état du ViewModel
       currentUser = null;
+      isLoading = false;
+      errorMessage = null;
+      
+      // Forcer la réinitialisation de l'état de connexion
+      await UserPreferences.setRememberMe(false);
+      await UserPreferences.setToken("");
+      await UserPreferences.setUserId("");
+      
+      // Désactiver la connexion automatique Google
+      await _googleSignIn.signOut();
+      
+      print('✅ [Logout] Déconnexion réussie');
       notifyListeners();
     } catch (e) {
+      print('❌ [Logout] Erreur lors de la déconnexion: $e');
       _showErrorToast("Erreur lors de la déconnexion : ${e.toString()}");
     }
   }
 
   // Google Sign In
-  Future<bool> signInWithGoogle(String googleToken) async {
+  Future<bool> signInWithGoogle(String googleToken, String email, String fullname, String image) async {
+    print('🔐 [Google Login] Début du processus de connexion');
     isLoading = true;
-    errorMessage = null;
     notifyListeners();
 
     try {
-      final response = await userRepository.googleLogin(googleToken);
+      final response = await userRepository.googleLogin(googleToken, email, fullname, image);
+      print('✅ [Google Login] Réponse reçue du repository');
 
       if (response.status == Status.COMPLETED && response.data != null) {
         currentUser = response.data;
-        
-        // Save user data and update MyApp.userId
-        await UserPreferences.setUserId(response.data!.userId);
-        await UserPreferences.setToken(googleToken); // Save the token
-        MyApp.userId = response.data!.userId;
-        
-        // Always save user data for Google sign-in
-        await UserPreferences.setUser(response.data!);
-        await UserPreferences.setRememberMe(true);
-        
+        await UserPreferences.setUserId(currentUser!.userId);
+        await UserPreferences.setToken(googleToken);
+        await UserPreferences.setUser(currentUser!);
+        MyApp.userId = currentUser!.userId;
         return true;
       } else {
         errorMessage = response.message ?? "Échec de la connexion avec Google";

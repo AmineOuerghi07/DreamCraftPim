@@ -3,11 +3,15 @@ import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
 
-import 'package:pim_project/view/screens/Components/marketHeader.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/marketScreenSearchBar.dart' as custom;
 import 'package:pim_project/view/screens/Components/seeAllProductsWithSameCategory.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:pim_project/constants/constants.dart';
+
 
 class MarketScreen extends StatelessWidget {
   const MarketScreen({super.key});
@@ -39,17 +43,21 @@ class MarketScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              const Marketheader(
-                profileImage: "assets/images/profile.png",
-                greetingText: "Haaa! ",
-                username: "Mahamed",
-              ),
+              _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Header(
+                    greetingText: l10n.hello,
+                    username: _username,
+                    userId: widget.userId,
+                  ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     custom.Marketscreensearchbar(
+                      l10n: l10n,
                       controller: searchController,
                       focusNode: searchFocusNode,
                       onFilterTap: () {
@@ -81,8 +89,7 @@ class MarketScreen extends StatelessWidget {
                     }
 
                     if (provider.categories.isEmpty) {
-                      return const Center(
-                          child: Text("No categories available"));
+                      return Center(child: Text(l10n.noCategories));
                     }
 
                     // Use a GridView for category display

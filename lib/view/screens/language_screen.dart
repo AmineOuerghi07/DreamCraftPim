@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageScreen extends StatefulWidget {
   const LanguageScreen({super.key});
@@ -58,34 +59,28 @@ class _LanguageScreenState extends State<LanguageScreen> with SingleTickerProvid
     super.dispose();
   }
 
-  void _restartApp(BuildContext context) {
-    context.go(RouteNames.loadingScreen);
-  }
-
-  void _changeLanguage(String languageCode) async {
-    final languageService = Provider.of<LanguageService>(context, listen: false);
-    await languageService.changeLanguage(languageCode);
-
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.languageChanged),
-            content: Text('$languageCode'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  context.go(RouteNames.loadingScreen);
-                },
-                child: Text(AppLocalizations.of(context)!.restart),
-              ),
-            ],
-          );
-        },
-      );
+  Future<void> _changeLanguage(String languageCode) async {
+    try {
+      final languageService = Provider.of<LanguageService>(context, listen: false);
+      await languageService.changeLanguage(languageCode);
+      
+      // Sauvegarder la nouvelle langue
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('language_code', languageCode);
+      
+      // Recharger l'application avec la nouvelle langue
+      if (mounted) {
+        context.go(RouteNames.loadingScreen, extra: {
+          'restoreState': true,
+          'previousState': 'language_change',
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors du changement de langue: $e')),
+        );
+      }
     }
   }
 

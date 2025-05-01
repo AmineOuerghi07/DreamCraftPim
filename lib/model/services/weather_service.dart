@@ -1,28 +1,38 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:pim_project/constants/constants.dart';
 
 class WeatherApiService {
- // static const String baseUrl = 'http://192.168.43.232:3000/weather';
-   static const String baseUrl = 'http://127.0.0.1:3000/weather';
+  static const String baseUrl = '${AppConstants.baseUrl}/weather';
 
-
-
-  Future<Map<String, dynamic>?> getWeather(String city) async {
-    final url = Uri.parse('$baseUrl?city=$city');
-    
+  Future<Map<String, dynamic>?> getWeatherByCoordinates(double latitude, double longitude) async {
     try {
-      final response = await http.get(url);
+      print('🌤️ [WeatherService] Récupération des données météo pour les coordonnées: $latitude, $longitude');
+      final url = Uri.parse('$baseUrl/coordinates?lat=$latitude&lon=$longitude');
+      
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
 
-      if (response.statusCode == 200) {
+      print('📡 [WeatherService] Status code: ${response.statusCode}');
+      print('📡 [WeatherService] Response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
-        return data; // Tu obtiens ici : city, temperature, weather, humidity, advice (si calculé backend)
+        if (data == null) {
+          throw Exception('Aucune donnée météo reçue');
+        }
+        return data;
       } else {
-        print('❌ Erreur ${response.statusCode}: ${response.body}');
-        return null;
+        throw Exception('Erreur: Statut ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('❌ Erreur lors de la requête météo: $e');
-      return null;
+      print('❌ [WeatherService] Erreur: $e');
+      throw Exception('Erreur lors de la récupération des données météo: ${e.toString()}');
     }
   }
 }

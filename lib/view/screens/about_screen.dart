@@ -19,20 +19,21 @@ class AboutScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: 32),
-            _buildMissionSection(),
+            _buildMissionSection(context),
             const SizedBox(height: 32),
-            _buildTeamSection(),
+            _buildTeamSection(context),
             const SizedBox(height: 32),
-            _buildFooter(),
+            _buildFooter(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Container(
@@ -50,7 +51,7 @@ class AboutScreen extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'AgriTech Solutions',
+          l10n.appTitle,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -59,7 +60,7 @@ class AboutScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'We revolutionize agriculture through innovative technology solutions that increase efficiency, reduce waste, and maximize yields for farmers of all scales.',
+          l10n.companyDescription,
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey[800],
@@ -71,12 +72,13 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMissionSection() {
+  Widget _buildMissionSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Our Mission',
+          l10n.aboutTitle,
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -98,7 +100,7 @@ class AboutScreen extends StatelessWidget {
             ],
           ),
           child: Text(
-            'To empower the agricultural community with smart, sustainable solutions that bridge the gap between traditional farming and modern technology, ensuring food security for future generations.',
+            l10n.missionDescription,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[800],
@@ -110,12 +112,13 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamSection() {
+  Widget _buildTeamSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Our Team',
+          l10n.teamDescription,
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -144,13 +147,14 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Divider(color: Colors.grey[300]),
         const SizedBox(height: 24),
         Text(
-          'Innovating Agriculture for a Better Tomorrow',
+          l10n.aboutTitle,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -161,7 +165,7 @@ class AboutScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '🌱 Cultivating Innovation 🌱',
+          '🌱 ${l10n.aboutTitle} 🌱',
           style: TextStyle(
             fontSize: 14,
             color: Colors.grey[600],

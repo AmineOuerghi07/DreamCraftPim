@@ -98,6 +98,7 @@ class MarketProvider extends ChangeNotifier {
 }
 
 class ApiService {
+
   final String baseUrl = "http://localhost:3000";
 
  

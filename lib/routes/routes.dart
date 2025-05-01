@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
@@ -22,6 +23,7 @@ import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
 import 'package:pim_project/view/screens/map_screen.dart';
 import 'package:pim_project/view/screens/market_screen.dart';
+import 'package:pim_project/view/screens/on_boarding_screen.dart';
 import 'package:pim_project/view/screens/phone_verification_screen.dart';
 import 'package:pim_project/view/screens/product_details_screen.dart';
 import 'package:pim_project/view/screens/region_details_screen.dart';
@@ -63,17 +65,28 @@ class RouteNames {
   static const String editProfile = '/editprofile';
   static const String languageScreen = '/language_screen';
   static const String settings = '/loading_screen';
+  static const String onboarding = '/onboarding';
    static const String billingScreen = '/billing_screen';
 }
 
 final GoRouter router = GoRouter(
   navigatorKey: rootNavigatorKey,
-  initialLocation: RouteNames.loadingScreen, // Start with a loading screen
+  initialLocation: RouteNames.loadingScreen,
   routes: [
     GoRoute(
       path: RouteNames.loadingScreen,
       builder: (context, state) => LoadingScreen(
         onLoaded: () async {
+          // Check if this is a fresh install
+          final isFirstInstall = await UserPreferences.getIsFirstInstall();
+
+          if (isFirstInstall == null) {
+            // Fresh install: show onboarding and mark as opened
+            await UserPreferences.setIsFirstInstall(true);
+            return RouteNames.onboarding;
+          }
+
+          // Not a fresh install: check user login status
           final rememberMe = await UserPreferences.getRememberMe();
           final userId = await UserPreferences.getUserId();
           final token = await UserPreferences.getToken();
@@ -82,9 +95,14 @@ final GoRouter router = GoRouter(
             MyApp.userId = userId;
             return RouteNames.home;
           }
+
           return RouteNames.login;
         },
       ),
+    ),
+    GoRoute(
+      path: RouteNames.onboarding,
+      builder: (context, state) => const AnimatedOnboardingScreen(),
     ),
     ShellRoute(
       navigatorKey: shellNavigatorKey,
@@ -218,7 +236,7 @@ final GoRouter router = GoRouter(
           ChatScreen(initialData: state.extra as Map<String, dynamic>?),
     ),
     GoRoute(
-      path: RouteNames.processingScreen, // New route for animation
+      path: RouteNames.processingScreen,
       builder: (context, state) => const LoadingAnimationScreen(),
     ),
     GoRoute(
@@ -232,8 +250,12 @@ final GoRouter router = GoRouter(
       path: '${RouteNames.humidity}/:humidity',
       builder: (context, state) {
         final humidity = state.pathParameters['humidity']!;
-        final city = (state.extra as Map<String, dynamic>?)?['city'] ?? 'Tunis';
-        return HumidityScreen(humidity: humidity, city: city);
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        return HumidityScreen(
+          humidity: humidity,
+          latitude: extra['latitude'] ?? 0.0,
+          longitude: extra['longitude'] ?? 0.0,
+        );
       },
     ),
     GoRoute(
@@ -244,7 +266,6 @@ final GoRouter router = GoRouter(
     ),
   ],
   redirect: (context, state) {
-    // Redirect from loading screen after async check
     if (state.uri.toString() == RouteNames.loadingScreen) {
       return null; // Let LoadingScreen handle the redirect
     }
@@ -269,15 +290,30 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future<void> _checkAndRedirect() async {
-    final route = await widget.onLoaded();
-    if (mounted) {
-      GoRouter.of(context).go(route);
+    try {
+      final route = await widget.onLoaded();
+      if (mounted) {
+        // Vérifier si l'ID utilisateur est toujours présent
+        final userId = await UserPreferences.getUserId();
+        if (userId != null && userId.isNotEmpty) {
+          MyApp.userId = userId;
+          print('✅ [LoadingScreen] ID utilisateur restauré: $userId');
+        } else {
+          print('⚠️ [LoadingScreen] Aucun ID utilisateur trouvé');
+        }
+        GoRouter.of(context).go(route);
+      }
+    } catch (e) {
+      print('❌ [LoadingScreen] Erreur lors de la redirection: $e');
+      if (mounted) {
+        GoRouter.of(context).go(RouteNames.login);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
       ),
