@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 class SunAnimation extends StatefulWidget {
   final double size;
   final Color color;
+  final bool isLarge;
 
   const SunAnimation({
     Key? key,
     this.size = 100.0,
     this.color = Colors.amber,
+    this.isLarge = false,
   }) : super(key: key);
 
   @override
@@ -60,6 +62,9 @@ class _SunAnimationState extends State<SunAnimation> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    // Apply the actual size based on isLarge parameter
+    final actualSize = widget.isLarge ? widget.size * 1.4 : widget.size;
+    
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -68,16 +73,16 @@ class _SunAnimationState extends State<SunAnimation> with SingleTickerProviderSt
           child: Transform.rotate(
             angle: _rotationAnimation.value,
             child: Container(
-              width: widget.size,
-              height: widget.size,
+              width: actualSize,
+              height: actualSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: widget.color,
                 boxShadow: [
                   BoxShadow(
                     color: widget.color.withOpacity(0.3),
-                    blurRadius: 20,
-                    spreadRadius: 5,
+                    blurRadius: widget.isLarge ? 25 : 20,
+                    spreadRadius: widget.isLarge ? 7 : 5,
                   ),
                 ],
               ),
@@ -92,11 +97,13 @@ class _SunAnimationState extends State<SunAnimation> with SingleTickerProviderSt
 class CloudAnimation extends StatefulWidget {
   final double size;
   final bool isDark;
+  final bool isLarge;
 
   const CloudAnimation({
     Key? key,
     this.size = 100.0,
     this.isDark = false,
+    this.isLarge = false,
   }) : super(key: key);
 
   @override
@@ -132,10 +139,13 @@ class _CloudAnimationState extends State<CloudAnimation> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    // Apply the actual size based on isLarge parameter
+    final actualSize = widget.isLarge ? widget.size * 1.4 : widget.size;
+    
     return SlideTransition(
       position: _slideAnimation,
       child: CustomPaint(
-        size: Size(widget.size, widget.size * 0.6),
+        size: Size(actualSize, actualSize * 0.6),
         painter: CloudPainter(isDark: widget.isDark),
       ),
     );
@@ -202,7 +212,12 @@ class CloudPainter extends CustomPainter {
 }
 
 class RainDropsAnimation extends StatefulWidget {
-  const RainDropsAnimation({Key? key}) : super(key: key);
+  final bool isLarge;
+
+  const RainDropsAnimation({
+    Key? key,
+    this.isLarge = false,
+  }) : super(key: key);
 
   @override
   _RainDropsAnimationState createState() => _RainDropsAnimationState();
@@ -244,32 +259,47 @@ class _RainDropsAnimationState extends State<RainDropsAnimation> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: List.generate(numberOfDrops, (index) {
-        return AnimatedBuilder(
-          animation: _animations[index],
-          builder: (context, child) {
-            return Positioned(
-              left: (index * 10).toDouble(),
-              top: _animations[index].value * 100,
-              child: Container(
-                width: 2,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.blue[300],
-                  borderRadius: BorderRadius.circular(1),
+    // Size adjustments based on isLarge parameter
+    final containerWidth = widget.isLarge ? 120.0 : 100.0;
+    final containerHeight = widget.isLarge ? 120.0 : 100.0;
+    final dropWidth = widget.isLarge ? 2.5 : 2.0;
+    final dropHeight = widget.isLarge ? 14.0 : 10.0;
+    
+    return Container(
+      width: containerWidth,
+      height: containerHeight,
+      child: Stack(
+        children: List.generate(numberOfDrops, (index) {
+          return AnimatedBuilder(
+            animation: _animations[index],
+            builder: (context, child) {
+              return Positioned(
+                left: (containerWidth / numberOfDrops * index),
+                top: _animations[index].value * containerHeight,
+                child: Container(
+                  width: dropWidth,
+                  height: dropHeight,
+                  decoration: BoxDecoration(
+                    color: Colors.blue[300],
+                    borderRadius: BorderRadius.circular(dropWidth / 2),
+                  ),
                 ),
-              ),
-            );
-          },
-        );
-      }),
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 }
 
 class SnowflakesAnimation extends StatefulWidget {
-  const SnowflakesAnimation({Key? key}) : super(key: key);
+  final bool isLarge;
+
+  const SnowflakesAnimation({
+    Key? key,
+    this.isLarge = false,
+  }) : super(key: key);
 
   @override
   _SnowflakesAnimationState createState() => _SnowflakesAnimationState();
@@ -311,26 +341,35 @@ class _SnowflakesAnimationState extends State<SnowflakesAnimation> with TickerPr
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: List.generate(numberOfFlakes, (index) {
-        return AnimatedBuilder(
-          animation: _animations[index],
-          builder: (context, child) {
-            return Positioned(
-              left: (index * 10).toDouble(),
-              top: _animations[index].value * 100,
-              child: Transform.rotate(
-                angle: _animations[index].value * 2 * math.pi,
-                child: Icon(
-                  Icons.ac_unit,
-                  color: Colors.white,
-                  size: 10,
+    // Size adjustments based on isLarge parameter
+    final containerWidth = widget.isLarge ? 120.0 : 100.0;
+    final containerHeight = widget.isLarge ? 120.0 : 100.0;
+    final flakeSize = widget.isLarge ? 14.0 : 10.0;
+    
+    return Container(
+      width: containerWidth,
+      height: containerHeight,
+      child: Stack(
+        children: List.generate(numberOfFlakes, (index) {
+          return AnimatedBuilder(
+            animation: _animations[index],
+            builder: (context, child) {
+              return Positioned(
+                left: (containerWidth / numberOfFlakes * index),
+                top: _animations[index].value * containerHeight,
+                child: Transform.rotate(
+                  angle: _animations[index].value * 2 * math.pi,
+                  child: Icon(
+                    Icons.ac_unit,
+                    color: Colors.white,
+                    size: flakeSize,
+                  ),
                 ),
-              ),
-            );
-          },
-        );
-      }),
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 }
@@ -338,11 +377,13 @@ class _SnowflakesAnimationState extends State<SnowflakesAnimation> with TickerPr
 class MoonAnimation extends StatefulWidget {
   final double size;
   final Color color;
+  final bool isLarge;
 
   const MoonAnimation({
     Key? key,
     this.size = 100.0,
     this.color = Colors.grey,
+    this.isLarge = false,
   }) : super(key: key);
 
   @override
@@ -378,16 +419,20 @@ class _MoonAnimationState extends State<MoonAnimation> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    // Apply the actual size based on isLarge parameter
+    final actualSize = widget.isLarge ? widget.size * 1.4 : widget.size;
+    
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         return Container(
-          width: widget.size,
-          height: widget.size,
+          width: actualSize,
+          height: actualSize,
           child: CustomPaint(
             painter: MoonPainter(
               glowValue: _glowAnimation.value,
               color: widget.color,
+              isLarge: widget.isLarge,
             ),
           ),
         );
@@ -399,10 +444,12 @@ class _MoonAnimationState extends State<MoonAnimation> with SingleTickerProvider
 class MoonPainter extends CustomPainter {
   final double glowValue;
   final Color color;
+  final bool isLarge;
 
   MoonPainter({
     required this.glowValue,
     required this.color,
+    this.isLarge = false,
   });
 
   @override
@@ -410,18 +457,18 @@ class MoonPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    // Dessiner le cercle principal de la lune
+    // Draw the main moon circle
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(center, radius, paint);
 
-    // Ajouter l'effet de lueur
+    // Add the glow effect with enhanced glow for larger screens
     final glowPaint = Paint()
-      ..color = Colors.white.withOpacity(glowValue * 0.3)
+      ..color = Colors.white.withOpacity(glowValue * (isLarge ? 0.4 : 0.3))
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = isLarge ? 3.0 : 2.0;
 
     canvas.drawCircle(center, radius, glowPaint);
   }
