@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
-import 'package:pim_project/view/screens/Components/header.dart';
 
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/marketScreenSearchBar.dart' as custom;
@@ -13,58 +12,18 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
 
-class MarketScreen extends StatefulWidget {
-  final String userId;
 
-  const MarketScreen({super.key, required this.userId});
-
-  @override
-  State<MarketScreen> createState() => _MarketScreenState();
-}
-
-class _MarketScreenState extends State<MarketScreen> {
-  String _username = '';
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    try {
-      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
-      final response = await http.get(url);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        if (mounted) {
-          setState(() {
-            _username = data['fullname'] ?? '';
-            _isLoading = false;
-          });
-        }
-      }
-    } catch (e) {
-      print('❌ [MarketScreen] Erreur lors de la récupération des données utilisateur: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
+class MarketScreen extends StatelessWidget {
+  const MarketScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final marketProvider = Provider.of<MarketProvider>(context, listen: false);
-    final l10n = AppLocalizations.of(context)!;
 
     // Fetch products only if the list is empty (prevents redundant API calls)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (marketProvider.products.isEmpty) {
-        marketProvider.fetchProducts();
+        marketProvider.fetchProducts(); // Ensure products are only fetched once
       }
     });
 
@@ -91,6 +50,7 @@ class _MarketScreenState extends State<MarketScreen> {
                     username: _username,
                     userId: widget.userId,
                   ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
