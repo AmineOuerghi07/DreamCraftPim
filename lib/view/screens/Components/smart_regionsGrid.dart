@@ -14,6 +14,7 @@ class SmartRegionsGrid extends StatelessWidget {
     final provider = Provider.of<SmartRegionsProvider>(context);
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context, listen: true);
     final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600;
 
     // Connect the irrigation view model to the provider if not already done
     if (provider.isAutomaticMode != irrigationViewModel.isAutomaticMode) {
@@ -22,187 +23,225 @@ class SmartRegionsGrid extends StatelessWidget {
 
     int calculateCrossAxisCount() {
       if (screenWidth >= 1200) {
-        return 4;
+        return 4; // Large tablets and desktop
       } else if (screenWidth >= 800) {
-        return 3;
+        return 3; // Medium tablets like Nokia T20
+      } else if (screenWidth >= 600) {
+        return 2; // Small tablets and large phones
       } else {
-        return 2;
+        return 2; // Phones like Huawei P30 Pro
       }
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Mode Switch at the top
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Mode:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+    return Container(
+      color: Colors.white, // Ensure the container has a white background
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Enhanced Mode Switch
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: isTablet ? 16.0 : 12.0,
+              horizontal: isTablet ? 16.0 : 8.0,
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Control Mode',
+                  style: TextStyle(
+                    fontSize: isTablet ? 18 : 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF204D4F),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(4),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Manual mode
-                      GestureDetector(
-                        onTap: () => provider.setOperationMode(false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: !provider.isAutomaticMode
-                                ? const Color(0xFF204D4F)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Manual',
-                            style: TextStyle(
-                              color: !provider.isAutomaticMode
-                                  ? Colors.white
-                                  : Colors.black54,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                      _buildModeButton(
+                        context,
+                        'Manual',
+                        !provider.isAutomaticMode,
+                        () => provider.setOperationMode(false),
+                        Icons.handyman,
+                        isTablet,
                       ),
                       // Automatic mode
-                      GestureDetector(
-                        onTap: () => provider.setOperationMode(true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: provider.isAutomaticMode
-                                ? const Color(0xFF204D4F)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Automatic',
-                            style: TextStyle(
-                              color: provider.isAutomaticMode
-                                  ? Colors.white
-                                  : Colors.black54,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                      _buildModeButton(
+                        context,
+                        'Automatic',
+                        provider.isAutomaticMode,
+                        () => provider.setOperationMode(true),
+                        Icons.auto_fix_high,
+                        isTablet,
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        // Smart cards grid
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: calculateCrossAxisCount(),
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.97,
-              ),
-              itemCount: provider.cardsData.length,
-              itemBuilder: (context, index) {
-                final card = provider.cardsData[index];
-                final title = card["title"] as String;
-                final subtitle = card["subtitle"] as String;
-                HighlightLevel highlightLevel;
-
-                // Extract numeric value from subtitle (if present)
-                final match = RegExp(r'\d+(\.\d+)?').firstMatch(subtitle);
-                final value = match != null ? double.tryParse(match.group(0)!) : null;
-
-                // Define thresholds based on sensor type (title)
-                switch (title) {
-                  case "Lighting":
-                    // Example: wattage thresholds
-                    highlightLevel = value == null
-                        ? HighlightLevel.normal
-                        : value < 15
-                            ? HighlightLevel.normal
-                            : value < 20
-                                ? HighlightLevel.medium
-                                : HighlightLevel.danger;
-                    break;
-                  case "Temperature":
-                    // Example: temperature thresholds (°C)
-                    highlightLevel = value == null
-                        ? HighlightLevel.normal
-                        : value < 30
-                            ? HighlightLevel.normal
-                            : value < 37
-                                ? HighlightLevel.medium
-                                : HighlightLevel.danger;
-                    break;
-                  case "Irrigation":
-                    // Example: meter thresholds (assuming 'm' means meters)
-                    highlightLevel = value == null
-                        ? HighlightLevel.normal
-                        : value < 150
-                            ? HighlightLevel.normal
-                            : value < 250
-                                ? HighlightLevel.medium
-                                : HighlightLevel.danger;
-                    break;
-                  case "Soil":
-                    // Non-numeric case: Define based on subtitle text
-                    highlightLevel = subtitle == "Growth"
-                        ? HighlightLevel.normal
-                        : HighlightLevel.medium; // Example logic
-                    break;
-                  default:
-                    highlightLevel = HighlightLevel.normal;
-                }
-
-                // Determine if card should be disabled in automatic mode
-                // Only temperature and irrigation cards should be disabled
-                bool isDisabled = provider.isAutomaticMode && 
-                    (title == "Temperature" || title == "Irrigation");
-
-                return SmartRegionCard(
-                  icon: card["icon"],
-                  iconColor: card["iconColor"],
-                  title: card["title"],
-                  subtitle: card["subtitle"],
-                  switchValue: provider.switches[index],
-                  onSwitchChanged: (newValue) {
-                    provider.toggleSwitch(index, newValue);
-                  },
-                  highlightLevel: highlightLevel,
-                  isDisabled: isDisabled,
-                );
-              },
+                const SizedBox(height: 8),
+                Text(
+                  provider.isAutomaticMode 
+                      ? 'System will automatically adjust settings based on environmental conditions'
+                      : 'You have full control over all system settings',
+                  style: TextStyle(
+                    fontSize: isTablet ? 14 : 12,
+                    color: Colors.grey[600],
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
+          
+          // Cards grid
+          Expanded(
+            child: Container(
+              color: Colors.white, // Ensure the scrollable area has a white background
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.all(isTablet ? 8.0 : 4.0),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: calculateCrossAxisCount(),
+                      crossAxisSpacing: isTablet ? 12 : 8,
+                      mainAxisSpacing: isTablet ? 12 : 8,
+                      childAspectRatio: isTablet ? 1.0 : 0.95,
+                    ),
+                    itemCount: provider.cardsData.length,
+                    itemBuilder: (context, index) {
+                      final card = provider.cardsData[index];
+                      final title = card["title"] as String;
+                      final subtitle = card["subtitle"] as String;
+                      HighlightLevel highlightLevel;
+
+                      // Extract numeric value from subtitle (if present)
+                      final match = RegExp(r'\d+(\.\d+)?').firstMatch(subtitle);
+                      final value = match != null ? double.tryParse(match.group(0)!) : null;
+
+                      // Define thresholds based on sensor type (title)
+                      switch (title) {
+                        case "Lighting":
+                          highlightLevel = value == null
+                              ? HighlightLevel.normal
+                              : value < 15
+                                  ? HighlightLevel.normal
+                                  : value < 20
+                                      ? HighlightLevel.medium
+                                      : HighlightLevel.danger;
+                          break;
+                        case "Temperature":
+                          highlightLevel = value == null
+                              ? HighlightLevel.normal
+                              : value < 30
+                                  ? HighlightLevel.normal
+                                  : value < 37
+                                      ? HighlightLevel.medium
+                                      : HighlightLevel.danger;
+                          break;
+                        case "Irrigation":
+                          highlightLevel = value == null
+                              ? HighlightLevel.normal
+                              : value < 150
+                                  ? HighlightLevel.normal
+                                  : value < 250
+                                      ? HighlightLevel.medium
+                                      : HighlightLevel.danger;
+                          break;
+                        case "Soil":
+                          highlightLevel = subtitle == "Growth"
+                              ? HighlightLevel.normal
+                              : HighlightLevel.medium;
+                          break;
+                        default:
+                          highlightLevel = HighlightLevel.normal;
+                      }
+
+                      bool isDisabled = provider.isAutomaticMode && 
+                          (title == "Temperature" || title == "Irrigation");
+
+                      return SmartRegionCard(
+                        icon: card["icon"],
+                        iconColor: card["iconColor"],
+                        title: card["title"],
+                        subtitle: card["subtitle"],
+                        switchValue: provider.switches[index],
+                        onSwitchChanged: (newValue) {
+                          provider.toggleSwitch(index, newValue);
+                        },
+                        highlightLevel: highlightLevel,
+                        isDisabled: isDisabled,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeButton(
+    BuildContext context, 
+    String label, 
+    bool isActive, 
+    VoidCallback onTap,
+    IconData icon,
+    bool isTablet,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 20 : 16,
+          vertical: isTablet ? 12 : 10,
         ),
-      ],
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFF204D4F) : Colors.transparent,
+          borderRadius: BorderRadius.circular(25),
+          border: isActive 
+              ? null 
+              : Border.all(color: Colors.grey.shade300, width: 1.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: isTablet ? 22 : 18,
+              color: isActive ? Colors.white : Colors.grey.shade600,
+            ),
+            SizedBox(width: isTablet ? 8 : 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.grey.shade600,
+                fontWeight: FontWeight.bold,
+                fontSize: isTablet ? 16 : 14,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

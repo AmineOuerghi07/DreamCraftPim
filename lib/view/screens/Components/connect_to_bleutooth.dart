@@ -1,20 +1,31 @@
 // view/screens/components/connect_to_bleutooth.dart
 import 'package:flutter/material.dart';
-import 'package:pim_project/model/domain/irrigation_device.dart';
+import 'package:pim_project/model/domain/region.dart';
+import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/view/screens/components/device_discovery_dialog.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
+import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ConnectToBluetooth extends StatelessWidget {
-  const ConnectToBluetooth({super.key});
+  final VoidCallback? onDeviceConnected;
+  
+  const ConnectToBluetooth({
+    this.onDeviceConnected, 
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
+    final regionViewModel = Provider.of<RegionDetailsViewModel>(context);
     
+    // Always ensure we have no previous connection showing
+    final shouldShowConnectionInfo = irrigationViewModel.selectedDevice != null && 
+                                     regionViewModel.region != null &&
+                                     regionViewModel.region!.isConnected;
 
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
         child: Padding(
@@ -44,8 +55,8 @@ class ConnectToBluetooth extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               
-              // Show connected device info if available
-              if (irrigationViewModel.selectedDevice != null) ...[
+              // Show connected device info ONLY when the device is connected to THIS region
+              if (shouldShowConnectionInfo) ...[
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -106,7 +117,9 @@ class ConnectToBluetooth extends StatelessWidget {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    _showDeviceDiscoveryDialog(context);
+                    // Force reset of connections first
+                    irrigationViewModel.resetDeviceConnection();
+                    _showDeviceDiscoveryDialog(context, regionViewModel);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -124,7 +137,9 @@ class ConnectToBluetooth extends StatelessWidget {
                 // Connection button if no device is connected
                 ElevatedButton(
                   onPressed: () {
-                    _showDeviceDiscoveryDialog(context);
+                    // Force reset of connections first
+                    irrigationViewModel.resetDeviceConnection();
+                    _showDeviceDiscoveryDialog(context, regionViewModel);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 23, 106, 26),
@@ -147,7 +162,7 @@ class ConnectToBluetooth extends StatelessWidget {
     );
   }
   
-  void _showDeviceDiscoveryDialog(BuildContext context) {
+  void _showDeviceDiscoveryDialog(BuildContext context, RegionDetailsViewModel regionViewModel) {
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context, listen: false);
     
     // Start discovery process
@@ -157,16 +172,53 @@ class ConnectToBluetooth extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => DeviceDiscoveryDialog(
-        onDeviceSelected: (device) {
+        onDeviceSelected: (device) async {
           // Get status when a device is selected
           irrigationViewModel.selectDevice(device.id);
           
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Connected to device ${device.id}'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          // Update the region's isConnected status to true
+          if (regionViewModel.region != null) {
+            final updatedRegion = Region(
+              id: regionViewModel.region!.id,
+              name: regionViewModel.region!.name,
+              surface: regionViewModel.region!.surface,
+              land: regionViewModel.region!.land,
+              sensors: regionViewModel.region!.sensors,
+              plants: regionViewModel.region!.plants,
+              isConnected: true, // Set to true when a device is connected
+            );
+            
+            // Update the region in the database and view model
+            final response = await regionViewModel.updateRegion(updatedRegion);
+            
+            if (response.status == Status.COMPLETED) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Connected to device ${device.id}'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              
+              // Call the callback if provided
+              if (onDeviceConnected != null) {
+                onDeviceConnected!();
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Connected to device but failed to update region status: ${response.message}'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Connected to device but region information is missing'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
         },
       ),
     );

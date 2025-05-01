@@ -59,10 +59,6 @@ class _LanguageScreenState extends State<LanguageScreen> with SingleTickerProvid
     super.dispose();
   }
 
-  void _restartApp(BuildContext context) {
-    context.go(RouteNames.loadingScreen);
-  }
-
   Future<void> _changeLanguage(String languageCode) async {
     try {
       final languageService = Provider.of<LanguageService>(context, listen: false);

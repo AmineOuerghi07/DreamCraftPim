@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/humidity_view_model.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
 class HumidityScreen extends StatelessWidget {

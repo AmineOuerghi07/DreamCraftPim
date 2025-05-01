@@ -84,7 +84,7 @@ class _HeaderState extends State<Header> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isRTL = Directionality.of(context) == TextDirection.rtl;
+   // final isRTL = Directionality.of(context) == TextDirection.rtl;
     
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

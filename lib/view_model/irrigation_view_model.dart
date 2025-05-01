@@ -35,6 +35,15 @@ class IrrigationViewModel with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   
+  // Completely reset the device connection state
+  void resetDeviceConnection() {
+    _selectedDevice = null;
+    _discoveredDevices = [];
+    _systemStatus = {};
+    _isPumpOn = false;
+    notifyListeners();
+  }
+  
   // Discover devices
   Future<void> discoverDevices() async {
     _isLoading = true;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegionInfo extends StatelessWidget {
   final String regionCount;
@@ -16,23 +15,20 @@ class RegionInfo extends StatelessWidget {
     required this.cultivationType,
     required this.location,
     required this.onAddRegion,
-    this.buttonText = "Add Region",
+   required this.buttonText,
     this.showRegionCount = true, // Default to showing region count
     this.onAddSensors,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Left Column: Region Count or Add Sensors, Cultivation Type, and Location
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Conditionally show region count or "Add Sensors" button
             showRegionCount
                 ? Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
@@ -41,7 +37,7 @@ class RegionInfo extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      "$regionCount ${l10n.regions}",
+                      "$regionCount Regions",
                       style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.w500,
@@ -56,9 +52,9 @@ class RegionInfo extends StatelessWidget {
                         color: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(
-                        l10n.addSensors,
-                        style: const TextStyle(
+                      child: const Text(
+                        "Add Sensors",
+                        style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
                         ),
@@ -102,7 +98,7 @@ class RegionInfo extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  l10n.addRegion,
+                  buttonText,
                   style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,

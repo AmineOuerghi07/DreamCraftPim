@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pim_project/main.dart';
 import 'dart:io';
 import 'dart:async'; 
-import 'package:pim_project/model/services/user_service.dart';
 import 'package:pim_project/model/domain/user.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
-import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -14,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
-import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/profile_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -43,15 +39,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _currentImageUrl;
   bool _formChanged = false;
 
-  late UserService _userService;
-
   @override
 void initState() {
   super.initState();
   print('🔄 EditProfileScreen initialisé');
-
-  final apiClient = ApiClient(baseUrl: AppConstants.baseUrl);
-  _userService = UserService(apiClient: apiClient);
 
     if (widget.userData != null) {
       _fullNameController.text = widget.userData!['fullname'] ?? '';
@@ -144,7 +135,7 @@ void initState() {
       print('ℹ️ Aucun changement détecté');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.noChangesMessage ?? "No changes to save"),
+          content: Text(AppLocalizations.of(context)!.noChangesMessage ),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
@@ -163,7 +154,7 @@ void initState() {
       final userId = await UserPreferences.getUserId();
       print('👤 ID utilisateur: $userId');
       if (userId == null) {
-        throw Exception(AppLocalizations.of(context)!.userIdNotFound ?? 'User ID not found');
+        throw Exception(AppLocalizations.of(context)!.userIdNotFound );
       }
 
       var request = http.MultipartRequest(
@@ -184,7 +175,7 @@ void initState() {
 
       if (_showPasswordFields && _passwordController.text.isNotEmpty) {
         if (_passwordController.text != _confirmPasswordController.text) {
-          throw Exception(AppLocalizations.of(context)!.passwordsDoNotMatch ?? 'Passwords do not match');
+          throw Exception(AppLocalizations.of(context)!.passwordsDoNotMatch );
         }
         request.fields['password'] = _passwordController.text;
         print('🔑 Mot de passe ajouté à la requête');
@@ -281,7 +272,7 @@ void initState() {
       setState(() {
         _isLoading = false;
       });
-      _showErrorSnackBar(AppLocalizations.of(context)!.requestTimeout ?? 'Request timed out');
+      _showErrorSnackBar(AppLocalizations.of(context)!.requestTimeout );
     } catch (e) {
       print('❌ Exception: $e');
       if (!mounted) return;
@@ -301,7 +292,7 @@ void initState() {
             const SizedBox(width: 16),
             Expanded(
               child: Text(
-                AppLocalizations.of(context)!.profileUpdatedSuccess ?? "Profile updated successfully",
+                AppLocalizations.of(context)!.profileUpdatedSuccess ,
                 style: const TextStyle(fontSize: 16),
               ),
             ),
@@ -338,7 +329,7 @@ void initState() {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+   // final theme = Theme.of(context);
     
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -529,7 +520,7 @@ void initState() {
                                       return l10n.pleaseEnterPassword;
                                     }
                                     if (_showPasswordFields && value != null && value.length < 6) {
-                                      return l10n.passwordTooShort ?? 'Password must be at least 6 characters';
+                                      return l10n.passwordTooShort ;
                                     }
                                     return null;
                                   },
