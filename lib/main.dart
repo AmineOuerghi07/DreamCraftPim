@@ -136,15 +136,14 @@ class MyApp extends StatelessWidget {
                     create: (context) => SignupViewModel(
                       userRepository: context.read<UserRepository>(),
                     ),
-                    ChangeNotifierProvider(create: (context) => HumidityViewModel()),
-                    ChangeNotifierProvider(create: (context) => IrrigationViewModel()),
-                    Provider(create: (context) => PredictionService()),
-                    ChangeNotifierProvider<PredictionViewModel>(
-                      create: (context) => PredictionViewModel(
-                        predictionRepository: PredictionRepository(
-                          predictionService: context.read<PredictionService>(),
-                        ),
-
+                  ),
+                  ChangeNotifierProvider(create: (context) => HumidityViewModel()),
+                  ChangeNotifierProvider(create: (context) => IrrigationViewModel()),
+                  Provider(create: (context) => PredictionService()),
+                  ChangeNotifierProvider<PredictionViewModel>(
+                    create: (context) => PredictionViewModel(
+                      predictionRepository: PredictionRepository(
+                        predictionService: context.read<PredictionService>(),
                       ),
                     ),
                   ),
