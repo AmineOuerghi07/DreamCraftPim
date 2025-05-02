@@ -15,9 +15,18 @@ class LandService {
   required Land land,
   required File image,
 }) async {
+  // Prepare the fields map with all necessary data
+  final fields = land.toMap();
+  
+  // Make sure owner phone is included if available
+  if (land.ownerPhone.isNotEmpty) {
+    fields['ownerPhone'] = land.ownerPhone;
+    print('Including owner phone in request: ${land.ownerPhone}');
+  }
+  
   return await _apiClient.postMultipart(
     endpoint: 'lands',
-    fields: land.toMap(),
+    fields: fields,
     files: {'file': image},
     parser: (json) => Land.fromJson(json),
   );
