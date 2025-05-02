@@ -1,25 +1,22 @@
+// view/screens/market_screen.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
-
-import 'package:pim_project/view/screens/Components/marketHeader.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/marketScreenSearchBar.dart' as custom;
 import 'package:pim_project/view/screens/Components/seeAllProductsWithSameCategory.dart';
 import 'package:provider/provider.dart';
-import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
-import 'package:go_router/go_router.dart';
-import 'package:pim_project/routes/routes.dart';
+
 
 class MarketScreen extends StatefulWidget {
   final String userId;
-
+  
   const MarketScreen({super.key, required this.userId});
 
   @override
@@ -45,13 +42,13 @@ class _MarketScreenState extends State<MarketScreen> {
         final data = jsonDecode(response.body);
         if (mounted) {
           setState(() {
-            _username = data['fullname'] ?? '';
+            _username = data['fullname'] ?? 'User';
             _isLoading = false;
           });
         }
       }
     } catch (e) {
-      print('❌ [MarketScreen] Erreur lors de la récupération des données utilisateur: $e');
+      print('❌ [MarketScreen] Error loading user data: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -62,13 +59,13 @@ class _MarketScreenState extends State<MarketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final marketProvider = Provider.of<MarketProvider>(context, listen: false);
     final l10n = AppLocalizations.of(context)!;
+    final marketProvider = Provider.of<MarketProvider>(context, listen: false);
 
     // Fetch products only if the list is empty (prevents redundant API calls)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (marketProvider.products.isEmpty) {
-        marketProvider.fetchProducts();
+        marketProvider.fetchProducts(); // Ensure products are only fetched once
       }
     });
 
@@ -88,11 +85,17 @@ class _MarketScreenState extends State<MarketScreen> {
           child: Column(
             children: [
               const SizedBox(height: 12),
-               Header(
-                greetingText: l10n.hello,
-                username: _username,
-                userId: widget.userId,
-              ),
+              _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Consumer<MarketProvider>(
+                  builder: (context, provider, _) => provider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Header(
+                        greetingText: l10n.hello,
+                        username: _username,
+                        userId: widget.userId,
+                      ),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(

@@ -7,6 +7,7 @@ import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/model/services/language_service.dart';
 import 'package:pim_project/view_model/connected_region_view_model.dart';
 import 'package:pim_project/view_model/humidity_view_model.dart';
+import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
@@ -137,6 +138,7 @@ class MyApp extends StatelessWidget {
                     ),
                   ),
                   ChangeNotifierProvider(create: (context) => HumidityViewModel()),
+                  ChangeNotifierProvider(create: (context) => IrrigationViewModel()),
                   Provider(create: (context) => PredictionService()),
                   ChangeNotifierProvider<PredictionViewModel>(
                     create: (context) => PredictionViewModel(

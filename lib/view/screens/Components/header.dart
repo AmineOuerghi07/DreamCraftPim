@@ -1,3 +1,4 @@
+// view/screens/components/header.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -84,7 +85,7 @@ class _HeaderState extends State<Header> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isRTL = Directionality.of(context) == TextDirection.rtl;
+   // final isRTL = Directionality.of(context) == TextDirection.rtl;
     
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -135,7 +136,7 @@ class _HeaderState extends State<Header> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -149,6 +150,7 @@ class _HeaderState extends State<Header> {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
+                      const SizedBox(width: 4),
                       Text(
                         widget.username,
                         style: const TextStyle(

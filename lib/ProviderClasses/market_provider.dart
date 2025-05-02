@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/product.dart';
+
 import 'package:http/http.dart' as http;
 
 class MarketProvider extends ChangeNotifier {
@@ -97,7 +98,10 @@ class MarketProvider extends ChangeNotifier {
 }
 
 class ApiService {
-  final String baseUrl = "http://127.0.0.1:3000";
+
+  final String baseUrl = "http://localhost:3000";
+
+ 
 
   Future<List<Product>> fetchProducts() async {
     final response = await http.get(Uri.parse("$baseUrl/product"));

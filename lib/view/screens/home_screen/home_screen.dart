@@ -1,18 +1,18 @@
+// view/screens/home_screen/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:pim_project/model/domain/region.dart';
+
 import 'package:pim_project/view/screens/home_screen/components/field_management_grid.dart';
 import 'package:pim_project/view/screens/home_screen/components/weather_card.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
-import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
+
 import 'package:pim_project/view_model/home_view_model.dart';
-import 'package:pim_project/model/domain/land.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    final l10n = AppLocalizations.of(context)!;
+  //  final l10n = AppLocalizations.of(context)!;
     try {
       print('📍 [HomeScreen] Début de la récupération de la position');
       
@@ -112,8 +112,14 @@ class _HomeScreenState extends State<HomeScreen> {
     print('🏠 [HomeScreen] Construction de l\'écran d\'accueil');
     print('👤 [HomeScreen] ID utilisateur: ${widget.userId}');
 
-    final TextEditingController searchController = TextEditingController();
-    final FocusNode searchFocusNode = FocusNode();
+    // Get screen size
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool isTablet = screenSize.shortestSide >= 600;
+
+    // Define responsive padding based on device size
+    final EdgeInsets horizontalPadding = EdgeInsets.symmetric(
+      horizontal: isTablet ? screenSize.width * 0.05 : 16.0,
+    );
 
     // Fetch rented lands and connected regions when screen loads
     Future.delayed(Duration.zero, () {
@@ -125,230 +131,212 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Header(
-                greetingText: l10n.hello,
-                username: _username,
-                userId: widget.userId,
-              ),
-            
-              // Search Bar
-              const SizedBox(height: 16),
-              
-              // Weather Card
-              Consumer<HomeViewModel>(
-                builder: (context, viewModel, child) {
-                  if (_error != null) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.location_off,
-                            color: Colors.red[800],
-                            size: 48,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _error!,
-                            style: TextStyle(
-                              color: Colors.red[800],
-                              fontSize: 16,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: _getCurrentLocation,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header - Always full width
+                  Header(
+                    greetingText: l10n.hello,
+                    username: _username,
+                    userId: widget.userId,
+                  ),
+                
+                  // Spacing - Responsive height
+                  SizedBox(height: isTablet ? 24.0 : 16.0),
+                  
+                  // Weather Card - Responsive width with adaptive padding
+                  Consumer<HomeViewModel>(
+                    builder: (context, viewModel, child) {
+                      if (_error != null) {
+                        return Padding(
+                          padding: horizontalPadding,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: isTablet ? 500 : double.infinity,
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.location_off,
+                                    color: Colors.red[800],
+                                    size: isTablet ? 64 : 48,
+                                  ),
+                                  SizedBox(height: isTablet ? 24 : 16),
+                                  Text(
+                                    _error!,
+                                    style: TextStyle(
+                                      color: Colors.red[800],
+                                      fontSize: isTablet ? 18 : 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: isTablet ? 24 : 16),
+                                  ElevatedButton.icon(
+                                    onPressed: _getCurrentLocation,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isTablet ? 32 : 24,
+                                        vertical: isTablet ? 16 : 12,
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.refresh),
+                                    label: Text(l10n.tryAgain),
+                                  ),
+                                ],
                               ),
                             ),
-                            icon: const Icon(Icons.refresh),
-                            label: Text(l10n.tryAgain),
                           ),
-                        ],
-                      ),
-                    );
-                  }
+                        );
+                      }
 
-                  if (viewModel.isLoading) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(color: Colors.green),
-                            SizedBox(height: 16),
-                            Text(
-                              'Chargement des données météo...',
-                              style: TextStyle(color: Colors.green),
+                      if (viewModel.isLoading) {
+                        return Center(
+                          child: Padding(
+                            padding: horizontalPadding,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const CircularProgressIndicator(color: Colors.green),
+                                SizedBox(height: isTablet ? 24 : 16),
+                                Text(
+                                  'Chargement des données météo...',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: isTablet ? 18 : 16,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
+                        );
+                      }
+
+                      if (viewModel.error.isNotEmpty) {
+                        return Padding(
+                          padding: horizontalPadding,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: isTablet ? 500 : double.infinity,
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: Colors.red[800],
+                                    size: isTablet ? 64 : 48,
+                                  ),
+                                  SizedBox(height: isTablet ? 24 : 16),
+                                  Text(
+                                    viewModel.error,
+                                    style: TextStyle(
+                                      color: Colors.red[800],
+                                      fontSize: isTablet ? 18 : 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: isTablet ? 24 : 16),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      if (_currentPosition != null) {
+                                        viewModel.fetchWeatherByCoordinates(
+                                          _currentPosition!.latitude,
+                                          _currentPosition!.longitude,
+                                        );
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isTablet ? 32 : 24,
+                                        vertical: isTablet ? 16 : 12,
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.refresh),
+                                    label: Text(l10n.tryAgain),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      return Padding(
+                        padding: horizontalPadding,
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: isTablet ? 600 : double.infinity,
+                            ),
+                            child: WeatherCard(
+                              temperature: viewModel.weatherData?['temperature'] ?? 'N/A',
+                              condition: viewModel.weatherData?['weather'] ?? 'N/A',
+                              humidity: viewModel.weatherData?['humidity'] ?? 'N/A',
+                              advice: viewModel.weatherData?['advice'] ?? l10n.noAdviceAvailable,
+                              precipitation: viewModel.weatherData?['precipitation'] ?? '0%',
+                              soilCondition: viewModel.weatherData?['soilCondition'] ?? 'N/A',
+                              city: viewModel.weatherData?['city'] ?? l10n.unknownCity,
+                              latitude: _currentPosition?.latitude ?? 0.0,
+                              longitude: _currentPosition?.longitude ?? 0.0,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: isTablet ? 30 : 20),
+
+                  // Field Management Title - Adaptive font size
+                  Padding(
+                    padding: horizontalPadding,
+                    child: Text(
+                      l10n.fieldManagement,
+                      style: TextStyle(
+                        fontSize: isTablet ? 24 : 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: isTablet ? 24 : 16),
+
+                  // Field Management Grid - Already responsive as mentioned
+                  Padding(
+                    padding: horizontalPadding,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: isTablet ? 800 : double.infinity,
+                        ),
+                        child: FieldManagementGrid(
+                          onFeatureSelected: (feature) {
+                            print('🎯 [HomeScreen] Fonctionnalité sélectionnée: $feature');
+                            switch (feature) {
+                              case 'regions':
+                                print('🌍 [HomeScreen] Navigation vers la page des régions');
+                                break;
+                              case 'lands':
+                                print('🏞️ [HomeScreen] Navigation vers la page des terres');
+                                break;
+                            }
+                          },
                         ),
                       ),
-                    );
-                  }
-
-                  if (viewModel.error.isNotEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: Colors.red[800],
-                            size: 48,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            viewModel.error,
-                            style: TextStyle(
-                              color: Colors.red[800],
-                              fontSize: 16,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              if (_currentPosition != null) {
-                                viewModel.fetchWeatherByCoordinates(
-                                  _currentPosition!.latitude,
-                                  _currentPosition!.longitude,
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                            ),
-                            icon: const Icon(Icons.refresh),
-                            label: Text(l10n.tryAgain),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: WeatherCard(
-                      temperature: viewModel.weatherData?['temperature'] ?? 'N/A',
-                      condition: viewModel.weatherData?['weather'] ?? 'N/A',
-                      humidity: viewModel.weatherData?['humidity'] ?? 'N/A',
-                      advice: viewModel.weatherData?['advice'] ?? l10n.noAdviceAvailable,
-                      precipitation: viewModel.weatherData?['precipitation'] ?? '0%',
-                      soilCondition: viewModel.weatherData?['soilCondition'] ?? 'N/A',
-                      city: viewModel.weatherData?['city'] ?? l10n.unknownCity,
-                      latitude: _currentPosition?.latitude ?? 0.0,
-                      longitude: _currentPosition?.longitude ?? 0.0,
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Field Management Title
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  l10n.fieldManagement,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
                   ),
-                ),
+                  // Add bottom padding for scrolling comfort
+                ],
               ),
-              const SizedBox(height: 16),
-
-              // Field Management Grid Component
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: FieldManagementGrid(
-                  onFeatureSelected: (feature) {
-                    print('🎯 [HomeScreen] Fonctionnalité sélectionnée: $feature');
-                    switch (feature) {
-                      case 'regions':
-                        print('🌍 [HomeScreen] Navigation vers la page des régions');
-                        break;
-                      case 'lands':
-                        print('🏞️ [HomeScreen] Navigation vers la page des terres');
-                        break;
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 }
-              // Help Card
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              //   child: Container(
-              //     padding: const EdgeInsets.all(16),
-              //     decoration: BoxDecoration(
-              //       color: Colors.green.withOpacity(0.1),
-              //       borderRadius: BorderRadius.circular(12),
-              //     ),
-              //     child: Row(
-              //       children: [
-              //         Expanded(
-              //           child: Column(
-              //             crossAxisAlignment: CrossAxisAlignment.start,
-              //             children: [
-              //               const Text(
-              //                 "Need Our Help?",
-              //                 style: TextStyle(
-              //                   fontSize: 16,
-              //                   fontWeight: FontWeight.bold,
-              //                 ),
-              //               ),
-              //               const SizedBox(height: 8),
-              //               const Text("Feel free to contact our support for any troubles"),
-              //               const SizedBox(height: 8),
-              //               ElevatedButton(
-              //                 onPressed: () {
-              //                   print("Call Now button tapped!");
-              //                 },
-              //                 style: ElevatedButton.styleFrom(
-              //                   backgroundColor: Colors.green,
-              //                   shape: RoundedRectangleBorder(
-              //                     borderRadius: BorderRadius.circular(4),
-              //                   ),
-              //                 ),
-              //                 child: const Text(
-              //                   "Call Now",
-              //                   style: TextStyle(
-              //                     fontSize: 12,
-              //                     color: Colors.white,
-              //                   ),
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //         const SizedBox(width: 16),
-
-              //         Image.asset("assets/images/help.png", fit: BoxFit.cover),
-              //       ],
-              //     ),
-              //   ),
-              // ),
-         

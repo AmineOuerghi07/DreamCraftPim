@@ -7,13 +7,33 @@ import 'package:shared_preferences/shared_preferences.dart'; // Make sure you ha
 class ProductDetailsProvider with ChangeNotifier {
   bool isLoading = true;
   Product? product;
+  List<Product>? relatedProducts;
   int quantity = 1;
 
   // Constructor to initialize with a product ID (to fetch the product details)
   ProductDetailsProvider({required String productId}) {
     fetchProductDetails(productId);
+    fetchRelatedProducts(productId);
   }
 
+  // Fetch related products from the API
+  Future<void> fetchRelatedProducts(String productId) async {
+   
+    try {
+      isLoading = true;
+      notifyListeners();
+      // Here, replace with your actual API call
+      final apiService = ApiService();
+      relatedProducts = await apiService.fetchProducts().then((products) {
+        return products.where((product) => product.category == this.product?.category && product.id != productId).toList();
+      });
+    } catch (e) {
+      print('Error fetching product details: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
   // Fetch product details from the API
   Future<void> fetchProductDetails(String productId) async {
     try {

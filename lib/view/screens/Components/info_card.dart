@@ -1,3 +1,4 @@
+// view/screens/components/info_card.dart
 import 'package:flutter/material.dart';
 
 class InfoCard extends StatelessWidget {

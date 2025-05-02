@@ -45,114 +45,165 @@ class _AnimatedOnboardingScreenState extends State<AnimatedOnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    // Get screen dimensions
+    final Size size = MediaQuery.of(context).size;
+    final bool isTablet = size.shortestSide >= 600;
+    
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          CustomPaint(
-            painter: ArcPaint(),
-            child: SizedBox(
-              height: size.height / 1.35,
-              width: size.width,
-            ),
-          ),
-          Positioned(
-            top: 110,
-            right: 0,
-            left: 0,
-            child: Lottie.network(
-              onboardingItems[currentIndex].lottieURL,
-              width: 500,
-              alignment: Alignment.topCenter,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error), // Handle invalid URL
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              height: 270,
-              child: Column(
-                children: [
-                  Flexible(
-                    child: PageView.builder(
-                      controller: pageController,
-                      itemCount: onboardingItems.length,
-                      itemBuilder: (context, index) {
-                        final item = onboardingItems[index];
-                        return Column(
-                          children: [
-                            Text(
-                              item.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(height: 50),
-                            Text(
-                              item.subtitle,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.black45,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                      onPageChanged: (value) {
-                        setState(() {
-                          currentIndex = value;
-                        });
-                      },
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calculate responsive dimensions
+          final double arcHeight = constraints.maxHeight * 0.75;
+          final double lottieTopPosition = constraints.maxHeight * 0.12;
+          final double lottieWidth = isTablet 
+              ? constraints.maxWidth * 0.6 
+              : constraints.maxWidth * 0.85;
+          final double textSectionHeight = constraints.maxHeight * 0.3;
+          
+          return Stack(
+            children: [
+              // Background arc
+              CustomPaint(
+                painter: ArcPaint(),
+                size: Size(constraints.maxWidth, arcHeight),
+              ),
+              
+              // Lottie animation
+              Positioned(
+                top: lottieTopPosition,
+                right: 0,
+                left: 0,
+                child: Lottie.network(
+                  onboardingItems[currentIndex].lottieURL,
+                  width: lottieWidth,
+                  height: constraints.maxHeight * 0.4,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.center,
+                  errorBuilder: (context, error, stackTrace) => 
+                      const Icon(Icons.error, size: 50), // Handle invalid URL
+                ),
+              ),
+              
+              // Bottom text section
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  height: textSectionHeight,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      for (int index = 0; index < onboardingItems.length; index++)
-                        dotIndicator(isSelected: index == currentIndex),
+                      // Page content
+                      Expanded(
+                        child: PageView.builder(
+                          controller: pageController,
+                          itemCount: onboardingItems.length,
+                          itemBuilder: (context, index) {
+                            final item = onboardingItems[index];
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: constraints.maxWidth * 0.08,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    item.title,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: isTablet ? 36 : 28,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  SizedBox(height: constraints.maxHeight * 0.04),
+                                  Text(
+                                    item.subtitle,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 22 : 16,
+                                      color: Colors.black45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          onPageChanged: (value) {
+                            setState(() {
+                              currentIndex = value;
+                            });
+                          },
+                        ),
+                      ),
+                      
+                      // Dot indicators
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: constraints.maxHeight * 0.03,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (int index = 0; index < onboardingItems.length; index++)
+                              dotIndicator(
+                                isSelected: index == currentIndex,
+                                size: isTablet ? 10.0 : 8.0,
+                              ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 50),
-                ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: Builder(
+        builder: (context) {
+          final double fabSize = isTablet ? 64.0 : 56.0;
+          final double iconSize = isTablet ? 28.0 : 24.0;
+          
+          return SizedBox(
+            width: fabSize,
+            height: fabSize,
+            child: FloatingActionButton(
+              onPressed: () {
+                if (currentIndex < onboardingItems.length - 1) {
+                  pageController.nextPage(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                  );
+                } else {
+                  GoRouter.of(context).go('/login');
+                }
+              },
+              elevation: 2,
+              backgroundColor: Colors.white,
+              child: Icon(
+                currentIndex < onboardingItems.length - 1
+                    ? Icons.arrow_forward_ios
+                    : Icons.check,
+                color: Colors.black,
+                size: iconSize,
               ),
             ),
-          ),
-        ],
+          );
+        }
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (currentIndex < onboardingItems.length - 1) {
-            pageController.nextPage(
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.linear,
-            );
-          } else {
-            GoRouter.of(context).go('/login');
-          }
-        },
-        elevation: 0,
-        backgroundColor: Colors.white,
-        child: Icon(
-          currentIndex < onboardingItems.length - 1
-              ? Icons.arrow_forward_ios
-              : Icons.check,
-          color: Colors.black,
-        ),
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  Widget dotIndicator({required bool isSelected}) {
+  Widget dotIndicator({required bool isSelected, double size = 8.0}) {
     return Padding(
       padding: const EdgeInsets.only(right: 7),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
-        height: isSelected ? 8 : 6,
-        width: isSelected ? 8 : 6,
+        height: isSelected ? size : size * 0.75,
+        width: isSelected ? size : size * 0.75,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isSelected ? Colors.black : Colors.black26,
@@ -165,21 +216,33 @@ class _AnimatedOnboardingScreenState extends State<AnimatedOnboardingScreen> {
 class ArcPaint extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    // Calculate dynamic curve heights based on screen size
+    final double curveHeight1 = size.height * 0.15;
+    final double curveHeight2 = size.height * 0.12;
+    
+    // First curve (darker green)
     Path orangeArc = Path()
       ..moveTo(0, 0)
-      ..lineTo(0, size.height - 175)
-      ..quadraticBezierTo(size.width / 2, size.height, size.width, size.height - 175)
-      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height - curveHeight1)
+      ..quadraticBezierTo(
+          size.width / 2, 
+          size.height, 
+          size.width, 
+          size.height - curveHeight1)
       ..lineTo(size.width, 0)
       ..close();
 
     canvas.drawPath(orangeArc, Paint()..color = const Color.fromARGB(255, 14, 139, 9));
 
+    // Second curve (light blue)
     Path whiteArc = Path()
       ..moveTo(0.0, 0.0)
-      ..lineTo(0.0, size.height - 180)
-      ..quadraticBezierTo(size.width / 2, size.height - 60, size.width, size.height - 180)
-      ..lineTo(size.width, size.height)
+      ..lineTo(0.0, size.height - curveHeight2 - 5)
+      ..quadraticBezierTo(
+          size.width / 2, 
+          size.height - curveHeight2 / 3, 
+          size.width, 
+          size.height - curveHeight2 - 5)
       ..lineTo(size.width, 0)
       ..close();
 

@@ -1,26 +1,36 @@
+// view/screens/humidity_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/humidity_view_model.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 
 class HumidityScreen extends StatelessWidget {
   final double latitude;
   final double longitude;
   final String humidity;
+  final Color? backgroundColor;
+  final Color? secondaryColor;
   
   const HumidityScreen({
     Key? key, 
     required this.latitude,
     required this.longitude,
     required this.humidity,
+    this.backgroundColor,
+    this.secondaryColor,
   }) : super(key: key);
   
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => HumidityViewModel()..fetchHumidityDataByCoordinates(latitude, longitude),
-      child: _HumidityScreenContent(latitude: latitude, longitude: longitude, humidity: humidity),
+      child: _HumidityScreenContent(
+        latitude: latitude, 
+        longitude: longitude, 
+        humidity: humidity,
+        backgroundColor: backgroundColor,
+        secondaryColor: secondaryColor,
+      ),
     );
   }
 }
@@ -29,12 +39,16 @@ class _HumidityScreenContent extends StatefulWidget {
   final double latitude;
   final double longitude;
   final String humidity;
+  final Color? backgroundColor;
+  final Color? secondaryColor;
   
   const _HumidityScreenContent({
     Key? key, 
     required this.latitude,
     required this.longitude,
     required this.humidity,
+    this.backgroundColor,
+    this.secondaryColor,
   }) : super(key: key);
 
   @override
@@ -144,6 +158,16 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Humidité'),
+        backgroundColor: widget.backgroundColor ?? Colors.blue,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Consumer<HumidityViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
@@ -160,7 +184,10 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
           }
 
           final condition = humidityData['weather']?['condition']?.toLowerCase() ?? '';
-          final backgroundColor = _getBackgroundColor(condition);
+          
+          // Use passed colors from weather card if available, otherwise calculate based on condition
+          final primaryColor = widget.backgroundColor ?? _getBackgroundColor(condition);
+          final secondaryColor = widget.secondaryColor ?? primaryColor.withOpacity(0.6);
 
           return Stack(
             children: [
@@ -173,9 +200,9 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      backgroundColor,
-                      backgroundColor.withOpacity(0.8),
-                      backgroundColor.withOpacity(0.6),
+                      primaryColor,
+                      secondaryColor,
+                      primaryColor.withOpacity(0.6),
                     ],
                   ),
                 ),
@@ -223,17 +250,33 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
                     _buildAnimatedHumidityGraph(humidityData),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: _buildDailySummary(humidityData),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildDailyComparison(humidityData),
-                          ),
-                        ],
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // For narrow screens, stack summary widgets vertically
+                          if (constraints.maxWidth < 600) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildDailySummary(humidityData),
+                                const SizedBox(height: 16),
+                                _buildDailyComparison(humidityData),
+                              ],
+                            );
+                          } 
+                          // For wider screens, place them side by side
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: _buildDailySummary(humidityData),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildDailyComparison(humidityData),
+                              ),
+                            ],
+                          );
+                        }
                       ),
                     ),
                     _buildRelativeHumidity(humidityData),
@@ -250,11 +293,15 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   Widget _buildAnimatedHumidityBox(Map<String, dynamic> data) {
     final condition = data['weather']?['condition']?.toLowerCase() ?? '';
     
+    // Use passed colors if available, otherwise calculate based on condition
+    final startColor = widget.backgroundColor ?? const Color(0xFF29B6F6);
+    final endColor = widget.secondaryColor ?? _getBackgroundColor(condition);
+    
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 800),
       tween: ColorTween(
-        begin: const Color(0xFF29B6F6),
-        end: _getBackgroundColor(condition),
+        begin: startColor,
+        end: endColor,
       ),
       builder: (context, Color? color, child) {
         return AnimatedContainer(
@@ -265,25 +312,33 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color ?? const Color(0xFF29B6F6),
-                color?.withOpacity(0.7) ?? const Color(0xFF0288D1),
+                color ?? startColor,
+                color?.withOpacity(0.7) ?? endColor.withOpacity(0.7),
               ],
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: (color ?? const Color(0xFF29B6F6)).withOpacity(0.2),
+                color: (color ?? startColor).withOpacity(0.2),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Column(
-            children: [
-              _buildWeatherIcon(condition),
-              const SizedBox(height: 12),
-              _buildCombinedHumidityBox(data),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: constraints.maxWidth < 300 
+                    ? CrossAxisAlignment.center 
+                    : CrossAxisAlignment.start,
+                children: [
+                  _buildWeatherIcon(condition),
+                  const SizedBox(height: 12),
+                  _buildCombinedHumidityBox(data),
+                ],
+              );
+            }
           ),
         );
       },
@@ -336,71 +391,82 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
     final averageHumidity = dailySummary?['averageHumidity'] ?? 'N/A'; 
     final dewPointRange = dailySummary?['dewPointRange'] ?? 'N/A';
 
+    // Use passed colors if available, otherwise use default blue gradient
+    final startColor = widget.backgroundColor ?? const Color(0xFF29B6F6);
+    final endColor = widget.secondaryColor ?? const Color(0xFF0288D1);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF29B6F6), Color(0xFF0288D1)],
+          colors: [startColor, endColor],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.2),
+            color: startColor.withOpacity(0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(
-              Icons.water_drop,
-              color: Colors.white,
-              size: 28,
-            ),
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    humidity,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 300;
+          
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: isNarrow ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+              children: [
+                if (!isNarrow)
+                  const Icon(
+                    Icons.water_drop,
+                    color: Colors.white,
+                    size: 28,
                   ),
-                  const Text(
-                    'Humidité actuelle',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        humidity,
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Text(
+                        'Humidité actuelle',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+                _buildHumidityInfoRow(Icons.thermostat, 'Point de rosée', dewPoint),
+                const Divider(height: 32, color: Colors.white30),
+                const Text(
+                  'Détails journaliers',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildHumidityInfoRow(Icons.water_drop, 'Humidité moyenne', averageHumidity),
+                const SizedBox(height: 8),
+                _buildHumidityInfoRow(Icons.thermostat_auto, 'Plage point de rosée', dewPointRange),
+              ],
             ),
-            const SizedBox(height: 12),
-            _buildHumidityInfoRow(Icons.thermostat, 'Point de rosée', dewPoint),
-            const Divider(height: 32, color: Colors.white30),
-            const Text(
-              'Détails journaliers',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildHumidityInfoRow(Icons.water_drop, 'Humidité moyenne', averageHumidity),
-            const SizedBox(height: 8),
-            _buildHumidityInfoRow(Icons.thermostat_auto, 'Plage point de rosée', dewPointRange),
-          ],
-        ),
+          );
+        }
       ),
     );
   }
@@ -478,18 +544,25 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-           // height: 300,
-            width: double.infinity,
-            child: CustomPaint(
-              size: const Size(double.infinity, 300),
-              painter: HumidityChartPainter(
-                labels: labels,
-                data: values,
-                minValue: scale?['min'] ?? 0,
-                maxValue: scale?['max'] ?? 100,
-              ),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Adjust chart height based on available width
+              final chartHeight = constraints.maxWidth < 400 ? 200.0 : 300.0;
+              
+              return SizedBox(
+                height: chartHeight,
+                width: double.infinity,
+                child: CustomPaint(
+                  size: Size(double.infinity, chartHeight),
+                  painter: HumidityChartPainter(
+                    labels: labels,
+                    data: values,
+                    minValue: scale?['min'] ?? 0,
+                    maxValue: scale?['max'] ?? 100,
+                  ),
+                ),
+              );
+            }
           ),
         ],
       ),
@@ -507,8 +580,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
     }
     
     return Container(
-       width: 160, 
-    height: 160, 
+      constraints: BoxConstraints(minHeight: 100),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -523,6 +595,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             'Résumé quotidien',
@@ -539,6 +612,8 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
               fontSize: 14,
               color: Colors.black87,
             ),
+            softWrap: true,
+            overflow: TextOverflow.visible,
           ),
         ],
       ),
@@ -550,6 +625,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
     if (comparison == null) return const SizedBox.shrink();
     
     return Container(
+      constraints: BoxConstraints(minHeight: 100),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -564,6 +640,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             'Comparaison journalière',
@@ -663,6 +740,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             'Humidité relative',
@@ -674,17 +752,17 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
           ),
           const SizedBox(height: 12),
             
-             Text(
+          Text(
             relativeHumidity['definition'] ?? '',
             style: const TextStyle(
               fontSize: 14,
               color: Colors.black87,
             ),
+            softWrap: true,
           ),
           const SizedBox(height: 12),
           Container(
-          width: double.infinity,
-
+            width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.orange.withOpacity(0.1),
@@ -694,6 +772,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
               ),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(
                   Icons.info_outline,
@@ -708,6 +787,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
                       fontSize: 14,
                       color: Colors.orange,
                     ),
+                    softWrap: true,
                   ),
                 ),
               ],
