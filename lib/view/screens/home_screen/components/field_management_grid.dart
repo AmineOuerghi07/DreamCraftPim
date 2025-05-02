@@ -1,9 +1,11 @@
+// view/screens/home_screen/components/field_management_grid.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/main.dart';
 import 'package:pim_project/view/screens/components/home_cart.dart';
 import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
+import 'package:pim_project/view/screens/components/rent_land_card.dart';
 import 'package:pim_project/view_model/connected_region_view_model.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:provider/provider.dart';
@@ -333,6 +335,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
     final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
     final isTablet = size.shortestSide >= 600;
+    final isLandscape = size.width > size.height;
 
     switch (viewModel.status) {
       case Status.LOADING:
@@ -343,86 +346,104 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
         );
       case Status.ERROR:
         return Center(
-          child: Text(
-            viewModel.message ?? l10n.anErrorOccurred,
-            style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                viewModel.message ?? l10n.anErrorOccurred,
+                style: TextStyle(
+                  fontSize: isTablet ? 16 : 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => viewModel.fetchLandsForRent(),
+                child: Text(l10n.retry),
+              ),
+            ],
           ),
         );
       case Status.COMPLETED:
         final lands = viewModel.landsForRent;
         if (lands.isEmpty) {
           return Center(
-            child: Text(
-              l10n.noLandsForRent,
-              style: TextStyle(
-                fontSize: isTablet ? 16 : 14,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                l10n.noLandsForRent,
+                style: TextStyle(
+                  fontSize: isTablet ? 16 : 14,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           );
         }
         
         // Responsive grid for tablets in landscape
-        if (isTablet && MediaQuery.of(context).orientation == Orientation.landscape) {
+        if (isTablet && isLandscape) {
           return GridView.builder(
             padding: EdgeInsets.all(8),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, // Two columns for landscape tablets
-              childAspectRatio: 2.5,
+              childAspectRatio: 1.2, // Adjusted for better proportions
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
             ),
             itemCount: lands.length,
             itemBuilder: (context, index) {
               final land = lands[index];
-              return HomeCart(
-                title: land.name,
-                location: land.cordonate,
-                description:
-                    "${l10n.surface}: ${land.surface}m² • ${land.forRent ? l10n.forRent : l10n.notAvailable}",
-                imageUrl: land.image.isNotEmpty
-                    ? AppConstants.imagesbaseURL + land.image
-                    : 'assets/images/placeholder.png',
-                id: land.id,
-                onDetailsTap: () {
-                  GoRouter.of(context).push('/land-details/${land.id}');
-                },
-              );
+              return RentLandCard(land: land);
+            },
+          );
+        } else if (isTablet && !isLandscape) {
+          // Special grid for tablets in portrait
+          return GridView.builder(
+            padding: EdgeInsets.all(8),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1, // Single column but with grid sizing for tablets portrait
+              childAspectRatio: 2.0,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: lands.length,
+            itemBuilder: (context, index) {
+              final land = lands[index];
+              return RentLandCard(land: land);
             },
           );
         } else {
-          // Default list view for phones and portrait orientation
+          // Default list view for phones
           return ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             itemCount: lands.length,
             itemBuilder: (context, index) {
               final land = lands[index];
               return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: HomeCart(
-                  title: land.name,
-                  location: land.cordonate,
-                  description:
-                      "${l10n.surface}: ${land.surface}m² • ${land.forRent ? l10n.forRent : l10n.notAvailable}",
-                  imageUrl: land.image.isNotEmpty
-                      ? AppConstants.imagesbaseURL + land.image
-                      : 'assets/images/placeholder.png',
-                  id: land.id,
-                  onDetailsTap: () {
-                    GoRouter.of(context).push('/land-details/${land.id}');
-                  },
-                ),
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: RentLandCard(land: land),
               );
             },
           );
         }
       case Status.INITIAL:
         return Center(
-          child: Text(
-            l10n.tapToLoadLands,
-            style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n.tapToLoadLands,
+                style: TextStyle(
+                  fontSize: isTablet ? 16 : 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => viewModel.fetchLandsForRent(),
+                child: Text(l10n.retry),
+              ),
+            ],
           ),
         );
     }

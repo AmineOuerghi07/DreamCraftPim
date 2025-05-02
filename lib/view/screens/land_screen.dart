@@ -1,3 +1,4 @@
+// view/screens/land_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -327,7 +328,27 @@ class _LandScreenState extends State<LandScreen> {
                                       image: '',
                                       regions: [],
                                       rentPrice: 0,
+                                      userId: widget.userId,
+                                      ownerPhone: '',
                                     );
+                                    
+                                    // Fetch the owner's phone number before adding the land
+                                    try {
+                                      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
+                                      final userResponse = await http.get(url);
+                                      
+                                      if (userResponse.statusCode == 200 || userResponse.statusCode == 201) {
+                                        final userData = jsonDecode(userResponse.body);
+                                        // Try to get phone from either field
+                                        final phoneNumber = userData['phone']?.toString() ?? 
+                                                           userData['phonenumber']?.toString() ?? '';
+                                        newLand = newLand.copyWith(ownerPhone: phoneNumber);
+                                        print('Set owner phone number: $phoneNumber for new land');
+                                      }
+                                    } catch (e) {
+                                      print('Error fetching owner phone number: $e');
+                                    }
+                                    
                                     final landViewModel = Provider.of<LandViewModel>(context, listen: false);
                                     await landViewModel.addLand(land: newLand, image: selectedImage!).then((response) {
                                       if (!mounted) return;

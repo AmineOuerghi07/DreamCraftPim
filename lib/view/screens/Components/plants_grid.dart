@@ -1,3 +1,4 @@
+// view/screens/components/plants_grid.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
@@ -31,7 +32,7 @@ class PlantsGrid extends StatelessWidget {
                 Text('Error: ${viewModel.plantsResponse.message}'),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => viewModel.fetchPlantsForLand(landId!),
+                  onPressed: () => viewModel.fetchPlantsForLand(landId),
                   child: Text(l10n.retry),
                 ),
               ],
@@ -114,18 +115,16 @@ class PlantsGrid extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
-
                           ),
-                        ],
-                      ),
+                        )
+                      ],
                     ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ),
             );
-          default:
-            return const SizedBox.shrink();
-        }
+          },
+        );
       },
     );
   }

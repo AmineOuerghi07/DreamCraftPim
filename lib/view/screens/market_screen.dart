@@ -1,8 +1,9 @@
+// view/screens/market_screen.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
-
+import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/marketScreenSearchBar.dart' as custom;
 import 'package:pim_project/view/screens/Components/seeAllProductsWithSameCategory.dart';
@@ -13,11 +14,52 @@ import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
 
 
-class MarketScreen extends StatelessWidget {
-  const MarketScreen({super.key});
+class MarketScreen extends StatefulWidget {
+  final String userId;
+  
+  const MarketScreen({super.key, required this.userId});
+
+  @override
+  State<MarketScreen> createState() => _MarketScreenState();
+}
+
+class _MarketScreenState extends State<MarketScreen> {
+  String _username = '';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _username = data['fullname'] ?? 'User';
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('❌ [MarketScreen] Error loading user data: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final marketProvider = Provider.of<MarketProvider>(context, listen: false);
 
     // Fetch products only if the list is empty (prevents redundant API calls)
@@ -45,12 +87,15 @@ class MarketScreen extends StatelessWidget {
               const SizedBox(height: 12),
               _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : Header(
-                    greetingText: l10n.hello,
-                    username: _username,
-                    userId: widget.userId,
-                  ),
-
+                : Consumer<MarketProvider>(
+                  builder: (context, provider, _) => provider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Header(
+                        greetingText: l10n.hello,
+                        username: _username,
+                        userId: widget.userId,
+                      ),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(

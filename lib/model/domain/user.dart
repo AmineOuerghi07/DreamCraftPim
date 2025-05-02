@@ -1,3 +1,4 @@
+// model/domain/user.dart
 class User {
   final String userId;
   final String email;
@@ -32,19 +33,23 @@ class User {
     final image = json['image']?.toString();
     final token = json['token']?.toString();
     
+    // Extract phone number from either 'phonenumber' or 'phone' field
+    final phone = json['phone']?.toString() ?? json['phonenumber']?.toString() ?? '';
+    
     print('   - ID extrait: $userId');
+    print('   - Phone extrait: $phone');
     print('   - Image extraite: $image');
     print('   - Token extrait: $token');
     
     return User(
       userId: userId,
-      fullname: json['fullname']?.toString() ?? '',
+      fullname: json['fullname']?.toString() ?? json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
-      phonenumber: json['phonenumber']?.toString() ?? '',
+      phonenumber: phone,
       address: json['address']?.toString() ?? '',
       password: json['password']?.toString() ?? '',
       role: json['role']?.toString() ?? '',
-      phone: json['phonenumber']?.toString() ?? '',
+      phone: phone,
       image: image,
       token: token,
     );

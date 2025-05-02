@@ -1,3 +1,4 @@
+// routes/routes.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +16,7 @@ import 'package:pim_project/view/screens/email_verification_screen.dart';
 import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:pim_project/view/screens/home_screen/home_screen.dart';
 import 'package:pim_project/view/screens/humidity_screen.dart';
+import 'package:pim_project/view/screens/land_details_for_rent_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen.dart';
 import 'package:pim_project/view/screens/land_screen.dart';
 import 'package:pim_project/view/screens/language_screen.dart';
@@ -119,7 +121,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: RouteNames.market,
-          builder: (context, state) => const MarketScreen(),
+          builder: (context, state) => MarketScreen(userId: MyApp.userId),
         ),
         GoRoute(
           path: RouteNames.profile,
@@ -206,6 +208,13 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return LandDetailsScreen(id: id);
+      },
+    ),
+    GoRoute(
+      path: '/land-details-for-rent/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return LandDetailsForRentScreen(landId: id);
       },
     ),
     GoRoute(
