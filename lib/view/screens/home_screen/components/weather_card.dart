@@ -1,3 +1,4 @@
+// view/screens/home_screen/components/weather_card.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/view/screens/home_screen/components/components_animations.dart';
 import 'package:pim_project/view/screens/humidity_screen.dart';
@@ -96,6 +97,7 @@ class WeatherCard extends StatelessWidget {
     // Get screen size information
     final Size screenSize = MediaQuery.of(context).size;
     final bool isTablet = screenSize.shortestSide >= 600;
+    final bool isSmallPhone = screenSize.shortestSide < 400; // For smaller phones like P30 Pro
     
     // Créer les paramètres à partir des valeurs individuelles
     final Map<String, String> displayParameters = {
@@ -127,55 +129,108 @@ class WeatherCard extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Temperature and Weather Icon Row
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (isRTL) ...[
-                  _buildWeatherIcon(condition, isTablet: isTablet),
-                  const Spacer(),
+        child: isSmallPhone
+            // For small phones, use a more compact horizontal layout
+            ? _buildCompactLayout(
+                l10n, 
+                isRTL, 
+                displayParameters,
+                context,
+                primaryColor,
+                secondaryColor
+              )
+            // For tablets and regular phones, use the standard layout
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Temperature and Weather Icon Row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (isRTL) ...[
+                        _buildWeatherIcon(condition, isTablet: isTablet),
+                        const Spacer(),
+                        Text(
+                          temperature,
+                          style: TextStyle(
+                            fontSize: isTablet ? 32 : 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ] else ...[
+                        Text(
+                          temperature,
+                          style: TextStyle(
+                            fontSize: isTablet ? 32 : 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        _buildWeatherIcon(condition, isTablet: isTablet),
+                      ],
+                    ],
+                  ),
+                  // Weather Condition Text
                   Text(
-                    temperature,
+                    condition,
                     style: TextStyle(
-                      fontSize: isTablet ? 32 : 24,
-                      fontWeight: FontWeight.bold,
+                      fontSize: isTablet ? 20 : 16,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ] else ...[
-                  Text(
-                    temperature,
-                    style: TextStyle(
-                      fontSize: isTablet ? 32 : 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  _buildWeatherIcon(condition, isTablet: isTablet),
-                ],
-              ],
-            ),
-            // Weather Condition Text
-            Text(
-              condition,
-              style: TextStyle(
-                fontSize: isTablet ? 20 : 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: isTablet ? 28 : 20),
-            
-            // Weather Parameters
-            LayoutBuilder(
-              builder: (context, constraints) {
-                // For very narrow screens, stack the parameters vertically
-                if (constraints.maxWidth < 300) {
-                  return Column(
-                    children: displayParameters.entries.map((entry) {
-                      final Widget paramWidget = entry.key == l10n.humidity
-                          ? GestureDetector(
+                  SizedBox(height: isTablet ? 28 : 20),
+                  
+                  // Weather Parameters
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      // For very narrow screens, stack the parameters vertically
+                      if (constraints.maxWidth < 300) {
+                        return Column(
+                          children: displayParameters.entries.map((entry) {
+                            final Widget paramWidget = entry.key == l10n.humidity
+                                ? GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => HumidityScreen(
+                                            latitude: latitude,
+                                            longitude: longitude,
+                                            humidity: humidity,
+                                            backgroundColor: primaryColor,
+                                            secondaryColor: secondaryColor,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: _buildWeatherParameter(
+                                      entry.key, 
+                                      entry.value, 
+                                      isTablet: isTablet,
+                                      isNarrow: true,
+                                    ),
+                                  )
+                                : _buildWeatherParameter(
+                                    entry.key, 
+                                    entry.value, 
+                                    isTablet: isTablet,
+                                    isNarrow: true,
+                                  );
+                            
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: paramWidget,
+                            );
+                          }).toList(),
+                        );
+                      }
+                      
+                      // For wider screens, use row with spaceBetween
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: displayParameters.entries.map((entry) {
+                          if (entry.key == l10n.humidity) {
+                            return GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -184,6 +239,8 @@ class WeatherCard extends StatelessWidget {
                                       latitude: latitude,
                                       longitude: longitude,
                                       humidity: humidity,
+                                      backgroundColor: primaryColor,
+                                      secondaryColor: secondaryColor,
                                     ),
                                   ),
                                 );
@@ -191,85 +248,179 @@ class WeatherCard extends StatelessWidget {
                               child: _buildWeatherParameter(
                                 entry.key, 
                                 entry.value, 
-                                isTablet: isTablet,
-                                isNarrow: true,
+                                isTablet: isTablet
                               ),
-                            )
-                          : _buildWeatherParameter(
-                              entry.key, 
-                              entry.value, 
-                              isTablet: isTablet,
-                              isNarrow: true,
                             );
-                      
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: paramWidget,
-                      );
-                    }).toList(),
-                  );
-                }
-                
-                // For wider screens, use row with spaceBetween
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: displayParameters.entries.map((entry) {
-                    if (entry.key == l10n.humidity) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HumidityScreen(
-                                latitude: latitude,
-                                longitude: longitude,
-                                humidity: humidity,
-                              ),
-                            ),
+                          }
+                          return _buildWeatherParameter(
+                            entry.key, 
+                            entry.value, 
+                            isTablet: isTablet
                           );
-                        },
-                        child: _buildWeatherParameter(
-                          entry.key, 
-                          entry.value, 
-                          isTablet: isTablet
-                        ),
+                        }).toList(),
                       );
-                    }
-                    return _buildWeatherParameter(
-                      entry.key, 
-                      entry.value, 
-                      isTablet: isTablet
-                    );
-                  }).toList(),
-                );
-              },
-            ),
-            
-            // Advice Section
-            if (advice.isNotEmpty && advice != l10n.noAdviceAvailable)
-              _buildWeatherAdvice(isTablet: isTablet),
-          ],
-        ),
+                    },
+                  ),
+                  
+                  // Advice Section
+                  if (advice.isNotEmpty && advice != l10n.noAdviceAvailable)
+                    _buildWeatherAdvice(isTablet: isTablet),
+                ],
+              ),
       ),
     );
   }
   
-  Widget _buildWeatherIcon(String condition, {bool isTablet = false}) {
+  // New compact layout for small phones with more horizontal arrangement
+  Widget _buildCompactLayout(
+    AppLocalizations l10n, 
+    bool isRTL, 
+    Map<String, String> displayParameters,
+    BuildContext context,
+    Color primaryColor,
+    Color secondaryColor
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min, // Take minimum vertical space
+      children: [
+        // First row: Temperature, condition, and weather icon
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Temperature and condition
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    temperature,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    condition,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Weather icon
+            _buildWeatherIcon(condition, isCompact: true),
+          ],
+        ),
+        const SizedBox(height: 12),
+        
+        // Second row: Weather parameters in a horizontal arrangement
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: displayParameters.entries.map((entry) {
+            if (entry.key == l10n.humidity) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => HumidityScreen(
+                        latitude: this.latitude,
+                        longitude: this.longitude,
+                        humidity: this.humidity,
+                        backgroundColor: primaryColor,
+                        secondaryColor: secondaryColor,
+                      ),
+                    ),
+                  );
+                },
+                child: _buildCompactParameter(entry.key, entry.value),
+              );
+            }
+            return _buildCompactParameter(entry.key, entry.value);
+          }).toList(),
+        ),
+        
+        // Third row: Advice section in a more compact format
+        if (advice.isNotEmpty && advice != l10n.noAdviceAvailable)
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    advice,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+  
+  // Compact parameter display for small phones
+  Widget _buildCompactParameter(String label, String value) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.white70,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildWeatherIcon(String condition, {bool isTablet = false, bool isCompact = false}) {
     condition = condition.toLowerCase();
     final hour = DateTime.now().hour;
     final isNight = hour < 6 || hour > 18;
-    final double size = isTablet ? 70.0 : 50.0;
+    final double size = isCompact ? 40.0 : (isTablet ? 70.0 : 50.0);
     
     if (condition.contains('01n') || (isNight && (condition.contains('clear') || condition.contains('sunny')))) {
       return MoonAnimation(size: size);
     } else if (condition.contains('01d') || (!isNight && (condition.contains('clear') || condition.contains('sunny')))) {
       return SunAnimation(size: size);
     } else if (condition.contains('cloud')) {
-      return CloudAnimation(size: isTablet ? 80.0 : 60.0);
+      return CloudAnimation(size: isCompact ? 50.0 : (isTablet ? 80.0 : 60.0));
     } else if (condition.contains('rain')) {
-      return RainDropsAnimation(isLarge: isTablet);
+      return RainDropsAnimation(isLarge: isTablet && !isCompact);
     } else if (condition.contains('snow')) {
-      return SnowflakesAnimation(isLarge: isTablet);
+      return SnowflakesAnimation(isLarge: isTablet && !isCompact);
     } else {
       return isNight ? MoonAnimation(size: size) : SunAnimation(size: size);
     }

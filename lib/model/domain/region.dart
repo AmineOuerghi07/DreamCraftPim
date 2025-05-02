@@ -1,3 +1,4 @@
+// model/domain/region.dart
 
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/plant-with-quantity.dart';
@@ -39,6 +40,7 @@ class Region {
                 image: '',
                 regions: [],
                 rentPrice: 0.0,
+                userId: '',
               )
             : Land.fromJson(json['land'] as Map<String, dynamic>),
         surface: (json['surface'] as num?)?.toDouble() ?? 0.0,

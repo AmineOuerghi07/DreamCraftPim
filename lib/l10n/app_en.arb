@@ -324,5 +324,15 @@
   "regions": "Regions",
   "deleteFailed": "Delete failed",
   "readDetails": "Read Details",
-  "inventories": "Inventories"
+  "inventories": "Inventories",
+  "rentPrice": "Rent Price",
+  "contactNotAvailable": "Contact not available",
+  "ownerContact": "Owner Contact",
+  "landDetails": "Land Details",
+  "confirmRequest": "Confirm Request",
+  "confirmRequestLandRental": "Do you want to send a request to the owner for this land?",
+  "sendRequest": "Send Request",
+  "noDescriptionAvailable": "No description available",
+  "noLandsForRent": "No lands available for rent",
+  "confirm": "Confirm"
 }
