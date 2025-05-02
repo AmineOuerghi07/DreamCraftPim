@@ -121,7 +121,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: RouteNames.market,
-          builder: (context, state) => const MarketScreen(),
+          builder: (context, state) => MarketScreen(userId: MyApp.userId),
         ),
         GoRoute(
           path: RouteNames.profile,

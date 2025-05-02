@@ -1,8 +1,9 @@
+// view/screens/market_screen.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
-
+import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/marketScreenSearchBar.dart' as custom;
 import 'package:pim_project/view/screens/Components/seeAllProductsWithSameCategory.dart';
@@ -14,10 +15,13 @@ import 'package:pim_project/constants/constants.dart';
 
 
 class MarketScreen extends StatelessWidget {
-  const MarketScreen({super.key});
+  final String userId;
+  
+  const MarketScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final marketProvider = Provider.of<MarketProvider>(context, listen: false);
 
     // Fetch products only if the list is empty (prevents redundant API calls)
@@ -43,14 +47,15 @@ class MarketScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : Header(
-                    greetingText: l10n.hello,
-                    username: _username,
-                    userId: widget.userId,
-                  ),
-
+              Consumer<MarketProvider>(
+                builder: (context, provider, _) => provider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Header(
+                      greetingText: l10n.hello,
+                      username: "Market User",
+                      userId: userId,
+                    ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
