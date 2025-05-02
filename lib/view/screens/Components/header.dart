@@ -1,3 +1,4 @@
+// view/screens/components/header.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -135,7 +136,7 @@ class _HeaderState extends State<Header> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -149,6 +150,7 @@ class _HeaderState extends State<Header> {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
+                      const SizedBox(width: 4),
                       Text(
                         widget.username,
                         style: const TextStyle(

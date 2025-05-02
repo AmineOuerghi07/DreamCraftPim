@@ -27,5 +27,5 @@ class AppConstants {
   static const String usersEndpoint = "$baseUrl/users";
 
   //static const String imagesbaseURL = "http://192.168.43.232:3000/uploads/";
-  static const String imagesbaseURL = "http://localhost:3000/uploads/";
+  static const String imagesbaseURL = "http://192.168.43.232:3000/uploads/";
 }

@@ -14,10 +14,48 @@ import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
 
 
-class MarketScreen extends StatelessWidget {
+class MarketScreen extends StatefulWidget {
   final String userId;
   
   const MarketScreen({super.key, required this.userId});
+
+  @override
+  State<MarketScreen> createState() => _MarketScreenState();
+}
+
+class _MarketScreenState extends State<MarketScreen> {
+  String _username = '';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _username = data['fullname'] ?? 'User';
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('❌ [MarketScreen] Error loading user data: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,15 +85,17 @@ class MarketScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              Consumer<MarketProvider>(
-                builder: (context, provider, _) => provider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : Header(
-                      greetingText: l10n.hello,
-                      username: "Market User",
-                      userId: userId,
-                    ),
-              ),
+              _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Consumer<MarketProvider>(
+                  builder: (context, provider, _) => provider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Header(
+                        greetingText: l10n.hello,
+                        username: _username,
+                        userId: widget.userId,
+                      ),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
