@@ -7,6 +7,7 @@ import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
 import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
 import 'package:pim_project/view/screens/about_screen.dart';
 import 'package:pim_project/view/screens/add_plant_screen.dart';
+import 'package:pim_project/view/screens/billing_Screen.dart';
 import 'package:pim_project/view/screens/camera_screen.dart';
 import 'package:pim_project/view/screens/chat_screen.dart';
 import 'package:pim_project/view/screens/contact_screen.dart';
@@ -33,8 +34,10 @@ import 'package:pim_project/view/screens/reset_password_screen.dart';
 import 'package:pim_project/view/screens/signup_screen.dart';
 import 'package:pim_project/main.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
+final GlobalKey<NavigatorState> rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> shellNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shell');
 
 class RouteNames {
   static const String home = '/';
@@ -65,6 +68,7 @@ class RouteNames {
   static const String languageScreen = '/language_screen';
   static const String settings = '/loading_screen';
   static const String onboarding = '/onboarding';
+   static const String billingScreen = '/billing_screen';
 }
 
 final GoRouter router = GoRouter(
@@ -117,10 +121,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: RouteNames.market,
-          builder: (context, state) {
-            final userId = state.extra as String? ?? MyApp.userId;
-            return MarketScreen(userId: userId);
-          },
+          builder: (context, state) => const MarketScreen(),
         ),
         GoRoute(
           path: RouteNames.profile,
@@ -133,6 +134,10 @@ final GoRouter router = GoRouter(
             }
             return ProfileScreen(userId: userId);
           },
+        ),
+         GoRoute(
+          path: RouteNames.billingScreen,
+          builder: (context, state) => const BillHistoryScreen(),
         ),
         GoRoute(
           path: RouteNames.land,
@@ -155,7 +160,8 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: RouteNames.editProfile,
-          builder: (context, state) => EditProfileScreen(userData: state.extra as Map<String, dynamic>),
+          builder: (context, state) =>
+              EditProfileScreen(userData: state.extra as Map<String, dynamic>),
         ),
       ],
     ),
@@ -235,7 +241,8 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: RouteNames.chatScreen,
-      builder: (context, state) => ChatScreen(initialData: state.extra as Map<String, dynamic>?),
+      builder: (context, state) =>
+          ChatScreen(initialData: state.extra as Map<String, dynamic>?),
     ),
     GoRoute(
       path: RouteNames.processingScreen,
@@ -248,7 +255,6 @@ final GoRouter router = GoRouter(
         return AddPlantScreen(regionId: regionId);
       },
     ),
-
     GoRoute(
       path: '${RouteNames.humidity}/:humidity',
       builder: (context, state) {

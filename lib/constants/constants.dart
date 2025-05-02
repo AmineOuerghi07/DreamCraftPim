@@ -1,7 +1,6 @@
 // constants/constants.dart
 import 'package:flutter/material.dart';
 
-
 class AppConstants {
   static const double padding = 16.0;
   static const double margin = 12.0;
@@ -21,14 +20,12 @@ class AppConstants {
 
 
 
-
-
   // API Endpoints
   static const String signInEndpoint = "$baseUrl/sign-in";
   static const String landsEndpoint = "$baseUrl/lands";
   static const String regionsEndpoint = "$baseUrl/regions";
   static const String usersEndpoint = "$baseUrl/users";
 
-   static const String imagesbaseURL = "http://192.168.43.232:3000/uploads/";
-   //static const String imagesbaseURL = "http://127.0.0.1:3000/uploads/";
+  //static const String imagesbaseURL = "http://192.168.43.232:3000/uploads/";
+  static const String imagesbaseURL = "http://localhost:3000/uploads/";
 }

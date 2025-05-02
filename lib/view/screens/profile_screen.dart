@@ -31,7 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> fetchUserProfile(String userId) async {
-    final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
+    final url =
+        Uri.parse('${AppConstants.baseUrl}/account/get-account/$userId');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -313,6 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
+
               ),
             ],
           ),

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PlantsGrid extends StatelessWidget {
-  final String ? landId;
+  final String landId;
 
   const PlantsGrid({super.key, required this.landId});
 
@@ -114,16 +114,18 @@ class PlantsGrid extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
+
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             );
-          },
-        );
+          default:
+            return const SizedBox.shrink();
+        }
       },
     );
   }

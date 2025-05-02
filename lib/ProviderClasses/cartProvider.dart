@@ -15,30 +15,34 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<Product>> getcartProducts() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? cart = prefs.getStringList('cart');
-    List<String>? cartQte = prefs.getStringList('cartQte');
+ Future<List<Product>> getcartProducts() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String>? cart = prefs.getStringList('cart') ?? [];
+  List<String>? cartQte = prefs.getStringList('cartQte') ?? [];
 
-    ApiService apiService = ApiService();
-    List<Product> products = await apiService.fetchProducts();
+  ApiService apiService = ApiService();
+  List<Product> products = await apiService.fetchProducts();
 
-    List<Product> returnList = [];
+  List<Product> returnList = [];
 
-    if (cart != null && cartQte != null) {
-      for (int i = 0; i < products.length; i++) {
-        if (cart.contains(products[i].id)) {
-          Product _product = products[i];
-          _product.quantity = int.parse(cartQte[cart.indexOf(products[i].id)]);
+  if (cart.isNotEmpty && cartQte.isNotEmpty) {  // ✅ Ensure lists are not null/empty
+    for (int i = 0; i < products.length; i++) {
+      if (cart!.contains(products[i].id)) {  // ✅ Use ! to indicate non-null
+        Product _product = products[i];
+        int index = cart!.indexOf(products[i].id);
+        
+        if (index < cartQte!.length) {  // ✅ Avoid out-of-bounds error
+          _product.quantity = int.parse(cartQte![index]);
           returnList.add(_product);
         }
       }
     }
-    
-    cartItems = returnList; // Store in provider
-    notifyListeners(); // Notify UI updates
-    return returnList;
   }
+
+  cartItems = returnList;  // Store in provider
+  notifyListeners();  // Notify UI updates
+  return returnList;
+}
 
   Future<void> removeItem(Product product) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
