@@ -170,4 +170,66 @@ class IrrigationService {
       return ApiResponse.error('An error occurred: ${e.toString()}');
     }
   }
+
+  // Turn ventilator on/off
+  Future<ApiResponse<Map<String, dynamic>>> setVentilatorState(bool state) async {
+    try {
+      final endpoint = state ? '$_baseUrl/ventilator/on' : '$_baseUrl/ventilator/off';
+      final response = await _apiClient.post(endpoint, {}, 
+        (data) => data as Map<String, dynamic>);
+      if (response.status == Status.COMPLETED && response.data != null) {
+        return ApiResponse.completed(response.data!);
+      } else {
+        return ApiResponse.error(response.message ?? 'Failed to set ventilator state');
+      }
+    } catch (e) {
+      return ApiResponse.error('An error occurred: ${e.toString()}');
+    }
+  }
+
+  // Get ventilator status
+  Future<ApiResponse<Map<String, dynamic>>> getVentilatorStatus() async {
+    try {
+      final response = await _apiClient.get('$_baseUrl/ventilator/status', 
+        (data) => data as Map<String, dynamic>);
+      if (response.status == Status.COMPLETED && response.data != null) {
+        return ApiResponse.completed(response.data!);
+      } else {
+        return ApiResponse.error(response.message ?? 'Failed to get ventilator status');
+      }
+    } catch (e) {
+      return ApiResponse.error('An error occurred: ${e.toString()}');
+    }
+  }
+
+  // Turn LED on/off
+  Future<ApiResponse<Map<String, dynamic>>> setLedState(bool state) async {
+    try {
+      final endpoint = state ? '$_baseUrl/led/on' : '$_baseUrl/led/off';
+      final response = await _apiClient.post(endpoint, {}, 
+        (data) => data as Map<String, dynamic>);
+      if (response.status == Status.COMPLETED && response.data != null) {
+        return ApiResponse.completed(response.data!);
+      } else {
+        return ApiResponse.error(response.message ?? 'Failed to set LED state');
+      }
+    } catch (e) {
+      return ApiResponse.error('An error occurred: ${e.toString()}');
+    }
+  }
+
+  // Get light status
+  Future<ApiResponse<Map<String, dynamic>>> getLightStatus() async {
+    try {
+      final response = await _apiClient.get('$_baseUrl/light', 
+        (data) => data as Map<String, dynamic>);
+      if (response.status == Status.COMPLETED && response.data != null) {
+        return ApiResponse.completed(response.data!);
+      } else {
+        return ApiResponse.error(response.message ?? 'Failed to get light status');
+      }
+    } catch (e) {
+      return ApiResponse.error('An error occurred: ${e.toString()}');
+    }
+  }
 } 

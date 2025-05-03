@@ -25,6 +25,8 @@ class RegionDetailsScreen extends StatefulWidget {
 class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
   // This flag will override the database isConnected status
   bool _isDeviceVerified = false;
+  // Add loading state to prevent UI flashing during connection
+  bool _isConnecting = false;
 
   @override
   void initState() {
@@ -38,6 +40,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
     // Reset local connection state
     setState(() {
       _isDeviceVerified = false;
+      _isConnecting = false;
     });
     
     // Schedule a microtask to reset the IrrigationViewModel
@@ -156,27 +159,56 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                     Expanded(
                       child: _isDeviceVerified
                         ? const SmartRegionsGrid()
-                        : ConnectToBluetooth(
-                            onDeviceConnected: () {
-                              setState(() {
-                                _isDeviceVerified = true;
+                        : _isConnecting 
+                          ? const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(color: Color(0xFF204D4F)),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    "Connecting to device...",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF204D4F),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ConnectToBluetooth(
+                              onDeviceConnected: () {
+                                // Set connecting state first to avoid flashing content
+                                setState(() {
+                                  _isConnecting = true;
+                                });
                                 
-                                // Also update the region.isConnected in the database
-                                if (viewModel.region != null) {
-                                  final updatedRegion = Region(
-                                    id: viewModel.region!.id,
-                                    name: viewModel.region!.name,
-                                    surface: viewModel.region!.surface,
-                                    land: viewModel.region!.land,
-                                    sensors: viewModel.region!.sensors,
-                                    plants: viewModel.region!.plants,
-                                    isConnected: true,
-                                  );
-                                  viewModel.updateRegion(updatedRegion);
-                                }
-                              });
-                            },
-                          ),
+                                // Use a slight delay to ensure smooth transition
+                                Future.delayed(const Duration(milliseconds: 300), () {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isDeviceVerified = true;
+                                      _isConnecting = false;
+                                      
+                                      // Also update the region.isConnected in the database
+                                      if (viewModel.region != null) {
+                                        final updatedRegion = Region(
+                                          id: viewModel.region!.id,
+                                          name: viewModel.region!.name,
+                                          surface: viewModel.region!.surface,
+                                          land: viewModel.region!.land,
+                                          sensors: viewModel.region!.sensors,
+                                          plants: viewModel.region!.plants,
+                                          isConnected: true,
+                                        );
+                                        viewModel.updateRegion(updatedRegion);
+                                      }
+                                    });
+                                  }
+                                });
+                              },
+                            ),
                     ),
                   ],
                 ),

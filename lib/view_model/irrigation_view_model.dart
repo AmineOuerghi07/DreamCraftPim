@@ -20,6 +20,8 @@ class IrrigationViewModel with ChangeNotifier {
   // Sensor states
   bool _isPumpOn = false;
   bool _isTemperatureSensorOn = false;
+  bool _isVentilatorOn = false;
+  bool _isLedOn = false;
   
   // Loading and error states
   bool _isLoading = false;
@@ -32,6 +34,8 @@ class IrrigationViewModel with ChangeNotifier {
   bool get isAutomaticMode => _isAutomaticMode;
   bool get isPumpOn => _isPumpOn;
   bool get isTemperatureSensorOn => _isTemperatureSensorOn;
+  bool get isVentilatorOn => _isVentilatorOn;
+  bool get isLedOn => _isLedOn;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   
@@ -41,6 +45,8 @@ class IrrigationViewModel with ChangeNotifier {
     _discoveredDevices = [];
     _systemStatus = {};
     _isPumpOn = false;
+    _isVentilatorOn = false;
+    _isLedOn = false;
     notifyListeners();
   }
   
@@ -168,6 +174,14 @@ class IrrigationViewModel with ChangeNotifier {
     if (_systemStatus.containsKey('temperature_sensor')) {
       _isTemperatureSensorOn = _systemStatus['temperature_sensor'] == true;
     }
+    
+    if (_systemStatus.containsKey('ventilator_state')) {
+      _isVentilatorOn = _systemStatus['ventilator_state'] == false;
+    }
+    
+    if (_systemStatus.containsKey('led_state')) {
+      _isLedOn = _systemStatus['led_state'] == true;
+    }
   }
   
   // Set pump state
@@ -212,6 +226,8 @@ class IrrigationViewModel with ChangeNotifier {
         if (!automatic) {
           await setPumpState(false);
           await setTemperatureSensor(false);
+          await setVentilatorState(false);
+          await setLedState(false);
         }
       } else {
         _errorMessage = response.message ?? 'Failed to set operation mode';
@@ -244,6 +260,59 @@ class IrrigationViewModel with ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = 'Error setting temperature sensor: ${e.toString()}';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  // Set ventilator state
+  Future<void> setVentilatorState(bool enabled) async {
+    if (_isAutomaticMode) {
+      // Can't change ventilator state in automatic mode
+      return;
+    }
+    
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      // Invert the value sent to the API to fix the on/off inversion
+      final response = await _irrigationService.setVentilatorState(!enabled);
+      if (response.status == Status.COMPLETED) {
+        _isVentilatorOn = enabled;
+      } else {
+        _errorMessage = response.message ?? 'Failed to set ventilator state';
+      }
+    } catch (e) {
+      _errorMessage = 'Error setting ventilator state: ${e.toString()}';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  // Set LED state
+  Future<void> setLedState(bool enabled) async {
+    if (_isAutomaticMode) {
+      // Can't change LED state in automatic mode
+      return;
+    }
+    
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final response = await _irrigationService.setLedState(enabled);
+      if (response.status == Status.COMPLETED) {
+        _isLedOn = enabled;
+      } else {
+        _errorMessage = response.message ?? 'Failed to set LED state';
+      }
+    } catch (e) {
+      _errorMessage = 'Error setting LED state: ${e.toString()}';
     } finally {
       _isLoading = false;
       notifyListeners();
