@@ -20,11 +20,6 @@ class ConnectToBluetooth extends StatelessWidget {
   Widget build(BuildContext context) {
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
     final regionViewModel = Provider.of<RegionDetailsViewModel>(context);
-    
-    // Always ensure we have no previous connection showing
-    final shouldShowConnectionInfo = irrigationViewModel.selectedDevice != null && 
-                                     regionViewModel.region != null &&
-                                     regionViewModel.region!.isConnected;
 
     return Scaffold(
       body: Center(
@@ -40,7 +35,6 @@ class ConnectToBluetooth extends StatelessWidget {
                 "Want to connect Your Irrigation System?",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -55,106 +49,26 @@ class ConnectToBluetooth extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               
-              // Show connected device info ONLY when the device is connected to THIS region
-              if (shouldShowConnectionInfo) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    border: Border.all(color: Colors.green.shade200),
-                    borderRadius: BorderRadius.circular(8),
+              // Always show the connect button, regardless of connection state
+              ElevatedButton(
+                onPressed: () {
+                  // Force reset of connections first
+                  irrigationViewModel.resetDeviceConnection();
+                  // Always show the device discovery dialog
+                  _showDeviceDiscoveryDialog(context, regionViewModel);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 23, 106, 26),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 36,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Connected to Device ${irrigationViewModel.selectedDevice!.id}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "IP: ${irrigationViewModel.selectedDevice!.ipAddress}",
-                        style: const TextStyle(
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Mode: ${irrigationViewModel.isAutomaticMode ? 'Automatic' : 'Manual'}",
-                            style: TextStyle(
-                              color: irrigationViewModel.isAutomaticMode 
-                                ? Colors.blue 
-                                : Colors.orange,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Text(
-                            "Pump: ${irrigationViewModel.isPumpOn ? 'On' : 'Off'}",
-                            style: TextStyle(
-                              color: irrigationViewModel.isPumpOn 
-                                ? Colors.green 
-                                : Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    // Force reset of connections first
-                    irrigationViewModel.resetDeviceConnection();
-                    _showDeviceDiscoveryDialog(context, regionViewModel);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  ),
-                  child: const Text(
-                    "Change Device",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
+                child: const Text(
+                  "Connect Your Device",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
-              ] else ...[
-                // Connection button if no device is connected
-                ElevatedButton(
-                  onPressed: () {
-                    // Force reset of connections first
-                    irrigationViewModel.resetDeviceConnection();
-                    _showDeviceDiscoveryDialog(context, regionViewModel);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 23, 106, 26),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  ),
-                  child: const Text(
-                    "Connect Your Device",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-
-                ),
-              ],
+              ),
             ],
           ),
         ),

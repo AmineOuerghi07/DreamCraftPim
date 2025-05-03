@@ -23,10 +23,10 @@ class SmartRegionsProvider extends ChangeNotifier {
       "subtitle": "100m",
     },
     {
-      "icon": Icons.landscape_rounded,
-      "iconColor": const Color.fromARGB(255, 172, 109, 15),
-      "title": "Soil",
-      "subtitle": "Growth",
+      "icon": Icons.air,
+      "iconColor": Colors.lightBlue,
+      "title": "Ventilator",
+      "subtitle": "Fresh Air",
     },
   ];
 
@@ -65,13 +65,19 @@ class SmartRegionsProvider extends ChangeNotifier {
     // Update temperature sensor switch (index 1)
     _switches[1] = _irrigationViewModel.isTemperatureSensorOn;
     
+    // Update ventilator switch (index 3)
+    _switches[3] = _irrigationViewModel.isVentilatorOn;
+    
+    // Update lighting switch (index 0) based on LED state
+    _switches[0] = _irrigationViewModel.isLedOn;
+    
     notifyListeners();
   }
 
   // Toggle a switch and update corresponding functionality
   void toggleSwitch(int index, bool value) async {
-    // If in automatic mode and trying to toggle irrigation controls, return
-    if (_isAutomaticMode && (index == 1 || index == 2)) {
+    // If in automatic mode and trying to toggle automated controls, return
+    if (_isAutomaticMode && (index == 1 || index == 2 || index == 3)) {
       return;
     }
     
@@ -80,6 +86,11 @@ class SmartRegionsProvider extends ChangeNotifier {
 
     // Update system state based on which switch was toggled
     switch (index) {
+      case 0: // Lighting (LED)
+        if (_irrigationViewModel != null) {
+          await _irrigationViewModel.setLedState(value);
+        }
+        break;
       case 1: // Temperature sensor
         if (_irrigationViewModel != null) {
           await _irrigationViewModel.setTemperatureSensor(value);
@@ -90,6 +101,11 @@ class SmartRegionsProvider extends ChangeNotifier {
           await _irrigationViewModel.setPumpState(value);
         }
         break;
+      case 3: // Ventilator
+        if (_irrigationViewModel != null) {
+          await _irrigationViewModel.setVentilatorState(value);
+        }
+        break;
     }
   }
 
@@ -98,9 +114,16 @@ class SmartRegionsProvider extends ChangeNotifier {
     _isAutomaticMode = automatic;
     
     if (_irrigationViewModel != null) {
+      // First update the UI state immediately
+      notifyListeners();
+      
+      // Then send the change to the backend
       await _irrigationViewModel.setOperationMode(automatic);
       
-      // Update switches after mode change
+      // Force refresh the system status to ensure all states are synchronized
+      await _irrigationViewModel.getSystemStatus();
+      
+      // Update switches after mode change and system status refresh
       updateSwitchesFromViewModel();
     }
     
