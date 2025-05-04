@@ -1,0 +1,24 @@
+{
+  "ar": [
+    "contactNotAvailable",
+    "ownerContact",
+    "landDetails",
+    "confirmRequest",
+    "confirmRequestLandRental",
+    "sendRequest",
+    "noDescriptionAvailable",
+    "confirm"
+  ],
+
+  "fr": [
+    "rentPrice",
+    "contactNotAvailable",
+    "ownerContact",
+    "landDetails",
+    "confirmRequest",
+    "confirmRequestLandRental",
+    "sendRequest",
+    "noDescriptionAvailable",
+    "confirm"
+  ]
+}
