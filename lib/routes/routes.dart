@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/view/screens/OTPVerificationScreen.dart';
-import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
 import 'package:pim_project/view/screens/about_screen.dart';
 import 'package:pim_project/view/screens/add_plant_screen.dart';
 import 'package:pim_project/view/screens/billing_Screen.dart';
@@ -26,7 +25,6 @@ import 'package:pim_project/view/screens/main_screen.dart';
 import 'package:pim_project/view/screens/map_screen.dart';
 import 'package:pim_project/view/screens/market_screen.dart';
 import 'package:pim_project/view/screens/on_boarding_screen.dart';
-import 'package:pim_project/view/screens/phone_verification_screen.dart';
 import 'package:pim_project/view/screens/product_details_screen.dart';
 import 'package:pim_project/view/screens/region_details_screen.dart';
 import 'package:pim_project/view/screens/profile_screen.dart';
@@ -165,10 +163,7 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
-    GoRoute(
-      path: RouteNames.phoneNumberScreen,
-      builder: (context, state) => const PhoneNumberScreen(),
-    ),
+   
     GoRoute(
       path: RouteNames.login,
       builder: (context, state) => const LoginScreen(),
@@ -199,10 +194,7 @@ final GoRouter router = GoRouter(
       path: RouteNames.emailVerification,
       builder: (context, state) => const EmailVerificationScreen(),
     ),
-    GoRoute(
-      path: RouteNames.phoneVerification,
-      builder: (context, state) => const PhoneVerificationScreen(),
-    ),
+    
     GoRoute(
       path: '${RouteNames.landDetails}/:id',
       builder: (context, state) {

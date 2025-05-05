@@ -61,17 +61,11 @@ class MyApp extends StatelessWidget {
     final userId = await UserPreferences.getUserId();
     final token = await UserPreferences.getToken();
 
-    print('🔍 [Initial Route] Vérification de l\'état de connexion:');
-    print('   - Remember Me: $rememberMe');
-    print('   - User ID: $userId');
-    print('   - Token: ${token != null ? "Présent" : "Absent"}');
 
     if (rememberMe && userId != null && userId.isNotEmpty && token != null && token.isNotEmpty) {
-      print('✅ [Initial Route] Utilisateur connecté, redirection vers l\'accueil');
       MyApp.userId = userId;
       return RouteNames.home;
     } else {
-      print('❌ [Initial Route] Aucun utilisateur connecté, redirection vers la connexion');
       // S'assurer que toutes les données de session sont effacées
       await UserPreferences.clear();
       return RouteNames.login;

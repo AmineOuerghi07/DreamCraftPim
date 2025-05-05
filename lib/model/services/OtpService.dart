@@ -7,34 +7,6 @@ import 'package:pim_project/constants/constants.dart';
 class OtpService {
   final Dio _dio = Dio(BaseOptions(baseUrl: '${AppConstants.baseUrl}/account'));
 
-  // Send OTP request via phone number
-  Future<bool> sendOtp(String phoneNumber) async {
-    final Uri url = Uri.parse('${AppConstants.baseUrl}/account/send-otp');
-
-    try {
-      print("Sending OTP to: $phoneNumber");
-
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'phone': phoneNumber}),
-      );
-
-      print("Response Status Code: ${response.statusCode}");
-      print("Response Body: ${response.body}");
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print("OTP sent successfully!");
-        return true;
-      } else {
-        print("Failed to send OTP: ${response.reasonPhrase}");
-        return false;
-      }
-    } catch (e) {
-      print("Error sending OTP: $e");
-      return false;
-    }
-  }
 
   // Send OTP request via Email
   Future<bool> sendOtpEmail(String email) async {

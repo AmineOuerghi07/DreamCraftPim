@@ -12,6 +12,7 @@ import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegionDetailsScreen extends StatefulWidget {
   final String id;
@@ -25,6 +26,8 @@ class RegionDetailsScreen extends StatefulWidget {
 class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
   // This flag will override the database isConnected status
   bool _isDeviceVerified = false;
+  // Add loading state to prevent UI flashing during connection
+  bool _isConnecting = false;
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
     // Reset local connection state
     setState(() {
       _isDeviceVerified = false;
+      _isConnecting = false;
     });
     
     // Schedule a microtask to reset the IrrigationViewModel
@@ -156,27 +160,56 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                     Expanded(
                       child: _isDeviceVerified
                         ? const SmartRegionsGrid()
-                        : ConnectToBluetooth(
-                            onDeviceConnected: () {
-                              setState(() {
-                                _isDeviceVerified = true;
+                        : _isConnecting 
+                          ? const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(color: Color(0xFF204D4F)),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    "Connecting to device...",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF204D4F),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ConnectToBluetooth(
+                              onDeviceConnected: () {
+                                // Set connecting state first to avoid flashing content
+                                setState(() {
+                                  _isConnecting = true;
+                                });
                                 
-                                // Also update the region.isConnected in the database
-                                if (viewModel.region != null) {
-                                  final updatedRegion = Region(
-                                    id: viewModel.region!.id,
-                                    name: viewModel.region!.name,
-                                    surface: viewModel.region!.surface,
-                                    land: viewModel.region!.land,
-                                    sensors: viewModel.region!.sensors,
-                                    plants: viewModel.region!.plants,
-                                    isConnected: true,
-                                  );
-                                  viewModel.updateRegion(updatedRegion);
-                                }
-                              });
-                            },
-                          ),
+                                // Use a slight delay to ensure smooth transition
+                                Future.delayed(const Duration(milliseconds: 300), () {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isDeviceVerified = true;
+                                      _isConnecting = false;
+                                      
+                                      // Also update the region.isConnected in the database
+                                      if (viewModel.region != null) {
+                                        final updatedRegion = Region(
+                                          id: viewModel.region!.id,
+                                          name: viewModel.region!.name,
+                                          surface: viewModel.region!.surface,
+                                          land: viewModel.region!.land,
+                                          sensors: viewModel.region!.sensors,
+                                          plants: viewModel.region!.plants,
+                                          isConnected: true,
+                                        );
+                                        viewModel.updateRegion(updatedRegion);
+                                      }
+                                    });
+                                  }
+                                });
+                              },
+                            ),
                     ),
                   ],
                 ),
@@ -222,6 +255,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
     TextEditingController nameController = TextEditingController(text: region.name);
     TextEditingController surfaceController = TextEditingController(text: region.surface.toString());
     bool isLoading = false;
+    final l10n = AppLocalizations.of(context)!;
 
     // Get screen size for responsive dialog
     final screenSize = MediaQuery.of(context).size;
@@ -233,7 +267,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Update Region'),
+              title: Text(l10n.updateRegion),
               content: Container(
                 width: isSmallScreen ? screenSize.width * 0.85 : screenSize.width * 0.5,
                 child: SingleChildScrollView(
@@ -242,8 +276,8 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                     children: [
                       TextField(
                         controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: "Region Name",
+                        decoration: InputDecoration(
+                          labelText: l10n.regionName,
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -251,8 +285,8 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                       TextField(
                         controller: surfaceController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: "Surface Area (m²)",
+                        decoration: InputDecoration(
+                          labelText: l10n.surfaceArea,
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -263,7 +297,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                 ),
                 ElevatedButton(
                   onPressed: isLoading
@@ -271,7 +305,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                       : () async {
                           if (nameController.text.isEmpty || surfaceController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Please fill all fields"), backgroundColor: Colors.red),
+                              SnackBar(content: Text(l10n.pleaseFillFields), backgroundColor: Colors.red),
                             );
                             return;
                           }
@@ -279,7 +313,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                           final surface = double.tryParse(surfaceController.text);
                           if (surface == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Invalid surface value"), backgroundColor: Colors.red),
+                              SnackBar(content: Text(l10n.invalidSurfaceValue), backgroundColor: Colors.red),
                             );
                             return;
                           }
@@ -304,7 +338,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                             Navigator.of(dialogContext).pop();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(response.message ?? "Update failed"), backgroundColor: Colors.red),
+                              SnackBar(content: Text(response.message ?? l10n.updateFailed), backgroundColor: Colors.red),
                             );
                           }
                         },
@@ -318,7 +352,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text('Update'),
+                      : Text(l10n.update),
                 ),
               ],
             );
@@ -330,12 +364,13 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
 
   void _showDeleteConfirmationDialog(BuildContext context, RegionDetailsViewModel viewModel) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final l10n = AppLocalizations.of(context)!;
     
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this region?'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.confirmDeleteMessage),
         insetPadding: EdgeInsets.symmetric(
           horizontal: isSmallScreen ? 20.0 : 40.0,
           vertical: 24.0,
@@ -343,7 +378,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -353,11 +388,11 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                 context.go(RouteNames.land);
               } else if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(response.message ?? 'Delete failed'), backgroundColor: Colors.red),
+                  SnackBar(content: Text(response.message ?? l10n.deleteFailed), backgroundColor: Colors.red),
                 );
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -366,12 +401,13 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
 
   void _showAddSensorsDialog(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final l10n = AppLocalizations.of(context)!;
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Sensors'),
-        content: const Text('This feature is coming soon!'),
+        title: Text(l10n.addSensors),
+        content: Text(l10n.featureComingSoon),
         insetPadding: EdgeInsets.symmetric(
           horizontal: isSmallScreen ? 20.0 : 40.0,
           vertical: 24.0,
@@ -379,7 +415,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),

@@ -16,9 +16,15 @@ class SmartRegionsGrid extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;
 
-    // Connect the irrigation view model to the provider if not already done
-    if (provider.isAutomaticMode != irrigationViewModel.isAutomaticMode) {
+    // Improved initialization logic to ensure proper state synchronization
+    // This runs on every build, but with efficient checks to minimize unnecessary updates
+    if (provider.isAutomaticMode != irrigationViewModel.isAutomaticMode || 
+        !_areControlsSynchronized(provider, irrigationViewModel)) {
+      // Force full synchronization
       provider.setIrrigationViewModel(irrigationViewModel);
+      
+      // Ensure system status is up-to-date
+      Future.microtask(() => irrigationViewModel.getSystemStatus());
     }
 
     int calculateCrossAxisCount() {
@@ -165,17 +171,15 @@ class SmartRegionsGrid extends StatelessWidget {
                                       ? HighlightLevel.medium
                                       : HighlightLevel.danger;
                           break;
-                        case "Soil":
-                          highlightLevel = subtitle == "Growth"
-                              ? HighlightLevel.normal
-                              : HighlightLevel.medium;
+                        case "Ventilator":
+                          highlightLevel = HighlightLevel.normal;
                           break;
                         default:
                           highlightLevel = HighlightLevel.normal;
                       }
 
                       bool isDisabled = provider.isAutomaticMode && 
-                          (title == "Temperature" || title == "Irrigation");
+                          (title == "Temperature" || title == "Irrigation" || title == "Ventilator");
 
                       return SmartRegionCard(
                         icon: card["icon"],
@@ -243,5 +247,13 @@ class SmartRegionsGrid extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Helper method to check if all controls are properly synchronized
+  bool _areControlsSynchronized(SmartRegionsProvider provider, IrrigationViewModel viewModel) {
+    return provider.switches[0] == viewModel.isLedOn &&
+           provider.switches[1] == viewModel.isTemperatureSensorOn &&
+           provider.switches[2] == viewModel.isPumpOn &&
+           provider.switches[3] == viewModel.isVentilatorOn;
   }
 }
