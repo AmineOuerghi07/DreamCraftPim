@@ -1,3 +1,4 @@
+// model/domain/user.dart
 class User {
   final String userId;
   final String email;
@@ -8,6 +9,7 @@ class User {
   final String role;
   final String phone;
   final String? image;
+  final String? token;
 
   User({
     required this.userId,
@@ -19,32 +21,35 @@ class User {
     required this.role,
     required this.phone,
     this.image,
+    this.token,
   });
 
   // Convert JSON response to User object
   factory User.fromJson(Map<String, dynamic> json) {
-    print('👤 [User] Conversion des données JSON:');
-    print('   - Données reçues: $json');
+  
     
     final userId = json['_id']?.toString() ?? json['id']?.toString() ?? json['userId']?.toString() ?? '';
     final image = json['image']?.toString();
+    final token = json['token']?.toString();
     
-    print('   - ID extrait: $userId');
-    print('   - Image extraite: $image');
+    // Extract phone number from either 'phonenumber' or 'phone' field
+    final phone = json['phone']?.toString() ?? json['phonenumber']?.toString() ?? '';
+    
+   
     
     return User(
       userId: userId,
-      fullname: json['fullname']?.toString() ?? '',
+      fullname: json['fullname']?.toString() ?? json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
-      phonenumber: json['phonenumber']?.toString() ?? '',
+      phonenumber: phone,
       address: json['address']?.toString() ?? '',
       password: json['password']?.toString() ?? '',
       role: json['role']?.toString() ?? '',
-      phone: json['phonenumber']?.toString() ?? '',
+      phone: phone,
       image: image,
+      token: token,
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -57,6 +62,7 @@ class User {
       'role': role,
       'phonenumber': phone,
       'image': image,
+      'token': token,
     };
   }
 }

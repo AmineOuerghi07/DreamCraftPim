@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pim_project/constants/constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -26,7 +27,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   Future<void> _resendOtp() async {
     if (!_canResendOtp) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please wait before resending OTP')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.waitBeforeResend)),
       );
       return;
     }
@@ -47,7 +48,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
           print("New stored OTP: $_sentOtp");
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('OTP resent successfully')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.otpResentSuccess)),
           );
           setState(() {
             _canResendOtp = false;
@@ -93,7 +94,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         print("OTP set to: $_sentOtp");  // <-- Check OTP value
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('OTP sent successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.otpSentSuccess)),
         );
       } else {
         print("No OTP key found in response.");
@@ -101,7 +102,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     } else {
       print("Failed to send OTP. Status code: ${response.statusCode}");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to send OTP')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.failedToSendOtp)),
       );
     }
   }
@@ -109,7 +110,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
  void _verifyOtp() {
   if (_sentOtp == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('OTP not sent yet. Please request OTP.')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.otpNotSent)),
     );
     return;
   }
@@ -121,12 +122,12 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User ID is missing. Cannot proceed.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.userIdMissing)),
       );
     }
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Incorrect OTP. Please try again.')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.incorrectOtp)),
     );
   }
 }
@@ -139,6 +140,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -146,8 +148,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Verification Email",
+            Text(
+              l10n.verificationEmail,
               style: TextStyle(
                 color: Color(0xFF3E754E),
                 fontSize: 24,
@@ -155,8 +157,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              "Please enter the code we just sent to your email",
+            Text(
+              l10n.enterVerificationCode,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF777777),
@@ -182,8 +184,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             const SizedBox(height: 20),
             TextButton(
               onPressed: _resendOtp,
-              child: const Text(
-                "Resend Code",
+              child: Text(
+                l10n.resendCode,
                 style: TextStyle(
                   color: Color(0xFF3E754E),
                   fontWeight: FontWeight.bold,
@@ -197,9 +199,9 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
               onPressed: _verifyOtp,
-              child: const Center(
+              child: Center(
                 child: Text(
-                  "Next",
+                  l10n.next,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,

@@ -1,9 +1,9 @@
+// view/screens/land_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pim_project/constants/constants.dart';
-import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
@@ -12,7 +12,6 @@ import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
 import 'package:pim_project/view/screens/Components/home_cart.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -76,8 +75,6 @@ class _LandScreenState extends State<LandScreen> {
       if (searchFocusNode.hasFocus) {
         searchFocusNode.unfocus();
       }
-        String _username = '';
-    bool _isLoading = true;
     }
     
     void showFilterDialog(BuildContext context) {
@@ -187,27 +184,7 @@ class _LandScreenState extends State<LandScreen> {
       );
     }
 
-    List<Land> applyFilters(List<Land> lands) {
-      // Apply search filter first
-      var filtered = lands.where((land) =>
-        land.name.toLowerCase().contains(searchController.text.toLowerCase()) ||
-        land.cordonate.toLowerCase().contains(searchController.text.toLowerCase())
-      ).toList();
-
-      // Apply rent status filter
-      if (_selectedFilter == 'forRent') {
-        filtered = filtered.where((land) => land.forRent).toList();
-      } else if (_selectedFilter == 'notForRent') {
-        filtered = filtered.where((land) => !land.forRent).toList();
-      }
-
-      // Apply location filter
-      if (_selectedLocation != 'all') {
-        filtered = filtered.where((land) => land.cordonate == _selectedLocation).toList();
-      }
-
-      return filtered;
-    }
+  
 
     void showAddLandPopup(BuildContext context) {
       File? selectedImage;
@@ -215,6 +192,7 @@ class _LandScreenState extends State<LandScreen> {
       TextEditingController landNameController = TextEditingController();
       TextEditingController spaceController = TextEditingController();
       bool isLoading = false;
+      final l10n = AppLocalizations.of(context)!;
 
       Future<void> pickImage(StateSetter setState) async {
         final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -250,7 +228,7 @@ class _LandScreenState extends State<LandScreen> {
                         ),
                         Center(
                           child: Text(
-                            "Add New Land",
+                            l10n.lands,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -261,9 +239,9 @@ class _LandScreenState extends State<LandScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: landNameController,
-                          decoration: const InputDecoration(
-                            labelText: "Land Name",
-                            hintText: "Enter the name of the land",
+                          decoration: InputDecoration(
+                            labelText: l10n.landName,
+                            hintText: l10n.landName,
                             border: UnderlineInputBorder(),
                           ),
                         ),
@@ -272,8 +250,8 @@ class _LandScreenState extends State<LandScreen> {
                           controller: locationController,
                           readOnly: true,
                           decoration: InputDecoration(
-                            labelText: "Location",
-                            hintText: "Choose location on map",
+                            labelText: l10n.location,
+                            hintText: l10n.location,
                             border: const UnderlineInputBorder(),
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.map, color: Colors.blue),
@@ -292,9 +270,9 @@ class _LandScreenState extends State<LandScreen> {
                         TextField(
                           controller: spaceController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: "Space (m²)",
-                            hintText: "Enter the land size in square meters",
+                          decoration: InputDecoration(
+                            labelText: l10n.surface,
+                            hintText: l10n.surface,
                             border: UnderlineInputBorder(),
                           ),
                         ),
@@ -306,8 +284,8 @@ class _LandScreenState extends State<LandScreen> {
                               onPressed: () async {
                                 await pickImage(setState);
                               },
-                              child: const Text(
-                                "Upload Image",
+                              child: Text(
+                                l10n.changeImage,
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.w600,
@@ -332,8 +310,8 @@ class _LandScreenState extends State<LandScreen> {
                                         selectedImage == null) {
                                       if (!mounted) return;
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text("Please fill all fields and upload an image."),
+                                        SnackBar(
+                                          content: Text(l10n.fillAllFields),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -351,14 +329,34 @@ class _LandScreenState extends State<LandScreen> {
                                       image: '',
                                       regions: [],
                                       rentPrice: 0,
+                                      userId: widget.userId,
+                                      ownerPhone: '',
                                     );
+                                    
+                                    // Fetch the owner's phone number before adding the land
+                                    try {
+                                      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
+                                      final userResponse = await http.get(url);
+                                      
+                                      if (userResponse.statusCode == 200 || userResponse.statusCode == 201) {
+                                        final userData = jsonDecode(userResponse.body);
+                                        // Try to get phone from either field
+                                        final phoneNumber = userData['phone']?.toString() ?? 
+                                                           userData['phonenumber']?.toString() ?? '';
+                                        newLand = newLand.copyWith(ownerPhone: phoneNumber);
+                                        print('Set owner phone number: $phoneNumber for new land');
+                                      }
+                                    } catch (e) {
+                                      print('Error fetching owner phone number: $e');
+                                    }
+                                    
                                     final landViewModel = Provider.of<LandViewModel>(context, listen: false);
                                     await landViewModel.addLand(land: newLand, image: selectedImage!).then((response) {
                                       if (!mounted) return;
                                       if (response.status == Status.COMPLETED) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text("Land added successfully!"),
+                                          SnackBar(
+                                            content: Text(l10n.profileUpdatedSuccess),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
@@ -366,7 +364,7 @@ class _LandScreenState extends State<LandScreen> {
                                       } else {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text(response.message ?? "Failed to add land."),
+                                            content: Text(response.message ?? l10n.updateFailed),
                                             backgroundColor: Colors.red,
                                           ),
                                         );
@@ -386,7 +384,7 @@ class _LandScreenState extends State<LandScreen> {
                             ),
                             child: isLoading
                                 ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text("Save", style: TextStyle(color: Colors.white)),
+                                : Text(l10n.save, style: TextStyle(color: Colors.white)),
                           ),
                         ),
                       ],
@@ -406,11 +404,13 @@ class _LandScreenState extends State<LandScreen> {
         body: Column(
           children: [
             const Padding(padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12)),
-           Header(
-                greetingText: 'Bonjour ',
-                username: _username,
-                userId: widget.userId,
-              ),
+           _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Header(
+                  greetingText: '${l10n.hello} ',
+                  username: _username,
+                  userId: widget.userId,
+                ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -424,6 +424,7 @@ class _LandScreenState extends State<LandScreen> {
                       onChanged: (query) {
                         Provider.of<LandViewModel>(context, listen: false).searchLands(query);
                       },
+                      l10n: l10n,
                     ),
                     const SizedBox(height: 16),
                     Row(

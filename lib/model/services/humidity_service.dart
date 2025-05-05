@@ -1,41 +1,38 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:pim_project/constants/constants.dart';
 
 class HumidityService {
- // static const String baseUrl = 'http://192.168.43.232:3000/weather/humidity-details';
-  static const String baseUrl = 'http://127.0.0.1:3000/weather/humidity-details';
-
-
-
-  Future<Map<String, dynamic>> getHumidityDetails(String city) async {
-    final url = Uri.parse('$baseUrl?city=$city');
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = json.decode(response.body);
-        return data;
-      } else {
-        throw Exception('Erreur: Statut ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Erreur lors de la récupération des données: $e');
-    }
-  }
+  static const String baseUrl = '${AppConstants.baseUrl}/weather/humidity-details/coordinates';
 
   Future<Map<String, dynamic>> getHumidityByCoordinates(double latitude, double longitude) async {
-    final url = Uri.parse('$baseUrl?lat=$latitude&lon=$longitude');
     try {
-      final response = await http.get(url);
+      print('🌡️ [HumidityService] Récupération des données d\'humidité pour les coordonnées: $latitude, $longitude');
+      final url = Uri.parse('$baseUrl?lat=$latitude&lon=$longitude');
+      
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      print('📡 [HumidityService] Status code: ${response.statusCode}');
+      print('📡 [HumidityService] Response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
+        if (data == null) {
+          throw Exception('Aucune donnée d\'humidité reçue');
+        }
         return data;
       } else {
-        throw Exception('Erreur: Statut ${response.statusCode}');
+        throw Exception('Erreur: Statut ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      throw Exception('Erreur lors de la récupération des données: $e');
+      print('❌ [HumidityService] Erreur: $e');
+      throw Exception('Erreur lors de la récupération des données d\'humidité: ${e.toString()}');
     }
   }
 }

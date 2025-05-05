@@ -9,6 +9,7 @@ class UserPreferences {
   static const String _tokenKey = 'token';
   static const String _userKey = 'user';
   static const String _rememberMeKey = 'rememberMe';
+  static const _keyIsFirstInstall = 'isFirstInstall';
 
   // Save userId
   static Future<void> setUserId(String userId) async {
@@ -80,5 +81,15 @@ class UserPreferences {
     await prefs.remove(_userKey);
     await prefs.remove(_rememberMeKey);
     developer.log('All user preferences cleared (logout)', name: 'UserPreferences');
+  }
+
+  static Future<bool?> getIsFirstInstall() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyIsFirstInstall); // Returns null if not set
+  }
+
+  static Future<void> setIsFirstInstall(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsFirstInstall, value);
   }
 }

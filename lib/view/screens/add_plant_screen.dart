@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/plant.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/add_plant_view_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddPlantScreen extends StatelessWidget {
   final String regionId;
@@ -37,9 +38,9 @@ class AddPlantScreen extends StatelessWidget {
                               context.pop(selectedPlants); // Return selected plants
                             }
                           : null,
-                      child: const Text(
-                        "Save",
-                        style: TextStyle(
+                      child: Text(
+                        AppLocalizations.of(context)!.save,
+                        style: const TextStyle(
                           color: Colors.green,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -57,7 +58,7 @@ class AddPlantScreen extends StatelessWidget {
                   // Search Bar
                   TextField(
                     decoration: InputDecoration(
-                      hintText: "Search Plants...",
+                      hintText: AppLocalizations.of(context)!.search,
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -73,7 +74,7 @@ class AddPlantScreen extends StatelessWidget {
                     child: viewModel.isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : viewModel.filteredPlants.isEmpty
-                            ? const Center(child: Text("No plants found"))
+                            ? Center(child: Text(AppLocalizations.of(context)!.noPlantsFound))
                             : GridView.builder(
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({Key? key}) : super(key: key);
@@ -37,16 +38,17 @@ class _ContactScreenState extends State<ContactScreen> {
       
       if (!mounted) return;
       
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
-            children: const [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 12),
-              Text('Message sent successfully!'),
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Text(l10n.messageSentSuccess),
             ],
           ),
-          backgroundColor: const Color(0xFF4CAF50), // Stronger green for better contrast
+          backgroundColor: const Color(0xFF4CAF50),
           duration: const Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -63,22 +65,19 @@ class _ContactScreenState extends State<ContactScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9F5), // Subtle green tint for background
+      backgroundColor: const Color(0xFFF5F9F5),
       appBar: AppBar(
-        title: const Text(
-          'Contact Us', 
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: const Color(0xFF4CAF50), // More vibrant green
-        elevation: 0, // Modern flat design
+        title: Text(l10n.contactUs),
+        backgroundColor: const Color(0xFF4CAF50),
+        elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header image or illustration could go here
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
@@ -91,25 +90,25 @@ class _ContactScreenState extends State<ContactScreen> {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Icon(
+                  children: [
+                    const Icon(
                       Icons.contact_support_outlined,
                       color: Colors.white,
                       size: 48,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      'We\'re here to help',
-                      style: TextStyle(
+                      l10n.helpMessage,
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      'Feel free to reach out with any questions or suggestions.',
-                      style: TextStyle(
+                      l10n.helpMessage,
+                      style: const TextStyle(
                         fontSize: 16,
                         color: Colors.white,
                         height: 1.5,
@@ -166,6 +165,7 @@ class _ContactForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -178,35 +178,35 @@ class _ContactForm extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Send us a message',
-                style: TextStyle(
+              Text(
+                l10n.sendMessage,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32), // Dark green
+                  color: Color(0xFF2E7D32),
                 ),
               ),
               const SizedBox(height: 24),
               _CustomTextField(
                 controller: nameController,
-                label: 'Full Name',
-                hint: 'Enter your name',
+                label: l10n.name,
+                hint: l10n.enterName,
                 icon: Icons.person_outline,
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter your name' : null,
+                    value!.isEmpty ? l10n.pleaseEnterName : null,
               ),
               const SizedBox(height: 20),
               _CustomTextField(
                 controller: emailController,
-                label: 'Email Address',
-                hint: 'example@email.com',
+                label: l10n.email,
+                hint: l10n.enterEmail,
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
+                    return l10n.pleaseEnterEmail;
                   } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                    return 'Please enter a valid email';
+                    return l10n.pleaseEnterValidEmail;
                   }
                   return null;
                 },
@@ -214,12 +214,12 @@ class _ContactForm extends StatelessWidget {
               const SizedBox(height: 20),
               _CustomTextField(
                 controller: messageController,
-                label: 'Message',
-                hint: 'How can we help you?',
+                label: l10n.message,
+                hint: l10n.enterMessage,
                 icon: Icons.message_outlined,
                 maxLines: 5,
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter your message' : null,
+                    value!.isEmpty ? l10n.pleaseEnterMessage : null,
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -229,7 +229,7 @@ class _ContactForm extends StatelessWidget {
                   onPressed: isSubmitting ? null : onSubmit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),
-                    disabledBackgroundColor: const Color(0xFFA5D6A7), // Light green when disabled
+                    disabledBackgroundColor: const Color(0xFFA5D6A7),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -244,9 +244,9 @@ class _ContactForm extends StatelessWidget {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Send Message',
-                          style: TextStyle(
+                      : Text(
+                          l10n.sendMessage,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -344,10 +344,11 @@ class _ContactInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E9), // Light green background
+        color: const Color(0xFFE8F5E9),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -360,12 +361,12 @@ class _ContactInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Other Ways to Contact Us',
-            style: TextStyle(
+          Text(
+            l10n.contactInformation,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2E7D32), // Dark green
+              color: Color(0xFF2E7D32),
             ),
           ),
           const SizedBox(height: 16),
@@ -397,7 +398,7 @@ class _ContactInfoSection extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               _SocialButton(
-                icon: Icons.install_mobile_rounded, // Using as an Instagram icon
+                icon: Icons.install_mobile_rounded,
                 onTap: () {},
                 backgroundColor: const Color(0xFFE4405F),
               ),

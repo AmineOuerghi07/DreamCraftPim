@@ -8,11 +8,17 @@ class AppConstants {
   static const double appBarHeight = 56.0;
   static const Color primaryColor = Color(0xFF6200EA);
   static const Color backgroundColor = Color(0xFFF5F5F5);
-  //static const String  chatBaseUrl = "http://192.168.43.232:8000";
-  static const String chatBaseUrl = "http://127.0.0.1:8000";
+ static const String  chatBaseUrl = "http://127.0.0.1:8000";
+ // static const String  chatBaseUrl = "http://192.168.0.168:8000";
+  
+  static const String baseUrl = "http://127.0.0.1:3000"; 
+  //static const String baseUrl = 'http://192.168.0.168:3000';
+  static const String apiVersion = 'v1';
+  static const String apiUrl = '$baseUrl/api/$apiVersion';
 
-  //static const String baseUrl = "http://192.168.43.232:3000";
-  static const String baseUrl = "http://localhost:3000";
+ 
+
+
 
   // API Endpoints
   static const String signInEndpoint = "$baseUrl/sign-in";
@@ -21,5 +27,5 @@ class AppConstants {
   static const String usersEndpoint = "$baseUrl/users";
 
   //static const String imagesbaseURL = "http://192.168.43.232:3000/uploads/";
-  static const String imagesbaseURL = "http://localhost:3000/uploads/";
+  static const String imagesbaseURL = "http://127.0.0.1:3000/uploads/";
 }

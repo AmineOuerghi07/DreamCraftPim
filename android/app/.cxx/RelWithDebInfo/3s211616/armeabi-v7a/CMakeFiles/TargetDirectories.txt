@@ -1,0 +1,2 @@
+C:/Users/LENOVO/Desktop/piman/DreamCraftPim/android/app/.cxx/RelWithDebInfo/3s211616/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/LENOVO/Desktop/piman/DreamCraftPim/android/app/.cxx/RelWithDebInfo/3s211616/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -39,10 +39,21 @@ class UserRepository extends ChangeNotifier {
   }
 
   // Google login
-  Future<ApiResponse<User>> googleLogin(String googleToken) async {
+  Future<ApiResponse<User>> googleLogin(String googleToken, String email, String fullname, String? photoUrl) async {
     try {
-      return await userService.googleLogin(googleToken);
+      print('🔐 [UserRepository] Début de la connexion Google');
+      print('📧 Email: $email');
+      print('👤 Nom: $fullname');
+      print('🖼️ Image: $photoUrl');
+
+      final response = await userService.googleLogin(googleToken, email, fullname, photoUrl);
+      print('✅ [UserRepository] Réponse reçue du service');
+      print('📊 Statut: ${response.status}');
+      print('📄 Données: ${response.data?.toJson()}');
+
+      return response;
     } catch (e) {
+      print('❌ [UserRepository] Erreur lors de la connexion Google: $e');
       return ApiResponse.error('Repository error during Google login: $e');
     }
   }
