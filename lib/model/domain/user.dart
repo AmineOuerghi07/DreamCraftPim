@@ -26,8 +26,7 @@ class User {
 
   // Convert JSON response to User object
   factory User.fromJson(Map<String, dynamic> json) {
-    print('👤 [User] Conversion des données JSON:');
-    print('   - Données reçues: $json');
+  
     
     final userId = json['_id']?.toString() ?? json['id']?.toString() ?? json['userId']?.toString() ?? '';
     final image = json['image']?.toString();
@@ -36,10 +35,7 @@ class User {
     // Extract phone number from either 'phonenumber' or 'phone' field
     final phone = json['phone']?.toString() ?? json['phonenumber']?.toString() ?? '';
     
-    print('   - ID extrait: $userId');
-    print('   - Phone extrait: $phone');
-    print('   - Image extraite: $image');
-    print('   - Token extrait: $token');
+   
     
     return User(
       userId: userId,
