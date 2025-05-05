@@ -24,7 +24,7 @@ class ProductDetailsProvider with ChangeNotifier {
       notifyListeners();
       // Here, replace with your actual API call
       final apiService = ApiService();
-      relatedProducts = await apiService.fetchProducts().then((products) {
+      relatedProducts = await apiService.fetchProductsfromDatabase().then((products) {
         return products.where((product) => product.category == this.product?.category && product.id != productId).toList();
       });
     } catch (e) {
@@ -41,7 +41,7 @@ class ProductDetailsProvider with ChangeNotifier {
       notifyListeners();
       // Here, replace with your actual API call
       final apiService = ApiService();
-      product = await apiService.fetchProducts().then((products) {
+      product = await apiService.fetchProductsfromDatabase().then((products) {
         return products.firstWhere((product) => product.id == productId);
       });
     } catch (e) {

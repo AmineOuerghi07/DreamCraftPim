@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/humidity_view_model.dart';
 import 'dart:math';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HumidityScreen extends StatelessWidget {
   final double latitude;
@@ -156,10 +157,11 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Humidité'),
+        title: Text(l10n.humidityTitle),
         backgroundColor: widget.backgroundColor ?? Colors.blue,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -171,16 +173,16 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
       body: Consumer<HumidityViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: Text(l10n.humidityLoading));
           }
 
           if (viewModel.error != null) {
-            return Center(child: Text(viewModel.error!));
+            return Center(child: Text(l10n.humidityError));
           }
 
           final humidityData = viewModel.humidityData;
           if (humidityData == null) {
-            return const Center(child: Text('Aucune donnée disponible'));
+            return Center(child: Text(l10n.humidityNoData));
           }
 
           final condition = humidityData['weather']?['condition']?.toLowerCase() ?? '';
@@ -291,6 +293,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
 
   Widget _buildAnimatedHumidityBox(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
     final condition = data['weather']?['condition']?.toLowerCase() ?? '';
     
     // Use passed colors if available, otherwise calculate based on condition
@@ -384,6 +387,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
 
   Widget _buildCombinedHumidityBox(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
     final humidity = data['humidity']?['current'] ?? '0%';
     final dewPoint = data['humidity']?['dewPoint'] ?? 'N/A';
 
@@ -438,9 +442,9 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
                           color: Colors.white,
                         ),
                       ),
-                      const Text(
-                        'Humidité actuelle',
-                        style: TextStyle(
+                      Text(
+                        l10n.humidityCurrent,
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.white70,
                         ),
@@ -449,20 +453,20 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildHumidityInfoRow(Icons.thermostat, 'Point de rosée', dewPoint),
+                _buildHumidityInfoRow(Icons.thermostat, l10n.humidityDewPoint, dewPoint),
                 const Divider(height: 32, color: Colors.white30),
-                const Text(
-                  'Détails journaliers',
-                  style: TextStyle(
+                Text(
+                  l10n.humidityDailyDetails,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildHumidityInfoRow(Icons.water_drop, 'Humidité moyenne', averageHumidity),
+                _buildHumidityInfoRow(Icons.water_drop, l10n.humidityAverage, averageHumidity),
                 const SizedBox(height: 8),
-                _buildHumidityInfoRow(Icons.thermostat_auto, 'Plage point de rosée', dewPointRange),
+                _buildHumidityInfoRow(Icons.thermostat_auto, l10n.humidityDewPointRange, dewPointRange),
               ],
             ),
           );
@@ -483,7 +487,6 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-
               color: Colors.white70,
             ),
           ),
@@ -494,9 +497,8 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
             value,
             style: const TextStyle(
               fontSize: 16,
-               fontWeight: FontWeight.w500,
-              
-             color: Colors.white,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
             ),
             textAlign: TextAlign.end,
           ),
@@ -506,6 +508,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
 
   Widget _buildHumidityGraph(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
     final humidity = data['humidity'] as Map<String, dynamic>?;
     if (humidity == null) return const SizedBox.shrink();
     
@@ -535,9 +538,9 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Évolution de l\'humidité',
-            style: TextStyle(
+          Text(
+            l10n.humidityEvolution,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0288D1),
@@ -570,17 +573,18 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
   
   Widget _buildDailySummary(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
     final dailySummary = data['dailySummary'];
-    String description = 'Aucun résumé disponible';
+    String description = l10n.humidityNoData;
     
     if (dailySummary is Map<String, dynamic>) {
-      description = dailySummary['description'] ?? 'Aucun résumé disponible';
+      description = dailySummary['description'] ?? l10n.humidityNoData;
     } else if (dailySummary is String) {
       description = dailySummary;
     }
     
     return Container(
-      constraints: BoxConstraints(minHeight: 100),
+      constraints: const BoxConstraints(minHeight: 100),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -597,9 +601,9 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Résumé quotidien',
-            style: TextStyle(
+          Text(
+            l10n.humidityDailySummary,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0288D1),
@@ -621,11 +625,12 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
 
   Widget _buildDailyComparison(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
     final comparison = data['dailyComparison'] as Map<String, dynamic>?;
     if (comparison == null) return const SizedBox.shrink();
     
     return Container(
-      constraints: BoxConstraints(minHeight: 100),
+      constraints: const BoxConstraints(minHeight: 100),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -642,17 +647,17 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Comparaison journalière',
-            style: TextStyle(
+          Text(
+            l10n.humidityDailyComparison,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0288D1),
             ),
           ),
           const SizedBox(height: 12),
-          _buildComparisonRow('Aujourd\'hui', comparison['today'] ?? 'N/A'),
-          _buildComparisonRow('Hier', comparison['yesterday'] ?? 'N/A'),
+          _buildComparisonRow(l10n.humidityToday, comparison['today'] ?? l10n.humidityNoData),
+          _buildComparisonRow(l10n.humidityYesterday, comparison['yesterday'] ?? l10n.humidityNoData),
           const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.all(8),
@@ -721,6 +726,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
 
   Widget _buildRelativeHumidity(Map<String, dynamic> data) {
+    final l10n = AppLocalizations.of(context)!;
     final relativeHumidity = data['relativeHumidity'] as Map<String, dynamic>?;
     if (relativeHumidity == null) return const SizedBox.shrink();
     
@@ -733,7 +739,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),    
-             blurRadius: 10,
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
@@ -742,9 +748,9 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Humidité relative',
-            style: TextStyle(
+          Text(
+            l10n.humidityRelative,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0288D1),

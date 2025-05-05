@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pim_project/view/screens/PhoneNumberScreen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -14,21 +13,18 @@ class ForgotPasswordScreen extends StatelessWidget {
     
     // Get screen size
     final Size screenSize = MediaQuery.of(context).size;
-    final bool isTablet = screenSize.shortestSide >= 600;
+    final bool isTablet = screenSize.width > 600;
     
-    // Calculate responsive dimensions - match login screen header height
-    final double headerHeight = isTablet 
-        ? screenSize.height * 0.35 
-        : screenSize.height * 0.3;
+    // Calculate responsive dimensions
     final double horizontalPadding = isTablet 
-        ? screenSize.width * 0.1
-        : screenSize.width * 0.08;
+        ? screenSize.width * 0.08
+        : screenSize.width * 0.05;
     
     // Text sizes
-    final double titleFontSize = isTablet ? 32.0 : 28.0;
-    final double subTitleFontSize = isTablet ? 16.0 : 14.0;
-    final double optionTitleFontSize = isTablet ? 18.0 : 16.0;
-    final double optionSubtitleFontSize = isTablet ? 16.0 : 14.0;
+    final double titleFontSize = isTablet ? 32 : 28;
+    final double subTitleFontSize = isTablet ? 18 : 16;
+    final double optionTitleFontSize = isTablet ? 20 : 18;
+    final double optionSubtitleFontSize = isTablet ? 16 : 14;
     
     // Responsive spacing
     final double verticalSpacing = screenSize.height * 0.02;
@@ -41,19 +37,33 @@ class ForgotPasswordScreen extends StatelessWidget {
       required String title,
       required String subtitle,
       required VoidCallback onTap,
+      required double delay,
     }) {
-      return GestureDetector(
+      return TweenAnimationBuilder(
+        tween: Tween<double>(begin: 0, end: 1),
+        duration: Duration(milliseconds: 800),
+        curve: Curves.easeOut,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Transform.translate(
+              offset: Offset(30 * (1 - value), 0),
+              child: child,
+            ),
+          );
+        },
+        child: GestureDetector(
         onTap: onTap,
         child: Container(
           width: double.infinity,
           padding: EdgeInsets.all(containerPadding),
           decoration: BoxDecoration(
-            color: const Color(0xFFDAE5DD),
-            borderRadius: BorderRadius.circular(isTablet ? 12 : 10),
+              color: const Color(0xFFF2F7F4),
+              borderRadius: BorderRadius.circular(isTablet ? 16 : 12),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
+                  blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -62,7 +72,7 @@ class ForgotPasswordScreen extends StatelessWidget {
             textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(isTablet ? 14 : 12),
                 decoration: BoxDecoration(
                   color: const Color(0xFF3E754E).withOpacity(0.15),
                   shape: BoxShape.circle,
@@ -107,6 +117,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 size: isTablet ? 20 : 16,
               ),
             ],
+            ),
           ),
         ),
       );
@@ -114,60 +125,64 @@ class ForgotPasswordScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-
-      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            isRTL ? Icons.arrow_forward : Icons.arrow_back,
+            color: const Color(0xFF3E754E),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header with curved image - identical to login screen
-            Stack(
-              children: [
-                ClipPath(
-                  clipper: ResponsiveWaveClipper(),
-                  child: SizedBox(
-                    height: headerHeight,
-                    width: double.infinity,
-                    child: Image.asset(
-                      "assets/images/plantelogin.png",
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: AppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    iconTheme: const IconThemeData(color: Colors.white),
-                    toolbarHeight: isTablet ? 70 : 56,
-                  ),
-                ),
-              ],
-            ),
-
-            Expanded(
               child: SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: verticalSpacing),
+                SizedBox(height: verticalSpacing * 2),
                       
-                      // Title and subtitle
-                      Text(
+                // Title with animation
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 800),
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: Transform.translate(
+                        offset: Offset(0, 20 * (1 - value)),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Text(
                         l10n.forgetPassword,
                         style: GoogleFonts.roboto(
                           fontSize: titleFontSize,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF3E754E),
+                    ),
+                    textAlign: TextAlign.center,
                         ),
                       ),
+                
                       SizedBox(height: verticalSpacing * 0.5),
                       
-                      Text(
+                // Subtitle with animation
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: child,
+                    );
+                  },
+                  child: Text(
                         l10n.selectContact,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.roboto(
@@ -175,15 +190,33 @@ class ForgotPasswordScreen extends StatelessWidget {
                           fontWeight: FontWeight.w300,
                           color: const Color(0xFF777777),
                         ),
+                  ),
                       ),
                       
-                      SizedBox(height: verticalSpacing * 2),
+                SizedBox(height: verticalSpacing * 3),
                       
+                // Options in a card container
+                Container(
+                  padding: EdgeInsets.all(isTablet ? 24 : 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
                       // Email option
                       buildOptionContainer(
                         icon: Icons.email_outlined,
                         title: l10n.email,
                         subtitle: l10n.sendToEmail,
+                        delay: 0.2,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -196,25 +229,24 @@ class ForgotPasswordScreen extends StatelessWidget {
                       
                       SizedBox(height: verticalSpacing),
                       
-                      // Phone option
-                      buildOptionContainer(
-                        icon: Icons.phone_android,
-                        title: l10n.phoneNumber,
-                        subtitle: l10n.sendToPhone,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PhoneNumberScreen(),
-                            ),
-                          );
-                        },
+                     
+                    ],
+                  ),
                       ),
                       
                       SizedBox(height: verticalSpacing * 2),
                       
                       // OR Divider with more styling
-                      Row(
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 1000),
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: child,
+                    );
+                  },
+                  child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
@@ -241,15 +273,31 @@ class ForgotPasswordScreen extends StatelessWidget {
                             ),
                           ),
                         ],
+                  ),
                       ),
                       
                       SizedBox(height: verticalSpacing * 1.5),
                       
-                      // Sign in link with enhanced styling
-                      GestureDetector(
+                // Sign in link with enhanced styling and animation
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 1200),
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: child,
+                    );
+                  },
+                  child: GestureDetector(
                         onTap: () {
                           Navigator.pop(context);
                         },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: const Color(0xFFDAE5DD)),
+                      ),
                         child: Text.rich(
                           TextSpan(
                             text: l10n.didYouRemember,
@@ -268,54 +316,46 @@ class ForgotPasswordScreen extends StatelessWidget {
                                 ),
                               ),
                             ],
+                        ),
+                      ),
                           ),
                         ),
                       ),
                       
+                // Add ornamental elements at the bottom
                       SizedBox(height: verticalSpacing * 2),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: screenSize.width * 0.2,
+                        height: 1,
+                        color: const Color(0xFFDAE5DD),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Icon(
+                          Icons.eco,
+                          color: const Color(0xFF3E754E).withOpacity(0.5),
+                          size: isTablet ? 24 : 20,
+                        ),
+                      ),
+                      Container(
+                        width: screenSize.width * 0.2,
+                        height: 1,
+                        color: const Color(0xFFDAE5DD),
+                      ),
                     ],
                   ),
                 ),
-              ),
+                SizedBox(height: verticalSpacing * 2),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
-  }
-}
-
-// Responsive Wave Clipper - same as in LoginScreen for consistency
-class ResponsiveWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    path.lineTo(0, size.height * 0.8);
-
-    // First curve
-    path.quadraticBezierTo(
-      size.width * 0.25,
-      size.height,
-      size.width * 0.5,
-      size.height * 0.85,
-    );
-
-    // Second curve
-    path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height * 0.7,
-      size.width,
-      size.height * 0.8,
-    );
-
-    path.lineTo(size.width, 0);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
-    return false;
   }
 }

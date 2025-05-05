@@ -192,6 +192,7 @@ class _LandScreenState extends State<LandScreen> {
       TextEditingController landNameController = TextEditingController();
       TextEditingController spaceController = TextEditingController();
       bool isLoading = false;
+      final l10n = AppLocalizations.of(context)!;
 
       Future<void> pickImage(StateSetter setState) async {
         final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -227,7 +228,7 @@ class _LandScreenState extends State<LandScreen> {
                         ),
                         Center(
                           child: Text(
-                            "Add New Land",
+                            l10n.lands,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -238,9 +239,9 @@ class _LandScreenState extends State<LandScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: landNameController,
-                          decoration: const InputDecoration(
-                            labelText: "Land Name",
-                            hintText: "Enter the name of the land",
+                          decoration: InputDecoration(
+                            labelText: l10n.landName,
+                            hintText: l10n.landName,
                             border: UnderlineInputBorder(),
                           ),
                         ),
@@ -249,8 +250,8 @@ class _LandScreenState extends State<LandScreen> {
                           controller: locationController,
                           readOnly: true,
                           decoration: InputDecoration(
-                            labelText: "Location",
-                            hintText: "Choose location on map",
+                            labelText: l10n.location,
+                            hintText: l10n.location,
                             border: const UnderlineInputBorder(),
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.map, color: Colors.blue),
@@ -269,9 +270,9 @@ class _LandScreenState extends State<LandScreen> {
                         TextField(
                           controller: spaceController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: "Space (m²)",
-                            hintText: "Enter the land size in square meters",
+                          decoration: InputDecoration(
+                            labelText: l10n.surface,
+                            hintText: l10n.surface,
                             border: UnderlineInputBorder(),
                           ),
                         ),
@@ -283,8 +284,8 @@ class _LandScreenState extends State<LandScreen> {
                               onPressed: () async {
                                 await pickImage(setState);
                               },
-                              child: const Text(
-                                "Upload Image",
+                              child: Text(
+                                l10n.changeImage,
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.w600,
@@ -309,8 +310,8 @@ class _LandScreenState extends State<LandScreen> {
                                         selectedImage == null) {
                                       if (!mounted) return;
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text("Please fill all fields and upload an image."),
+                                        SnackBar(
+                                          content: Text(l10n.fillAllFields),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -354,8 +355,8 @@ class _LandScreenState extends State<LandScreen> {
                                       if (!mounted) return;
                                       if (response.status == Status.COMPLETED) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text("Land added successfully!"),
+                                          SnackBar(
+                                            content: Text(l10n.profileUpdatedSuccess),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
@@ -363,7 +364,7 @@ class _LandScreenState extends State<LandScreen> {
                                       } else {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text(response.message ?? "Failed to add land."),
+                                            content: Text(response.message ?? l10n.updateFailed),
                                             backgroundColor: Colors.red,
                                           ),
                                         );
@@ -383,7 +384,7 @@ class _LandScreenState extends State<LandScreen> {
                             ),
                             child: isLoading
                                 ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text("Save", style: TextStyle(color: Colors.white)),
+                                : Text(l10n.save, style: TextStyle(color: Colors.white)),
                           ),
                         ),
                       ],

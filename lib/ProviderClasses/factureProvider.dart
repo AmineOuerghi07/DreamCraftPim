@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/order.dart';
+import 'package:pim_project/model/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -41,6 +42,18 @@ class FactureProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  Future<Product> fetchProductById(String productId) async {
+    final response = await http.get(Uri.parse('http://localhost:3000/product/$productId'));
+
+    if (response.statusCode == 200) {
+      return Product.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load product details');
+    }
+  }
+
+
   Future<void> createOrder(BuildContext context, double totalAmount) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> cart = prefs.getStringList('cart') ?? [];
@@ -60,9 +73,12 @@ class FactureProvider extends ChangeNotifier {
       ));
     }
 
+
+
+
     // Construct the Order object
     final order = Order(
-      customerId: "67ce51510af75f3304655540",
+      customerId: MyApp.userId.toString(),
       orderStatus: 'pending',
       totalAmount: totalAmount,
       orderItems: orderItems.isNotEmpty ? orderItems : null,
@@ -83,7 +99,9 @@ class FactureProvider extends ChangeNotifier {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create order: ${response.reasonPhrase}')),
+          SnackBar(
+              content:
+                  Text('Failed to create order: ${response.reasonPhrase}')),
         );
       }
     } catch (e) {
@@ -97,16 +115,21 @@ class FactureProvider extends ChangeNotifier {
     if (_isFetching) return; // Empêche plusieurs appels simultanés
     _isFetching = true;
     notifyListeners();
+    
 
     try {
-      String baseUrl = 'http://localhost:3000/order'; // Change selon ton environnement
+      String baseUrl =
+          'http://localhost:3000/order'; // Change selon ton environnement
       final response = await http.get(Uri.parse(baseUrl));
 
       print("Response body: ${response.body}");
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
-        _orders = data.map((json) => Order.fromJson(json)).toList();
+        _orders = data
+        .map((json) => Order.fromJson(json))
+        .where((order) => order.customerId == MyApp.userId.toString())
+        .toList();
       } else {
         print("Erreur API: ${response.statusCode}");
         throw Exception("Failed to load orders");
