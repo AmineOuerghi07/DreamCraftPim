@@ -10,8 +10,8 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child, // ✅ Displays the selected screen
-      bottomNavigationBar: const BottomNavigationBarWidget(), // ✅ Always visible
+      body: child, //  Displays the selected screen
+      bottomNavigationBar: const BottomNavigationBarWidget(), //  Always visible
     );
   }
 }

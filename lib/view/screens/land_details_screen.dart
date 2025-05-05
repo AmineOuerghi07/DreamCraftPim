@@ -23,6 +23,8 @@ class LandDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        final l10n = AppLocalizations.of(context)!;
+
     return Consumer<LandDetailsViewModel>(
       builder: (context, viewModel, child) {
         // Schedule fetch after the build is complete
@@ -46,6 +48,7 @@ class LandDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildScaffold(BuildContext context, ApiResponse<Land> response) {
+    final l10n = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -60,11 +63,11 @@ class LandDetailsScreen extends StatelessWidget {
               icon: const Icon(Icons.more_vert, color: Colors.black),
               onSelected: (value) => _handleMenuSelection(value, context),
               itemBuilder: (BuildContext context) => [
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'update',
                   child: ListTile(
                     leading: Icon(Icons.edit),
-                    title: Text('Update Land'),
+                    title: Text(AppLocalizations.of(context)!.updateLand),
                   ),
                 ),
                 PopupMenuItem<String>(
@@ -79,15 +82,15 @@ class LandDetailsScreen extends StatelessWidget {
                           : Colors.green,
                     ),
                     title: response.data?.forRent == true 
-                        ? Text('Disable For Rent')
-                        : Text('Set Land For Rent'),
+                        ? Text(AppLocalizations.of(context)!.disableForRent)
+                        : Text(AppLocalizations.of(context)!.setForRent),
                   ),
                 ),
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'delete',
                   child: ListTile(
                     leading: Icon(Icons.delete),
-                    title: Text('Delete Land'),
+                    title: Text(AppLocalizations.of(context)!.deleteLand),
                   ),
                 ),
               ],
@@ -124,6 +127,7 @@ class LandDetailsScreen extends StatelessWidget {
   }
 
   void _showUpdateLandPopup(BuildContext parentContext, Land land) {
+    final l10n = AppLocalizations.of(parentContext)!;
     File? _selectedImage;
     TextEditingController locationController =
         TextEditingController(text: land.cordonate);
@@ -155,6 +159,7 @@ class LandDetailsScreen extends StatelessWidget {
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
+            final dialogL10n = AppLocalizations.of(context)!;
             return Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
@@ -178,7 +183,7 @@ class LandDetailsScreen extends StatelessWidget {
                       ),
                       Center(
                         child: Text(
-                          AppLocalizations.of(context)!.updateLand,
+                          dialogL10n.updateLand,
                           style: TextStyle(
                             fontSize: isTablet ? 24 : 20,
                             fontWeight: FontWeight.bold,
@@ -189,7 +194,7 @@ class LandDetailsScreen extends StatelessWidget {
                       TextField(
                         controller: landNameController,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.landName,
+                          labelText: dialogL10n.landName,
                           border: UnderlineInputBorder(),
                         ),
                       ),
@@ -197,7 +202,7 @@ class LandDetailsScreen extends StatelessWidget {
                       TextField(
                         controller: locationController,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.location,
+                          labelText: dialogL10n.location,
                           border: UnderlineInputBorder(),
                         ),
                       ),
@@ -205,8 +210,8 @@ class LandDetailsScreen extends StatelessWidget {
                       TextField(
                         controller: spaceController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: "Space (m²)",
+                        decoration: InputDecoration(
+                          labelText: dialogL10n.surface,
                           border: UnderlineInputBorder(),
                         ),
                       ),
@@ -215,7 +220,7 @@ class LandDetailsScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(AppLocalizations.of(context)!.forRent,
+                          Text(dialogL10n.forRent,
                               style: TextStyle(fontSize: isTablet ? 18 : 16)),
                           ToggleButtons(
                             isSelected: [_isForRent, !_isForRent],
@@ -227,10 +232,10 @@ class LandDetailsScreen extends StatelessWidget {
                             children: [
                               Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 16),
-                                  child: Text(AppLocalizations.of(context)!.yes)),
+                                  child: Text(dialogL10n.yes)),
                               Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 16),
-                                  child: Text(AppLocalizations.of(context)!.no)),
+                                  child: Text(dialogL10n.no)),
                             ],
                             borderColor: Colors.grey,
                             selectedBorderColor: Colors.green,
@@ -248,8 +253,8 @@ class LandDetailsScreen extends StatelessWidget {
                             onPressed: () async {
                               await _pickImage(setState);
                             },
-                            child: const Text(
-                              "Change Image",
+                            child: Text(
+                              dialogL10n.changeImage,
                               style: TextStyle(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.w600,
@@ -275,8 +280,8 @@ class LandDetailsScreen extends StatelessWidget {
                                       locationController.text.isEmpty ||
                                       spaceController.text.isEmpty) {
                                     ScaffoldMessenger.of(parentContext)
-                                        .showSnackBar(const SnackBar(
-                                      content: Text("Please fill all required fields"),
+                                        .showSnackBar(SnackBar(
+                                      content: Text(dialogL10n.fillAllFields),
                                       backgroundColor: Colors.red,
                                     ));
                                     return;
@@ -319,7 +324,7 @@ class LandDetailsScreen extends StatelessWidget {
                                     ScaffoldMessenger.of(parentContext)
                                         .showSnackBar(SnackBar(
                                       content:
-                                          Text(response.message ?? "Update failed"),
+                                          Text(response.message ?? dialogL10n.updateFailed),
                                       backgroundColor: Colors.red,
                                     ));
                                   }
@@ -335,7 +340,7 @@ class LandDetailsScreen extends StatelessWidget {
                           child: isLoading
                               ? const CircularProgressIndicator(color: Colors.white)
                               : Text(
-                                  "Update",
+                                  dialogL10n.update,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: isTablet ? 18 : 16,
@@ -359,6 +364,7 @@ class LandDetailsScreen extends StatelessWidget {
     // Get screen dimensions for responsive dialog
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
+    final l10n = AppLocalizations.of(context)!;
     
     // Text controller for the price input
     final TextEditingController priceController = TextEditingController();
@@ -375,7 +381,7 @@ class LandDetailsScreen extends StatelessWidget {
           
           return AlertDialog(
             title: Text(
-              'Set Land For Rent',
+              l10n.setForRent,
               style: TextStyle(fontSize: isTablet ? 22 : 18),
             ),
             content: Column(
@@ -383,12 +389,12 @@ class LandDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Are you sure you want to make this land available for rent?',
+                  l10n.confirmSetForRent,
                   style: TextStyle(fontSize: isTablet ? 18 : 16),
                 ),
                 SizedBox(height: isTablet ? 24 : 16),
                 Text(
-                  'Set rental price:',
+                  l10n.setRentalPrice,
                   style: TextStyle(
                     fontSize: isTablet ? 18 : 16,
                     fontWeight: FontWeight.w500,
@@ -399,10 +405,10 @@ class LandDetailsScreen extends StatelessWidget {
                   controller: priceController,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
-                    labelText: 'Price',
-                    hintText: 'Enter price per month',
+                    labelText: l10n.price,
+                    hintText: l10n.enterRentalPrice,
                     suffixText: 'DT/month',
-                    errorText: isValidPrice ? null : 'Please enter a valid price',
+                    errorText: isValidPrice ? null : l10n.invalidSurfaceValue,
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (value) {
@@ -426,7 +432,7 @@ class LandDetailsScreen extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => context.pop(),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () async {
@@ -474,7 +480,7 @@ class LandDetailsScreen extends StatelessWidget {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text("Land is now available for rent at ${price.toStringAsFixed(2)} DT/month"),
+                          content: Text(l10n.landIsNowForRent),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -484,14 +490,14 @@ class LandDetailsScreen extends StatelessWidget {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(response.message ?? "Failed to update land"),
+                          content: Text(response.message ?? l10n.updateFailed),
                           backgroundColor: Colors.red,
                         ),
                       );
                     }
                   }
                 },
-                child: const Text('Confirm', style: TextStyle(color: Colors.green)),
+                child: Text(l10n.confirm, style: TextStyle(color: Colors.green)),
               ),
             ],
           );
@@ -505,22 +511,23 @@ class LandDetailsScreen extends StatelessWidget {
     // Get screen dimensions for responsive dialog
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
+    final l10n = AppLocalizations.of(context)!;
     
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: Text(
-          'Disable Land For Rent',
+          l10n.disableForRent,
           style: TextStyle(fontSize: isTablet ? 22 : 18),
         ),
         content: Text(
-          'Are you sure you want to make this land no longer available for rent?',
+          l10n.confirmDisableForRent,
           style: TextStyle(fontSize: isTablet ? 18 : 16),
         ),
         actions: [
           TextButton(
             onPressed: () => context.pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -540,8 +547,8 @@ class LandDetailsScreen extends StatelessWidget {
                 // Show success message
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Land is no longer available for rent"),
+                    SnackBar(
+                      content: Text(l10n.landIsNoLongerForRent),
                       backgroundColor: Colors.blue,
                     ),
                   );
@@ -551,14 +558,14 @@ class LandDetailsScreen extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(response.message ?? "Failed to update land"),
+                      content: Text(response.message ?? l10n.updateFailed),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Confirm', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.confirm, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -570,22 +577,23 @@ class LandDetailsScreen extends StatelessWidget {
     // Get screen width for responsive dialog
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
+    final l10n = AppLocalizations.of(context)!;
     
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: Text(
-          'Confirm Delete',
+          l10n.confirmDelete,
           style: TextStyle(fontSize: isTablet ? 22 : 18),
         ),
         content: Text(
-          'Are you sure you want to delete this land?',
+          l10n.confirmDeleteMessage,
           style: TextStyle(fontSize: isTablet ? 18 : 16),
         ),
         actions: [
           TextButton(
             onPressed: () => context.pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -599,7 +607,7 @@ class LandDetailsScreen extends StatelessWidget {
                     .fetchLandsByUserId(MyApp.userId);
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -607,6 +615,8 @@ class LandDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, ApiResponse<Land> response) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (response.status == Status.LOADING) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -616,7 +626,7 @@ class LandDetailsScreen extends StatelessWidget {
     }
 
     if (response.data == null) {
-      return const Center(child: Text('No land data available'));
+      return Center(child: Text(l10n.noLandDataAvailable));
     }
 
     final land = response.data!;
@@ -624,6 +634,7 @@ class LandDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildLandContent(BuildContext context, Land land) {
+    final l10n = AppLocalizations.of(context)!;
     // Get screen dimensions
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -649,7 +660,7 @@ class LandDetailsScreen extends StatelessWidget {
                   cultivationType: land.name,
                   location: land.cordonate,
                   onAddRegion: () => _showAddRegionPopup(context, land),
-                  buttonText: 'AddRegion',
+                  buttonText: l10n.addRegion,
                 );
               } else {
                 // Use original design for phones
@@ -676,18 +687,18 @@ class LandDetailsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         InfoCard(
-                          title: "Expanse",
+                          title: l10n.expanse,
                           value: "${land.surface}m²",
                           imageName: "square_foot.png",
                         ),
                         InfoCard(
-                          title: "Humidity",
+                          title: l10n.humidity,
                           value: "${land.surface}%",
                           imageName: "humidity.png",
                         ),
                         InfoCard(
-                          title: "Plants",
-                          value: "${land.surface} ",
+                          title: l10n.plants,
+                          value: "${land.surface}",
                           imageName: "plant.png",
                         ),
                       ],
@@ -697,18 +708,18 @@ class LandDetailsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         InfoCard(
-                          title: "Expanse",
+                          title: l10n.expanse,
                           value: "${land.surface}m²",
                           imageName: "square_foot.png",
                         ),
                         InfoCard(
-                          title: "Humidity",
+                          title: l10n.humidity,
                           value: "${land.surface}%",
                           imageName: "humidity.png",
                         ),
                         InfoCard(
-                          title: "Plants",
-                          value: "${land.surface} ",
+                          title: l10n.plants,
+                          value: "${land.surface}",
                           imageName: "plant.png",
                         ),
                       ],
@@ -729,8 +740,8 @@ class LandDetailsScreen extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
             tabs: [
-              Tab(text: isTablet ? "Land Regions" : "Regions"),
-              Tab(text: "Plants"),
+              Tab(text: isTablet ? l10n.landRegions : l10n.regions),
+              Tab(text: l10n.plants),
             ],
           ),
           
@@ -765,6 +776,7 @@ class LandDetailsScreen extends StatelessWidget {
 
   // Original RegionInfo implementation for phones
   Widget _buildOriginalRegionInfo(BuildContext context, Land land) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -779,7 +791,7 @@ class LandDetailsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                "${land.regions.length} Regions",
+                "${land.regions.length} ${l10n.regionsCount}",
                 style: const TextStyle(
                   color: Colors.green,
                   fontWeight: FontWeight.w500,
@@ -822,8 +834,8 @@ class LandDetailsScreen extends StatelessWidget {
                   color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Text(
-                  'AddRegion',
+                child: Text(
+                  l10n.addRegion,
                   style: TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
@@ -896,6 +908,7 @@ class LandDetailsScreen extends StatelessWidget {
 void _showAddRegionPopup(BuildContext context, Land landId) {
   TextEditingController nameController = TextEditingController();
   TextEditingController surfaceController = TextEditingController();
+  final l10n = AppLocalizations.of(context)!;
 
   // Get screen dimensions for better responsiveness
   final screenWidth = MediaQuery.of(context).size.width;
@@ -931,7 +944,7 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                     ),
                     Center(
                       child: Text(
-                        "Add New Region",
+                        l10n.addNewRegion,
                         style: TextStyle(
                           fontSize: isTablet ? 24 : (isSmallPhone ? 18 : 20),
                           fontWeight: FontWeight.bold,
@@ -942,8 +955,8 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                     SizedBox(height: isTablet ? 24 : 16),
                     TextField(
                       controller: nameController,
-                      decoration: const InputDecoration(
-                        labelText: "Region Name",
+                      decoration: InputDecoration(
+                        labelText: l10n.regionName,
                         border: UnderlineInputBorder(),
                       ),
                     ),
@@ -951,8 +964,8 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                     TextField(
                       controller: surfaceController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Surface Area (m²)",
+                      decoration: InputDecoration(
+                        labelText: l10n.surfaceArea,
                         border: UnderlineInputBorder(),
                       ),
                     ),
@@ -963,8 +976,8 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                           if (nameController.text.isEmpty ||
                               surfaceController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Please fill all fields"),
+                              SnackBar(
+                                content: Text(l10n.pleaseFillFields),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -974,8 +987,8 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                           final surface = double.tryParse(surfaceController.text);
                           if (surface == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Invalid surface value"),
+                              SnackBar(
+                                content: Text(l10n.invalidSurfaceValue),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -999,7 +1012,7 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                               await viewModel.addRegion(newRegion).timeout(
                                     const Duration(seconds: 15),
                                     onTimeout: () {
-                                      return ApiResponse.error('Request timed out');
+                                      return ApiResponse.error(l10n.requestTimeout);
                                     },
                                   );
 
@@ -1009,7 +1022,7 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                    response.message ?? "Failed to add region"),
+                                    response.message ?? l10n.failedToAddRegion),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -1026,7 +1039,7 @@ void _showAddRegionPopup(BuildContext context, Land landId) {
                           ),
                         ),
                         child: Text(
-                          "Add Region",
+                          l10n.addRegion,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: isTablet ? 18 : (isSmallPhone ? 14 : 16),
