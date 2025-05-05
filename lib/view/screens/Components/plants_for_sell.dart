@@ -7,7 +7,8 @@ class PlantsForSell extends StatelessWidget {
   final List<Product> products;
   final List<String> categories;
 
-  const PlantsForSell({super.key, required this.products, required this.categories});
+  const PlantsForSell(
+      {super.key, required this.products, required this.categories});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,8 @@ class PlantCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // Navigate to the product details screen
-        GoRouter.of(context).push('/product-details/${product.id}'); // Pass product ID
+        GoRouter.of(context)
+            .push('/product-details/${product.id}'); // Pass product ID
       },
       child: Card(
         elevation: 4,
@@ -68,12 +70,13 @@ class PlantCard extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Image.network(
-  "${AppConstants.baseUrl}/uploads/${product.image}",
-  height: 200,
-  errorBuilder: (context, error, stackTrace) {
-    return const Text('Error loading image'); // Debug image loading issues
-  },
-),
+                    "${AppConstants.baseUrl}/uploads/${product.image}",
+                    height: 200,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Text(
+                          'Error loading image'); // Debug image loading issues
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -81,14 +84,16 @@ class PlantCard extends StatelessWidget {
               Center(
                 child: Text(
                   product.name, // Display dynamic name
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
               const SizedBox(height: 4),
               // Plant description or address (if available)
               Center(
                 child: Text(
-                  product.description ?? "No description", // Show description or default text
+                  product.description ??
+                      "No description", // Show description or default text
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ),

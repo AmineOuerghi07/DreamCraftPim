@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:pim_project/main.dart';
 import 'package:pim_project/model/product.dart';
 
 import 'package:http/http.dart' as http;
@@ -15,8 +16,6 @@ class MarketProvider extends ChangeNotifier {
   String _searchTerm = '';
   String _category = '';
 
-
-
   String get category => _category;
   bool get changefilterIcon => _changefilterIcon;
   bool get isFilterActive => _isFilterActive;
@@ -24,12 +23,16 @@ class MarketProvider extends ChangeNotifier {
   bool get isCategoryFilterActive => _isCategoryFilterActive;
   List<String> get categories => _categories;
 
-  List<Product> get products => _searchTerm.isEmpty ? _products : _filteredProducts;
+  List<Product> get products =>
+      _searchTerm.isEmpty ? _products : _filteredProducts;
 
-  List<Product> get plantsProducts => _filterByCategory('plant');
-  List<Product> get seedProducts => _filterByCategory('seeds');
-  List<Product> get machineProducts => _filterByCategory('machines');
-  
+  Future<List<Product>> get plantsProducts => _filterByCategory('plant');
+  Future<List<Product>> get seedProducts => _filterByCategory('seeds');
+  Future<List<Product>> get machineProducts => _filterByCategory('machines');
+
+  Future<List<Product>> get pesticidesProducts => _filterByCategory('pesticides');
+  Future<List<Product>> get fungicidesProducts => _filterByCategory('fungicides');
+  Future<List<Product>> get herbicidesProducts => _filterByCategory('herbicides');
 
   final ApiService _apiService = ApiService();
 
@@ -42,7 +45,8 @@ class MarketProvider extends ChangeNotifier {
     try {
       _products = await _apiService.fetchProducts();
       _categories = _products
-          .where((product) => product.category != null && product.category!.isNotEmpty)
+          .where((product) =>
+              product.category != null && product.category!.isNotEmpty)
           .map((product) => product.category!)
           .toSet()
           .toList();
@@ -66,44 +70,65 @@ class MarketProvider extends ChangeNotifier {
 
   void setCategoryFilter(String category) {
     _category = category;
-   
+
     notifyListeners();
   }
 
- void toggleCategoryFilter(String category) {
-  if (_isCategoryFilterActive && _category == category) {
-    _category = ''; // Reset category filter
-    _isCategoryFilterActive = false;
-  } else {
-    _category = category;
-    _isCategoryFilterActive = true;
+  void toggleCategoryFilter(String category) {
+    if (_isCategoryFilterActive && _category == category) {
+      _category = ''; // Reset category filter
+      _isCategoryFilterActive = false;
+    } else {
+      _category = category;
+      _isCategoryFilterActive = true;
+    }
+    notifyListeners();
   }
-  notifyListeners();
-}
-
 
   void setSearchTerm(String term) {
     _searchTerm = term;
     _filteredProducts = _products
-        .where((product) => product.name.toLowerCase().contains(term.toLowerCase()))
+        .where((product) =>
+            product.name.toLowerCase().contains(term.toLowerCase()))
         .toList();
     notifyListeners();
   }
 
-  List<Product> _filterByCategory(String category) {
-    return _isFilterActive
-        ? products.where((product) => product.category == category).toList()
-        : products;
+  Future<List<Product>> _filterByCategory(String category) async {
+    if (_isFilterActive) {
+      final productsFromDatabase = await _apiService.fetchProductsfromDatabase();
+      return productsFromDatabase.where((product) => product.category == category).toList();
+    } else {
+      return products;
+    }
   }
 }
 
 class ApiService {
   final String baseUrl = "http://localhost:3000";
 
- 
-
   Future<List<Product>> fetchProducts() async {
-    final response = await http.get(Uri.parse("$baseUrl/product"));
+    final customerId = MyApp.userId.toString();
+    final response = await http
+        .get(Uri.parse('http://localhost:8000/recommend/$customerId'));
+
+    print("Response body: ${response.body}");
+    if (response.statusCode == 200) {
+      try {
+        List<dynamic> data = json.decode(response.body);
+        return data.map((json) => Product.fromJson(json)).toList();
+      } catch (e) {
+        print("Error decoding JSON: $e");
+        rethrow;
+      }
+    } else {
+      throw Exception("Failed to load products");
+    }
+  }
+
+  Future<List<Product>> fetchProductsfromDatabase() async {
+    final customerId = MyApp.userId.toString();
+    final response = await http.get(Uri.parse('http://localhost:3000/product'));
 
     print("Response body: ${response.body}");
     if (response.statusCode == 200) {

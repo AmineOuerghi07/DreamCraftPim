@@ -9,9 +9,11 @@ class SeeAllProductsProvider extends ChangeNotifier {
 
   Future<void> getProducts(String category) async {
     ApiService apiService = ApiService();
-    List<Product> allProducts = await apiService.fetchProducts(); // Await the API call
+    List<Product> allProducts =
+        await apiService.fetchProductsfromDatabase(); // Await the API call
 
-    _products = allProducts.where((product) => product.category == category).toList();
+    _products =
+        allProducts.where((product) => product.category == category).toList();
 
     notifyListeners(); // Notify the UI
   }
