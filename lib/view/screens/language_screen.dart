@@ -68,12 +68,20 @@ class _LanguageScreenState extends State<LanguageScreen> with SingleTickerProvid
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('language_code', languageCode);
       
-      // Recharger l'application avec la nouvelle langue
+      // Appliquer le changement et retourner à l'écran de profil
       if (mounted) {
-        context.go(RouteNames.loadingScreen, extra: {
-          'restoreState': true,
-          'previousState': 'language_change',
-        });
+        // Afficher un message de confirmation
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.languageChanged),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        
+        // Retourner à l'écran de profil
+        context.go(RouteNames.home);
       }
     } catch (e) {
       if (mounted) {
@@ -99,7 +107,10 @@ class _LanguageScreenState extends State<LanguageScreen> with SingleTickerProvid
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            // Retourner à l'écran de profil avec l'ID utilisateur
+            context.go(RouteNames.home);
+          },
         ),
       ),
       body: Column(

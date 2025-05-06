@@ -17,6 +17,14 @@ class BottomNavigationBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Calculer une hauteur responsive pour la barre de navigation
+    final navBarHeight = screenHeight * 0.08;
+    // Limiter la hauteur entre 60 et 80
+    final clampedNavBarHeight = navBarHeight.clamp(60.0, 80.0);
+    
     return Consumer<BottomNavigationProvider>(
       builder: (context, provider, child) {
         return Directionality(
@@ -27,7 +35,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
 
               // Custom Bottom Navigation Bar
               Container(
-                height: 60, // Height of the navigation bar
+                height: clampedNavBarHeight, // Hauteur responsive
                 decoration: BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
@@ -47,13 +55,11 @@ class BottomNavigationBarWidget extends StatelessWidget {
                           provider.setIndex(0);
                           context.go(RouteNames.home,extra:  MyApp.userId);
                         },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.home, color: provider.selectedIndex == 0 ? Colors.green : Colors.grey),
-                            SizedBox(height: 4),
-                            Text(l10n.home, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 0 ? Colors.green : Colors.grey)),
-                          ],
+                        child: _buildNavItem(
+                          Icons.home, 
+                          l10n.home, 
+                          provider.selectedIndex == 0,
+                          clampedNavBarHeight
                         ),
                       ),
                     ),
@@ -64,13 +70,11 @@ class BottomNavigationBarWidget extends StatelessWidget {
                           provider.setIndex(1);
                           context.go(RouteNames.market);
                         },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.store, color: provider.selectedIndex == 1 ? Colors.green : Colors.grey),
-                            SizedBox(height: 4),
-                            Text(l10n.market, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 1 ? Colors.green : Colors.grey)),
-                          ],
+                        child: _buildNavItem(
+                          Icons.store, 
+                          l10n.market, 
+                          provider.selectedIndex == 1,
+                          clampedNavBarHeight
                         ),
                       ),
                     ),
@@ -85,13 +89,11 @@ class BottomNavigationBarWidget extends StatelessWidget {
                           provider.setIndex(3);
                           context.go(RouteNames.land);
                         },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.map, color: provider.selectedIndex == 3 ? Colors.green : Colors.grey),
-                            SizedBox(height: 4),
-                            Text(l10n.lands, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 3 ? Colors.green : Colors.grey)),
-                          ],
+                        child: _buildNavItem(
+                          Icons.map, 
+                          l10n.lands, 
+                          provider.selectedIndex == 3,
+                          clampedNavBarHeight
                         ),
                       ),
                     ),
@@ -102,13 +104,11 @@ class BottomNavigationBarWidget extends StatelessWidget {
                           provider.setIndex(4);
                           context.go(RouteNames.profile,extra: MyApp.userId);
                         },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.person, color: provider.selectedIndex == 4 ? Colors.green : Colors.grey),
-                            SizedBox(height: 4),
-                            Text(l10n.profile, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 4 ? Colors.green : Colors.grey)),
-                          ],
+                        child: _buildNavItem(
+                          Icons.person, 
+                          l10n.profile, 
+                          provider.selectedIndex == 4,
+                          clampedNavBarHeight
                         ),
                       ),
                     ),
@@ -118,8 +118,8 @@ class BottomNavigationBarWidget extends StatelessWidget {
 
               // Floating Camera Icon
               Positioned(
-                left: MediaQuery.of(context).size.width / 2 - 22.5, // Center the icon horizontally
-                bottom: 25, // Adjust the elevation
+                left: screenWidth / 2 - 25, // Centre l'icône horizontalement
+                bottom: clampedNavBarHeight * 0.5, // Position responsive
                 child: GestureDetector(
                   onTap: () async {
                     // Handle camera icon tap
@@ -151,6 +151,37 @@ class BottomNavigationBarWidget extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+  
+  // Méthode d'aide pour construire un élément de navigation uniforme
+  Widget _buildNavItem(IconData icon, String label, bool isSelected, double height) {
+    final color = isSelected ? Colors.green : Colors.grey;
+    
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: height * 0.1),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon, 
+            color: color,
+            size: height * 0.35, // Taille d'icône responsive
+          ),
+          SizedBox(height: height * 0.06),
+          Text(
+            label, 
+            style: TextStyle(
+              fontSize: height * 0.2, // Taille de texte responsive
+              color: color,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
