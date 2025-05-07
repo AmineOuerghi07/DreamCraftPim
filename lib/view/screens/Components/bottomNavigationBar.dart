@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/bottom_navigation_bar_provider_class.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/main.dart';
 
 import 'package:pim_project/routes/routes.dart';
@@ -50,9 +51,9 @@ class BottomNavigationBarWidget extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.home, color: provider.selectedIndex == 0 ? Colors.green : Colors.grey),
+                            Icon(Icons.home, color: provider.selectedIndex == 0 ? AppConstants.primaryColor : Colors.grey),
                             SizedBox(height: 4),
-                            Text(l10n.home, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 0 ? Colors.green : Colors.grey)),
+                            Text(l10n.home, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 0 ? AppConstants.primaryColor : Colors.grey)),
                           ],
                         ),
                       ),
@@ -67,9 +68,9 @@ class BottomNavigationBarWidget extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.store, color: provider.selectedIndex == 1 ? Colors.green : Colors.grey),
+                            Icon(Icons.store, color: provider.selectedIndex == 1 ? AppConstants.primaryColor : Colors.grey),
                             SizedBox(height: 4),
-                            Text(l10n.market, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 1 ? Colors.green : Colors.grey)),
+                            Text(l10n.market, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 1 ? AppConstants.primaryColor : Colors.grey)),
                           ],
                         ),
                       ),
@@ -88,9 +89,9 @@ class BottomNavigationBarWidget extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.map, color: provider.selectedIndex == 3 ? Colors.green : Colors.grey),
+                            Icon(Icons.map, color: provider.selectedIndex == 3 ? AppConstants.primaryColor : Colors.grey),
                             SizedBox(height: 4),
-                            Text(l10n.lands, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 3 ? Colors.green : Colors.grey)),
+                            Text(l10n.lands, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 3 ? AppConstants.primaryColor : Colors.grey)),
                           ],
                         ),
                       ),
@@ -105,9 +106,9 @@ class BottomNavigationBarWidget extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.person, color: provider.selectedIndex == 4 ? Colors.green : Colors.grey),
+                            Icon(Icons.person, color: provider.selectedIndex == 4 ? AppConstants.primaryColor : Colors.grey),
                             SizedBox(height: 4),
-                            Text(l10n.profile, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 4 ? Colors.green : Colors.grey)),
+                            Text(l10n.profile, style: TextStyle(fontSize: 12, color: provider.selectedIndex == 4 ? AppConstants.primaryColor : Colors.grey)),
                           ],
                         ),
                       ),
@@ -130,7 +131,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                     height: 50,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.green, // Background color of the circle
+                      color: AppConstants.primaryColor, // Background color of the circle
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.3),

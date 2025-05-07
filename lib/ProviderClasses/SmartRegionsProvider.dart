@@ -87,25 +87,17 @@ class SmartRegionsProvider extends ChangeNotifier {
     // Update system state based on which switch was toggled
     switch (index) {
       case 0: // Lighting (LED)
-        if (_irrigationViewModel != null) {
-          await _irrigationViewModel.setLedState(value);
-        }
-        break;
+        await _irrigationViewModel.setLedState(value);
+              break;
       case 1: // Temperature sensor
-        if (_irrigationViewModel != null) {
-          await _irrigationViewModel.setTemperatureSensor(value);
-        }
-        break;
+        await _irrigationViewModel.setTemperatureSensor(value);
+              break;
       case 2: // Irrigation pump
-        if (_irrigationViewModel != null) {
-          await _irrigationViewModel.setPumpState(value);
-        }
-        break;
+        await _irrigationViewModel.setPumpState(value);
+              break;
       case 3: // Ventilator
-        if (_irrigationViewModel != null) {
-          await _irrigationViewModel.setVentilatorState(value);
-        }
-        break;
+        await _irrigationViewModel.setVentilatorState(value);
+              break;
     }
   }
 
@@ -113,20 +105,26 @@ class SmartRegionsProvider extends ChangeNotifier {
   void setOperationMode(bool automatic) async {
     _isAutomaticMode = automatic;
     
-    if (_irrigationViewModel != null) {
-      // First update the UI state immediately
-      notifyListeners();
-      
-      // Then send the change to the backend
-      await _irrigationViewModel.setOperationMode(automatic);
-      
-      // Force refresh the system status to ensure all states are synchronized
-      await _irrigationViewModel.getSystemStatus();
-      
-      // Update switches after mode change and system status refresh
-      updateSwitchesFromViewModel();
-    }
+    // First update the UI state immediately
+    notifyListeners();
     
+    // Then send the change to the backend
+    await _irrigationViewModel.setOperationMode(automatic);
+    
+    // Force refresh the system status to ensure all states are synchronized
+    await _irrigationViewModel.getSystemStatus();
+    
+    // Update switches after mode change and system status refresh
+    updateSwitchesFromViewModel();
+      
     notifyListeners();
   }
+  
+  // Get a map between system controls and their titles
+  Map<int, String> get controlTitlesMap => {
+    0: "Lighting",
+    1: "Temperature",
+    2: "Irrigation",
+    3: "Ventilator",
+  };
 }

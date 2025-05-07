@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
-import 'package:pim_project/view/screens/components/device_discovery_dialog.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/device_discovery_dialog.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';

@@ -4,7 +4,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/loading_screen.dart';
 import 'package:pim_project/view_model/prediction_view_model.dart';
 import 'package:image_picker/image_picker.dart';
 

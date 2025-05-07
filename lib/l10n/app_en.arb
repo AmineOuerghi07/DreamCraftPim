@@ -368,5 +368,6 @@
   "humidityCurrentImpact": "Current Impact",
   "humidityLoading": "Loading...",
   "humidityError": "Error",
-  "humidityNoData": "No Data Available"
+  "humidityNoData": "No Data Available",
+  "aiAssistant":"Ai Assistant "
 }

@@ -1,7 +1,6 @@
-import 'package:dio/dio.dart';
+
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/services/OtpService.dart';
-import 'package:pim_project/model/services/api_client.dart';
 class OtpRepository extends ChangeNotifier {
   final OtpService otpService;
 

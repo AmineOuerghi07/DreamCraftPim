@@ -1,17 +1,17 @@
 // view/screens/home_screen/components/field_management_grid.dart
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:pim_project/constants/constants.dart';
+
 import 'package:pim_project/main.dart';
-import 'package:pim_project/view/screens/components/home_cart.dart';
+import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
 import 'package:pim_project/view/screens/components/rent_land_card.dart';
 import 'package:pim_project/view_model/connected_region_view_model.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:provider/provider.dart';
-import 'feature_card.dart'; // Your responsive FeatureCard
-import 'package:pim_project/model/services/api_client.dart'; // For Status
+import 'feature_card.dart'; 
+import 'package:pim_project/model/services/api_client.dart'; 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:go_router/go_router.dart'; 
 
 class FieldManagementGrid extends StatefulWidget {
   final Function(String) onFeatureSelected;
@@ -123,10 +123,13 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: FeatureCard(
-                    title: l10n.inventory,
-                    icon: Icons.inventory_2_outlined,
-                    iconBgColor: Colors.orange[100]!,
-                    onTap: () => widget.onFeatureSelected('inventory'),
+                    title: l10n.aiAssistant, // Changed from inventory to AI Assistant
+                    icon: Icons.smart_toy_outlined, // Changed icon to represent AI/chatbot
+                    iconBgColor: Colors.purple[100]!, // Changed color for visual distinction
+                    onTap: () {
+                      // Navigate to the chat screen using GoRouter
+                      context.push(RouteNames.chatScreen);
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -190,10 +193,13 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
               children: [
                 Expanded(
                   child: FeatureCard(
-                    title: l10n.inventory,
-                    icon: Icons.inventory_2_outlined,
-                    iconBgColor: Colors.orange[100]!,
-                    onTap: () => widget.onFeatureSelected('inventory'),
+                    title: l10n.aiAssistant, // AI Assistant
+                    icon: Icons.smart_toy_outlined, // Changed icon to represent AI/chatbot
+                    iconBgColor: Colors.purple[100]!, // Changed color for visual distinction
+                    onTap: () {
+                      // Navigate to the chat screen using GoRouter
+                      context.push(RouteNames.chatScreen);
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),

@@ -5,9 +5,9 @@ import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/Components/region_info.dart';
-import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
-import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/connect_to_bleutooth.dart';
 import 'package:pim_project/view/screens/components/region_detail_text.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/smart_regionsGrid.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
@@ -61,7 +61,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
     final isTablet = screenWidth > 600; // Common breakpoint for tablet layouts
     
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
-    final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
+    //final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
     final landVM = widget.landDetailsViewModel ?? context.read<LandDetailsViewModel>();
     
     if (viewModel.region == null || viewModel.region!.id != widget.id) {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/region.dart';
@@ -263,7 +264,7 @@ class LandDetailsScreen extends StatelessWidget {
                             ),
                           ),
                           _selectedImage != null
-                              ? const Icon(Icons.check_circle, color: Colors.green)
+                              ? const Icon(Icons.check_circle, color: AppConstants.primaryColor)
                               : (land.image.isNotEmpty
                                   ? Icon(Icons.image, color: Colors.green.shade700)
                                   : const SizedBox.shrink()),
@@ -637,7 +638,7 @@ class LandDetailsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     // Get screen dimensions
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+  //  final screenHeight = MediaQuery.of(context).size.height;
     
     // More precise device type detection
     final isTablet = screenWidth > 600;
@@ -793,7 +794,7 @@ class LandDetailsScreen extends StatelessWidget {
               child: Text(
                 "${land.regions.length} ${l10n.regionsCount}",
                 style: const TextStyle(
-                  color: Colors.green,
+                  color: AppConstants.primaryColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),

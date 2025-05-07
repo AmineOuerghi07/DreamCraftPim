@@ -9,7 +9,7 @@ import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
-import 'package:pim_project/view/screens/Components/home_cart.dart';
+import 'package:pim_project/view/screens/land_screen/components/land_card.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -168,7 +168,7 @@ class _LandScreenState extends State<LandScreen> {
                               setState(() {});
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: AppConstants.primaryColor, 
                             ),
                             child: Text(l10n.apply),
                           ),
@@ -232,7 +232,7 @@ class _LandScreenState extends State<LandScreen> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
+                              color: AppConstants.primaryColor,
                             ),
                           ),
                         ),
@@ -357,7 +357,7 @@ class _LandScreenState extends State<LandScreen> {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
                                             content: Text(l10n.profileUpdatedSuccess),
-                                            backgroundColor: Colors.green,
+                                            backgroundColor:AppConstants.primaryColor,
                                           ),
                                         );
                                         Navigator.of(context).pop();
@@ -500,7 +500,7 @@ class _LandScreenState extends State<LandScreen> {
         final land = viewModel.filteredLands[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
-          child: HomeCart(
+          child: LandCard(
             title: land.name,
             location: land.cordonate,
             description: "${l10n.surface}: ${land.surface}m² • ${land.forRent ? l10n.forRent : l10n.notAvailable}",

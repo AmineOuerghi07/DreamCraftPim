@@ -7,7 +7,6 @@ class CartProvider extends ChangeNotifier {
   bool isConfirmed = false;
   List<Product> cartItems = []; // Store cart items
   
-  List<Product> get _products => cartItems;
 
   void toggleConfirmation(bool? value) {
     if (value == null) return; // Handle null case
@@ -27,12 +26,12 @@ class CartProvider extends ChangeNotifier {
 
   if (cart.isNotEmpty && cartQte.isNotEmpty) {  // ✅ Ensure lists are not null/empty
     for (int i = 0; i < products.length; i++) {
-      if (cart!.contains(products[i].id)) {  // ✅ Use ! to indicate non-null
+      if (cart.contains(products[i].id)) {  // ✅ Use ! to indicate non-null
         Product _product = products[i];
-        int index = cart!.indexOf(products[i].id);
+        int index = cart.indexOf(products[i].id);
         
-        if (index < cartQte!.length) {  // ✅ Avoid out-of-bounds error
-          _product.quantity = int.parse(cartQte![index]);
+        if (index < cartQte.length) {  // ✅ Avoid out-of-bounds error
+          _product.quantity = int.parse(cartQte[index]);
           returnList.add(_product);
         }
       }
@@ -43,7 +42,12 @@ class CartProvider extends ChangeNotifier {
   notifyListeners();  // Notify UI updates
   return returnList;
 }
-
+// Add this to your CartProvider class
+void clearCart() {
+  cartItems.clear();
+  notifyListeners();
+  // If you're using a local cache or database, clear there too
+}
   Future<void> removeItem(Product product) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> cart = prefs.getStringList('cart') ?? [];

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:image_picker/image_picker.dart';
@@ -344,7 +345,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                   child: FloatingActionButton(
                     heroTag: 'gallery',
                     onPressed: _pickFromGallery,
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppConstants.primaryColor,
                     child: const Icon(Icons.photo_library),
                   ),
                 ),
@@ -354,17 +355,17 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                   child: FloatingActionButton(
                     heroTag: 'camera',
                     onPressed: _takePhoto,
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppConstants.primaryColor,
                     child: const Icon(Icons.camera),
                   ),
                 ),
                 Positioned(
-                  top: 16,
-                  right: 16,
+                  top: 30,
+                  right: 30,
                   child: FloatingActionButton(
                     heroTag: 'flash',
                     onPressed: _toggleFlash,
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppConstants.primaryColor,
                     child: Icon(_isFlashOn ? Icons.flash_on : Icons.flash_off),
                   ),
                 ),

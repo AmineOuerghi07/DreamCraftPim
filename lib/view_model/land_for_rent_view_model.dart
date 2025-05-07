@@ -120,14 +120,12 @@ class LandForRentViewModel extends ChangeNotifier {
           (land) => land.id == landId,
         );
         
-        if (foundLand != null) {
-          _selectedLand = foundLand;
-          _status = Status.COMPLETED;
-          _message = null;
-          notifyListeners();
-          return;
-        }
-      } catch (e) {
+        _selectedLand = foundLand;
+        _status = Status.COMPLETED;
+        _message = null;
+        notifyListeners();
+        return;
+            } catch (e) {
         print('Land not found in local list: $e');
       }
 

@@ -7,7 +7,6 @@ import 'package:pim_project/model/services/land_service.dart';
 import 'package:pim_project/model/services/plant_service.dart';
 import 'package:pim_project/model/services/region_service.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
-import 'package:pim_project/view_model/land_view_model.dart';
 
 class RegionDetailsViewModel with ChangeNotifier {
   final PlantService _plantService = PlantService();

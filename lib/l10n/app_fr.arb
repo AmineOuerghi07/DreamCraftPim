@@ -474,6 +474,7 @@
     "currentImpact": "Impact actuel",
     "loading": "Chargement...",
     "error": "Erreur",
-    "noData": "Aucune donnée disponible"
+    "noData": "Aucune donnée disponible",
+    "aiAssistant":"Assistant IA"
   }
 } 
