@@ -1,5 +1,27 @@
 {
   "fr": [
-    "aiAssistant"
+    "aiAssistant",
+    "deviceDiscoveryTitle",
+    "discoverTab",
+    "manualEntryTab",
+    "availableDevices",
+    "scanButton",
+    "scanningText",
+    "noDevicesFound",
+    "noDevicesMessage",
+    "devicePrefix",
+    "ipAddressPrefix",
+    "connectedStatus",
+    "enterDeviceIpTitle",
+    "enterDeviceIpSubtitle",
+    "ipAddressHint",
+    "connectButton",
+    "invalidIpError",
+    "connectIrrigationTitle",
+    "connectIrrigationDescription",
+    "connectDeviceButton",
+    "deviceConnectedMessage",
+    "deviceConnectedUpdateFailedMessage",
+    "deviceConnectedNoRegionMessage"
   ]
 }

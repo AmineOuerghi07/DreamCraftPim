@@ -86,14 +86,13 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Connect to Irrigation Device',
+                      l10n.deviceDiscoveryTitle,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.green.shade800,
                       ),
                     ),
                   ),
-                
                 ],
               ),
               const SizedBox(height: 16),
@@ -105,28 +104,28 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: TabBar(
-              controller: _tabController,
-              indicator: UnderlineTabIndicator(
-                borderRadius: BorderRadius.circular(25),
-                borderSide: BorderSide(color: AppConstants.primaryColor, width: 2),
-              ),
-              labelColor: Colors.black,
-              // Add these properties to remove the focus/tap effect
-              overlayColor: MaterialStateProperty.all(Colors.transparent),
-              splashFactory: NoSplash.splashFactory,
-              indicatorColor: Colors.transparent,
-              // Rest of your TabBar properties remain the same
-              tabs: const [
-                Tab(
-                  icon: Icon(Icons.radar),
-                  text: "Discover",
+                  controller: _tabController,
+                  indicator: UnderlineTabIndicator(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide(color: AppConstants.primaryColor, width: 2),
+                  ),
+                  labelColor: Colors.black,
+                  // Add these properties to remove the focus/tap effect
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  splashFactory: NoSplash.splashFactory,
+                  indicatorColor: Colors.transparent,
+                  // Rest of your TabBar properties remain the same
+                  tabs: [
+                    Tab(
+                      icon: const Icon(Icons.radar),
+                      text: l10n.discoverTab,
+                    ),
+                    Tab(
+                      icon: const Icon(Icons.edit),
+                      text: l10n.manualEntryTab,
+                    ),
+                  ],
                 ),
-                Tab(
-                  icon: Icon(Icons.edit),
-                  text: "Manual Entry",
-                ),
-              ],
-            ),
               ),
               
               const SizedBox(height: 20),
@@ -136,10 +135,10 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
                   controller: _tabController,
                   children: [
                     // Auto Discovery Tab
-                    _buildDiscoveryContent(irrigationViewModel),
+                    _buildDiscoveryContent(irrigationViewModel, l10n),
                     
                     // Manual Entry Tab
-                    _buildManualEntryContent(irrigationViewModel),
+                    _buildManualEntryContent(irrigationViewModel, l10n),
                   ],
                 ),
               ),
@@ -150,7 +149,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
     );
   }
 
-  Widget _buildDiscoveryContent(IrrigationViewModel viewModel) {
+  Widget _buildDiscoveryContent(IrrigationViewModel viewModel, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,7 +157,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Available Devices',
+              l10n.availableDevices,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
@@ -168,13 +167,12 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
             ElevatedButton.icon(
               onPressed: _isSearching ? null : () => _startDiscovery(viewModel),
               icon: _isSearching 
-                  ? SizedBox(
+                  ? const SizedBox(
                       width: 0, 
                       height: 0, 
-                     
                     )
-                  : Icon(Icons.refresh, size: 18),
-              label: Text(_isSearching ? 'Scanning...' : 'Scan'),
+                  : const Icon(Icons.refresh, size: 18),
+              label: Text(_isSearching ? l10n.scanningText : l10n.scanButton),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green.shade700,
                 foregroundColor: Colors.white,
@@ -193,14 +191,14 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
                   child: CircularProgressIndicator(color: Colors.green),
                 )
               : viewModel.discoveredDevices.isEmpty
-                  ? _buildEmptyState()
-                  : _buildDevicesList(viewModel),
+                  ? _buildEmptyState(l10n)
+                  : _buildDevicesList(viewModel, l10n),
         ),
       ],
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -212,7 +210,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
           ),
           const SizedBox(height: 16),
           Text(
-            'No devices found',
+            l10n.noDevicesFound,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey.shade600,
@@ -221,7 +219,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
           ),
           const SizedBox(height: 8),
           Text(
-            'Make sure your devices are powered on and connected to the network',
+            l10n.noDevicesMessage,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -233,19 +231,19 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
     );
   }
 
-  Widget _buildDevicesList(IrrigationViewModel viewModel) {
+  Widget _buildDevicesList(IrrigationViewModel viewModel, AppLocalizations l10n) {
     return ListView.separated(
       padding: EdgeInsets.zero,
       itemCount: viewModel.discoveredDevices.length,
       separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade300),
       itemBuilder: (context, index) {
         final device = viewModel.discoveredDevices[index];
-        return _buildDeviceCard(device);
+        return _buildDeviceCard(device, l10n);
       },
     );
   }
 
-  Widget _buildDeviceCard(IrrigationDevice device) {
+  Widget _buildDeviceCard(IrrigationDevice device, AppLocalizations l10n) {
     return Card(
       elevation: 0,
       color: device.isConnected ? Colors.green.shade50 : null,
@@ -286,7 +284,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Device ${device.id}',
+                      '${l10n.devicePrefix} ${device.id}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -294,7 +292,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'IP: ${device.ipAddress}',
+                      '${l10n.ipAddressPrefix} ${device.ipAddress}',
                       style: TextStyle(
                         color: Colors.grey.shade700,
                         fontSize: 14,
@@ -316,7 +314,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
                       Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
                       const SizedBox(width: 4),
                       Text(
-                        'Connected',
+                        l10n.connectedStatus,
                         style: TextStyle(
                           color: Colors.green.shade700,
                           fontWeight: FontWeight.w500,
@@ -333,12 +331,12 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
     );
   }
 
-  Widget _buildManualEntryContent(IrrigationViewModel viewModel) {
+  Widget _buildManualEntryContent(IrrigationViewModel viewModel, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Enter Device IP Address',
+          l10n.enterDeviceIpTitle,
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 16,
@@ -347,7 +345,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
         ),
         const SizedBox(height: 8),
         Text(
-          'Input the IP address of your irrigation device',
+          l10n.enterDeviceIpSubtitle,
           style: TextStyle(
             color: Colors.grey.shade700,
             fontSize: 14,
@@ -357,7 +355,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
         TextField(
           controller: _ipAddressController,
           decoration: InputDecoration(
-            hintText: 'e.g. 192.168.1.100',
+            hintText: l10n.ipAddressHint,
             prefixIcon: Icon(Icons.lan, color: Colors.green.shade700),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -384,7 +382,7 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
               final ipAddress = _ipAddressController.text.trim();
               if (ipAddress.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter a valid IP address')),
+                  SnackBar(content: Text(l10n.invalidIpError)),
                 );
                 return;
               }
@@ -410,9 +408,9 @@ class _DeviceDiscoveryDialogState extends State<DeviceDiscoveryDialog> with Sing
               ),
               minimumSize: const Size(200, 48),
             ),
-            child: const Text(
-              'Connect',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            child: Text(
+              l10n.connectButton,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ),
         ),

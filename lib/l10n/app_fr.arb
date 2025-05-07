@@ -475,6 +475,65 @@
     "loading": "Chargement...",
     "error": "Erreur",
     "noData": "Aucune donnée disponible",
-    "aiAssistant":"Assistant IA"
+    "aiAssistant":"Assistant IA",
+     "deviceDiscoveryTitle": "Connecter à l'appareil d'irrigation",
+  "discoverTab": "Découvrir",
+  "manualEntryTab": "Saisie manuelle",
+  "availableDevices": "Appareils disponibles",
+  "scanButton": "Scanner",
+  "scanningText": "Recherche...",
+  "noDevicesFound": "Aucun appareil trouvé",
+  "noDevicesMessage": "Assurez-vous que vos appareils sont allumés et connectés au réseau",
+  "devicePrefix": "Appareil",
+  "ipAddressPrefix": "IP :",
+  "connectedStatus": "Connecté",
+  "enterDeviceIpTitle": "Entrez l'adresse IP de l'appareil",
+  "enterDeviceIpSubtitle": "Saisissez l'adresse IP de votre appareil d'irrigation",
+  "ipAddressHint": "ex: 192.168.1.100",
+  "connectButton": "Connecter",
+  "invalidIpError": "Veuillez entrer une adresse IP valide",
+   "@@locale": "fr",
+  
+  "connectIrrigationTitle": "Vous souhaitez connecter votre système d'irrigation ?",
+  "@connectIrrigationTitle": {
+    "description": "Title for the irrigation system connection screen"
+  },
+  
+  "connectIrrigationDescription": "Découvrez et connectez-vous aux dispositifs d'irrigation disponibles",
+  "@connectIrrigationDescription": {
+    "description": "Description text for the irrigation connection screen"
+  },
+  
+  "connectDeviceButton": "Connecter votre appareil",
+  "@connectDeviceButton": {
+    "description": "Text for the button to connect devices"
+  },
+  
+  "deviceConnectedMessage": "Connecté à l'appareil {deviceId}",
+  "@deviceConnectedMessage": {
+    "description": "Message shown when a device is successfully connected",
+    "placeholders": {
+      "deviceId": {
+        "type": "String",
+        "example": "ABC123"
+      }
+    }
+  },
+  
+  "deviceConnectedUpdateFailedMessage": "Connecté à l'appareil mais échec de la mise à jour de l'état de la région : {errorMessage}",
+  "@deviceConnectedUpdateFailedMessage": {
+    "description": "Message shown when a device is connected but region update failed",
+    "placeholders": {
+      "errorMessage": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "deviceConnectedNoRegionMessage": "Connecté à l'appareil mais les informations de région sont manquantes",
+  "@deviceConnectedNoRegionMessage": {
+    "description": "Message shown when a device is connected but region info is missing"
+  }
   }
 } 

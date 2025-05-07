@@ -369,5 +369,64 @@
   "humidityLoading": "Loading...",
   "humidityError": "Error",
   "humidityNoData": "No Data Available",
-  "aiAssistant":"Ai Assistant "
+  "aiAssistant":"Ai Assistant ",
+   "deviceDiscoveryTitle": "Connect to Irrigation Device",
+  "discoverTab": "Discover",
+  "manualEntryTab": "Manual Entry",
+  "availableDevices": "Available Devices",
+  "scanButton": "Scan",
+  "scanningText": "Scanning...",
+  "noDevicesFound": "No devices found",
+  "noDevicesMessage": "Make sure your devices are powered on and connected to the network",
+  "devicePrefix": "Device",
+  "ipAddressPrefix": "IP:",
+  "connectedStatus": "Connected",
+  "enterDeviceIpTitle": "Enter Device IP Address",
+  "enterDeviceIpSubtitle": "Input the IP address of your irrigation device",
+  "ipAddressHint": "e.g. 192.168.1.100",
+  "connectButton": "Connect",
+  "invalidIpError": "Please enter a valid IP address",
+   "@@locale": "en",
+  
+  "connectIrrigationTitle": "Want to connect Your Irrigation System?",
+  "@connectIrrigationTitle": {
+    "description": "Title for the irrigation system connection screen"
+  },
+  
+  "connectIrrigationDescription": "Discover and connect to available irrigation devices",
+  "@connectIrrigationDescription": {
+    "description": "Description text for the irrigation connection screen"
+  },
+  
+  "connectDeviceButton": "Connect Your Device",
+  "@connectDeviceButton": {
+    "description": "Text for the button to connect devices"
+  },
+  
+  "deviceConnectedMessage": "Connected to device {deviceId}",
+  "@deviceConnectedMessage": {
+    "description": "Message shown when a device is successfully connected",
+    "placeholders": {
+      "deviceId": {
+        "type": "String",
+        "example": "ABC123"
+      }
+    }
+  },
+  
+  "deviceConnectedUpdateFailedMessage": "Connected to device but failed to update region status: {errorMessage}",
+  "@deviceConnectedUpdateFailedMessage": {
+    "description": "Message shown when a device is connected but region update failed",
+    "placeholders": {
+      "errorMessage": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "deviceConnectedNoRegionMessage": "Connected to device but region information is missing",
+  "@deviceConnectedNoRegionMessage": {
+    "description": "Message shown when a device is connected but region info is missing"
+  }
 }

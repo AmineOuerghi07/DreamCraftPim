@@ -6,7 +6,7 @@ import 'package:pim_project/view/screens/region_details_screen/components/device
 import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
 import 'package:provider/provider.dart';
-//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ConnectToBluetooth extends StatelessWidget {
   final VoidCallback? onDeviceConnected;
@@ -20,6 +20,7 @@ class ConnectToBluetooth extends StatelessWidget {
   Widget build(BuildContext context) {
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
     final regionViewModel = Provider.of<RegionDetailsViewModel>(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Center(
@@ -31,19 +32,19 @@ class ConnectToBluetooth extends StatelessWidget {
             children: [
               const Image(image: AssetImage("assets/images/graph_3.png")),
               const SizedBox(height: 12),
-              const Text(
-                "Want to connect Your Irrigation System?",
+              Text(
+                l10n.connectIrrigationTitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                "Discover and connect to available irrigation devices",
+              Text(
+                l10n.connectIrrigationDescription,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
@@ -64,9 +65,9 @@ class ConnectToBluetooth extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
-                child: const Text(
-                  "Connect Your Device",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Text(
+                  l10n.connectDeviceButton,
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ],
@@ -78,6 +79,7 @@ class ConnectToBluetooth extends StatelessWidget {
   
   void _showDeviceDiscoveryDialog(BuildContext context, RegionDetailsViewModel regionViewModel) {
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context, listen: false);
+    final l10n = AppLocalizations.of(context)!;
     
     // Start discovery process
     irrigationViewModel.discoverDevices();
@@ -108,7 +110,7 @@ class ConnectToBluetooth extends StatelessWidget {
             if (response.status == Status.COMPLETED) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Connected to device ${device.id}'),
+                  content: Text(l10n.deviceConnectedMessage(device.id)),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -120,15 +122,15 @@ class ConnectToBluetooth extends StatelessWidget {
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Connected to device but failed to update region status: ${response.message}'),
+                  content: Text(l10n.deviceConnectedUpdateFailedMessage(response.message!)),
                   backgroundColor: Colors.orange,
                 ),
               );
             }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Connected to device but region information is missing'),
+              SnackBar(
+                content: Text(l10n.deviceConnectedNoRegionMessage),
                 backgroundColor: Colors.orange,
               ),
             );
