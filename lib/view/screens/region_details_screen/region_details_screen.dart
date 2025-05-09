@@ -368,42 +368,54 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, RegionDetailsViewModel viewModel) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
-    final l10n = AppLocalizations.of(context)!;
-    
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(l10n.confirmDelete),
-        content: Text(l10n.confirmDeleteMessage),
-        insetPadding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 20.0 : 40.0,
-          vertical: 24.0,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              final response = await viewModel.deleteRegion(viewModel.region!.id);
-              Navigator.of(context).pop();
-              if (response.status == Status.COMPLETED && context.mounted) {
-                context.go(RouteNames.land);
-              } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(response.message ?? l10n.deleteFailed), backgroundColor: Colors.red),
-                );
-              }
-            },
-            child: Text(l10n.delete, style: TextStyle(color: Colors.red)),
-          ),
-        ],
+ void _showDeleteConfirmationDialog(BuildContext context, RegionDetailsViewModel viewModel) {
+  final isSmallScreen = MediaQuery.of(context).size.width < 600;
+  final l10n = AppLocalizations.of(context)!;
+  final landId = viewModel.region?.land.id;
+  final landViewModel = widget.landDetailsViewModel ?? Provider.of<LandDetailsViewModel>(context, listen: false);
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Text(l10n.confirmDelete),
+      content: Text(l10n.confirmDeleteMessage),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 20.0 : 40.0,
+        vertical: 24.0,
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          onPressed: () async {
+            final response = await viewModel.deleteRegion(viewModel.region!.id);
+            Navigator.of(context).pop();
+            
+            if (response.status == Status.COMPLETED && context.mounted) {
+              // Important: Refresh the land details data before navigation
+              if (landId != null) {
+                // Refresh regions for the parent land
+                landViewModel.fetchRegionsForLand(landId);
+                // Also refresh plants if needed
+                landViewModel.fetchPlantsForLand(landId);
+              }
+              
+              // Navigate back to land details
+              context.go("${RouteNames.landDetails}/$landId");
+            } else if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(response.message ?? l10n.deleteFailed), backgroundColor: Colors.red),
+              );
+            }
+          },
+          child: Text(l10n.delete, style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+}
 
   void _showAddSensorsDialog(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;

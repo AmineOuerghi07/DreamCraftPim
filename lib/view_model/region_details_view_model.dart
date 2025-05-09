@@ -173,27 +173,46 @@ class RegionDetailsViewModel with ChangeNotifier {
   }
 
   // New method to delete a region
-  Future<ApiResponse<void>> deleteRegion(String regionId) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+ Future<ApiResponse<void>> deleteRegion(String regionId) async {
+  _isLoading = true;
+  _errorMessage = null;
+  notifyListeners();
 
-    try {
-      final response = await _regionService.deleteRegion(regionId);
-      if (response.status == Status.COMPLETED) {
-        _region = null;
-        _regionResponse = null; // Clear region data after deletion
-        return ApiResponse.completed(null);
-      } else {
-        _errorMessage = response.message ?? 'Failed to delete region';
-        return ApiResponse.error(_errorMessage!);
+  try {
+    final response = await _regionService.deleteRegion(regionId);
+    if (response.status == Status.COMPLETED) {
+      // Store landId before clearing region data
+      final landId = _region?.land.id;
+      
+      // Clear region data after deletion
+      _region = null;
+      _regionResponse = null;
+      
+      // If we have the parent land's ID, we can refresh its data too
+      if (landId != null) {
+        try {
+          // Create a new instance to avoid circular dependencies
+          LandDetailsViewModel landViewModel = LandDetailsViewModel(landId);
+          await landViewModel.fetchRegionsForLand(landId);
+          await landViewModel.fetchPlantsForLand(landId);
+        } catch (e) {
+          print("Error refreshing land data: $e");
+          // Continue with deletion even if refresh fails
+        }
       }
-    } catch (e) {
-      _errorMessage = 'Delete error: ${e.toString()}';
+      
+      return ApiResponse.completed(null);
+    } else {
+      _errorMessage = response.message ?? 'Failed to delete region';
       return ApiResponse.error(_errorMessage!);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
+  } catch (e) {
+    _errorMessage = 'Delete error: ${e.toString()}';
+    return ApiResponse.error(_errorMessage!);
+  } finally {
+    _isLoading = false;
+    notifyListeners();
   }
+}
+
 }

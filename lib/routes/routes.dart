@@ -16,7 +16,7 @@ import 'package:pim_project/view/screens/forget_password_screen.dart';
 import 'package:pim_project/view/screens/home_screen/home_screen.dart';
 import 'package:pim_project/view/screens/humidity_screen.dart';
 import 'package:pim_project/view/screens/land_details_for_rent_screen.dart';
-import 'package:pim_project/view/screens/land_details_screen.dart';
+import 'package:pim_project/view/screens/land_details_screen/land_details_screen.dart';
 import 'package:pim_project/view/screens/land_screen/land_screen.dart';
 import 'package:pim_project/view/screens/language_screen.dart';
 import 'package:pim_project/view/screens/loading_screen.dart';
