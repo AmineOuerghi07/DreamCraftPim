@@ -22,15 +22,52 @@ class ApiClient {
     return headers;
   }
 
-  // Helper method to handle common response logic
+  // Improved response handler that properly handles different status codes
   ApiResponse<T> _handleResponse<T>(http.Response response, T Function(dynamic) fromJson) {
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      // Success: Parse the response body
-      final data = jsonDecode(response.body);
-      return ApiResponse.completed(fromJson(data));
-    } else {
-      // Error: Return an error response
-      return ApiResponse.error('Request failed with status: ${response.statusCode}');
+    try {
+      final responseBody = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        // Success response
+        return ApiResponse.completed(fromJson(responseBody));
+      } else {
+        // Handle specific error status codes
+        switch (response.statusCode) {
+          case 400:
+            return ApiResponse.error(
+              responseBody?['message'] ?? 'Bad request', 
+              statusCode: 400
+            );
+          case 401:
+            return ApiResponse.error(
+              responseBody?['message'] ?? 'Unauthorized', 
+              statusCode: 401
+            );
+          case 403:
+            return ApiResponse.error(
+              responseBody?['message'] ?? 'Forbidden', 
+              statusCode: 403
+            );
+          case 404:
+            return ApiResponse.error(
+              responseBody?['message'] ?? 'Resource not found', 
+              statusCode: 404
+            );
+          case 500:
+            return ApiResponse.error(
+              responseBody?['message'] ?? 'Internal server error', 
+              statusCode: 500
+            );
+          default:
+            return ApiResponse.error(
+              responseBody?['message'] ?? 'Request failed with status: ${response.statusCode}',
+              statusCode: response.statusCode
+            );
+        }
+      }
+    } catch (e) {
+      // Handle JSON parsing errors
+      return ApiResponse.error('Error processing response: $e');
     }
   }
 
@@ -49,12 +86,8 @@ class ApiClient {
       print('Response Status Code: ${response.statusCode}'); // Debug log
       print('Response Body: ${response.body}'); // Debug log
       
-      if (response.statusCode == 404) {
-        return ApiResponse.error('Resource not found');
-      }
-      
-      if (response.body.isEmpty) {
-        return ApiResponse.error('Empty response from server');
+      if (response.body.isEmpty && response.statusCode != 204) {
+        return ApiResponse.error('Empty response from server', statusCode: response.statusCode);
       }
       
       return _handleResponse(response, fromJson);
@@ -67,37 +100,45 @@ class ApiClient {
   // POST request
   Future<ApiResponse<T>> post<T>(String endpoint, dynamic data, T Function(dynamic) fromJson) async {
     try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      print('Making POST request to: $url'); // Debug log
+      print('Headers: $_headers'); // Debug log
+      print('Body: ${json.encode(data)}'); // Debug log
+      
       final response = await http.post(
-        Uri.parse('$baseUrl/$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (_authToken != null) 'Authorization': 'Bearer $_authToken',
-        },
+        url,
+        headers: _headers,
         body: json.encode(data),
       );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final jsonResponse = json.decode(response.body);
-        return ApiResponse.completed(fromJson(jsonResponse));
-      } else {
-        final error = json.decode(response.body);
-        return ApiResponse.error(error['message'] ?? 'Request failed');
-      }
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
+      return _handleResponse(response, fromJson);
     } catch (e) {
-      return ApiResponse.error('Error: ${e.toString()}');
+      print('POST Error: $e'); // Debug log
+      return ApiResponse.error('Error during POST request: $e');
     }
   }
 
   // PUT request
   Future<ApiResponse<T>> put<T>(String endpoint, dynamic body, T Function(dynamic) fromJson) async {
     try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      print('Making PUT request to: $url'); // Debug log
+      
       final response = await http.put(
-        Uri.parse('$baseUrl/$endpoint'),
+        url,
         headers: _headers,
         body: jsonEncode(body),
       );
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
       return _handleResponse(response, fromJson);
     } catch (e) {
+      print('PUT Error: $e'); // Debug log
       return ApiResponse.error('Error during PUT request: $e');
     }
   }
@@ -112,38 +153,59 @@ class ApiClient {
       final url = Uri.parse('$baseUrl/$endpoint');
       var request = http.MultipartRequest('POST', url);
 
+      // Add authorization header if available
+      if (_authToken != null) {
+        request.headers['Authorization'] = 'Bearer $_authToken';
+      }
+
       // Add fields
       fields.forEach((key, value) {
         request.fields[key] = value;
       });
 
       // Add files
-      files.forEach((key, value) async {
-        request.files.add(await http.MultipartFile.fromPath(key, value.path));
-      });
-
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return ApiResponse.completed(parser(json.decode(responseBody)));
-      } else {
-        return ApiResponse.error('Failed to upload: ${response.reasonPhrase}');
+      for (var entry in files.entries) {
+        request.files.add(await http.MultipartFile.fromPath(entry.key, entry.value.path));
       }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
+      return _handleResponse(response, parser);
     } catch (e) {
+      print('POST Multipart Error: $e'); // Debug log
       return ApiResponse.error('Network error: ${e.toString()}');
     }
   }
+
   // DELETE request
   Future<ApiResponse<void>> delete(String endpoint) async {
     try {
-      final response = await http.delete(Uri.parse('$baseUrl/$endpoint'));
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      print('Making DELETE request to: $url'); // Debug log
+      
+      final response = await http.delete(
+        url,
+        headers: _headers,
+      );
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         return ApiResponse.completed(null);
       } else {
-        return ApiResponse.error('Failed to delete: ${response.statusCode}');
+        final responseBody = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+        return ApiResponse.error(
+          responseBody?['message'] ?? 'Failed to delete: ${response.statusCode}',
+          statusCode: response.statusCode
+        );
       }
     } catch (e) {
+      print('DELETE Error: $e'); // Debug log
       return ApiResponse.error('Error during DELETE request: $e');
     }
   }
@@ -151,82 +213,116 @@ class ApiClient {
   // PATCH request
   Future<ApiResponse<T>> patch<T>(String endpoint, dynamic body, T Function(dynamic) fromJson) async {
     try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      print('Making PATCH request to: $url'); // Debug log
+      
       final response = await http.patch(
-        Uri.parse('$baseUrl/$endpoint'),
+        url,
         headers: _headers,
         body: jsonEncode(body),
       );
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
       return _handleResponse(response, fromJson);
     } catch (e) {
+      print('PATCH Error: $e'); // Debug log
       return ApiResponse.error('Error during PATCH request: $e');
     }
   }
-Future<ApiResponse<T>> putMultipart<T>({
-  required String endpoint,
-  required Map<String, String> fields,
-  required Map<String, File> files,
-  required T Function(dynamic) parser,
-}) async {
+
+  Future<ApiResponse<T>> putMultipart<T>({
+    required String endpoint,
+    required Map<String, String> fields,
+    required Map<String, File> files,
+    required T Function(dynamic) parser,
+  }) async {
     try {
       final url = Uri.parse('$baseUrl/$endpoint');
       var request = http.MultipartRequest('PUT', url);
+
+      // Add authorization header if available
+      if (_authToken != null) {
+        request.headers['Authorization'] = 'Bearer $_authToken';
+      }
 
       // Add fields
       fields.forEach((key, value) {
         request.fields[key] = value;
       });
 
-      // Add files
-      files.forEach((key, value) async {
-        request.files.add(await http.MultipartFile.fromPath(key, value.path));
-      });
-
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return ApiResponse.completed(parser(json.decode(responseBody)));
-      } else {
-        return ApiResponse.error('Failed to upload: ${response.reasonPhrase}');
+      // Add files correctly
+      for (var entry in files.entries) {
+        request.files.add(await http.MultipartFile.fromPath(entry.key, entry.value.path));
       }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
+      return _handleResponse(response, parser);
     } catch (e) {
+      print('PUT Multipart Error: $e'); // Debug log
       return ApiResponse.error('Network error: ${e.toString()}');
     }
-}
-  Future<ApiResponse<dynamic>> sendMultipart(http.MultipartRequest request) async {
-  try {
-    final response = await request.send();
-    final body = await response.stream.bytesToString();
-    
-    if (response.statusCode == 200) {
-      return ApiResponse.completed(json.decode(body));
-    }
-    return ApiResponse.error('Failed: ${response.statusCode}');
-  } catch (e) {
-    return ApiResponse.error('Exception: $e');
   }
-}
+  
+  Future<ApiResponse<dynamic>> sendMultipart(http.MultipartRequest request) async {
+    try {
+      // Add authorization header if available
+      if (_authToken != null) {
+        request.headers['Authorization'] = 'Bearer $_authToken';
+      }
+      
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      print('Response Status Code: ${response.statusCode}'); // Debug log
+      print('Response Body: ${response.body}'); // Debug log
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final body = response.body.isNotEmpty ? json.decode(response.body) : null;
+        return ApiResponse.completed(body);
+      }
+      
+      final responseBody = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+      return ApiResponse.error(
+        responseBody?['message'] ?? 'Failed: ${response.statusCode}',
+        statusCode: response.statusCode
+      );
+    } catch (e) {
+      print('Multipart Error: $e'); // Debug log
+      return ApiResponse.error('Exception: $e');
+    }
+  }
 }
 
 class ApiResponse<T> {
   Status status;
   T? data;
   String? message;
+  int? statusCode;
 
-  ApiResponse.initial(this.message) : status = Status.INITIAL;
+  ApiResponse.initial(this.message) : status = Status.INITIAL, statusCode = null;
 
-  ApiResponse.loading(this.message) : status = Status.LOADING;
+  ApiResponse.loading(this.message) : status = Status.LOADING, statusCode = null;
 
-  ApiResponse.completed(this.data) : status = Status.COMPLETED;
+  ApiResponse.completed(this.data) : status = Status.COMPLETED, message = null, statusCode = 200;
 
-  ApiResponse.error(this.message) : status = Status.ERROR;
+  ApiResponse.error(this.message, {this.statusCode}) : status = Status.ERROR, data = null;
 
-
-  get errorMessage => null;
+  bool get isSuccess => status == Status.COMPLETED;
+  
+  bool get isError => status == Status.ERROR;
+  
+  bool get isLoading => status == Status.LOADING;
 
   @override
   String toString() {
-    return "Status : $status \n Message : $message \n Data : $data";
+    return "Status: $status | StatusCode: $statusCode | Message: $message | Data: $data";
   }
 }
 
