@@ -126,11 +126,12 @@ class LandDetailsScreen extends StatelessWidget {
           context,
           onConfirm: () async {
             await viewModel.deleteLand(id);
-          },
-          onComplete: () {
-            // Fetch updated plants when navigating back
-final landDetailsViewModel = Provider.of<LandDetailsViewModel>(context, listen: false);
-    landDetailsViewModel.fetchRegionsForLand(id);          },
+            context.go(RouteNames.land);
+            if (context.mounted) {
+              Provider.of<LandViewModel>(context, listen: false)
+                  .fetchLandsByUserId(MyApp.userId);
+            }
+          }
         );
         break;
     }
@@ -183,6 +184,4 @@ final landDetailsViewModel = Provider.of<LandDetailsViewModel>(context, listen: 
       ),
     );
   }
-
-
 }
