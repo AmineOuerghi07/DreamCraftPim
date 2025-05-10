@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/main.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
+import 'package:pim_project/view/screens/home_screen/components/no_connected_region.dart'; // Import the new component
+import 'package:pim_project/view/screens/home_screen/components/no_land_for_rent.dart'; // Import the new component
 import 'package:pim_project/view/screens/components/rent_land_card.dart';
 import 'package:pim_project/view_model/connected_region_view_model.dart';
+import 'package:pim_project/view_model/home_view_model.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:provider/provider.dart';
 import 'feature_card.dart'; 
@@ -65,7 +68,7 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
             child: _showRegions
                 ? _buildRegionsView(context, regionVM)
                 : _showRentLands
-                    ? _buildRentLandsView(context, landVM)
+                    ? _buildRentLandsContent(context, landVM)
                     : _buildGridView(context),
           ),
         );
@@ -138,7 +141,11 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
                     title: l10n.balance,
                     icon: Icons.account_balance_wallet_outlined,
                     iconBgColor: Colors.yellow[100]!,
-                    onTap: () => widget.onFeatureSelected('balance'),
+                    onTap: () {
+                      widget.onFeatureSelected('balance');
+                      // Navigate to the billing screen using GoRouter
+                      context.push(RouteNames.billingScreen);
+                    },
                   ),
                 ),
               ],
@@ -208,7 +215,11 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
                     title: l10n.balance,
                     icon: Icons.account_balance_wallet_outlined,
                     iconBgColor: Colors.yellow[100]!,
-                    onTap: () => widget.onFeatureSelected('balance'),
+                    onTap: () {
+                      widget.onFeatureSelected('balance');
+                      // Navigate to the billing screen using GoRouter
+                      context.push(RouteNames.billingScreen);
+                    },
                   ),
                 ),
               ],
@@ -252,206 +263,169 @@ class _FieldManagementGridState extends State<FieldManagementGrid> {
     );
   }
 
-  Widget _buildContentBasedOnStatus(BuildContext context, ConnectedRegionViewModel viewModel) {
-    final l10n = AppLocalizations.of(context)!;
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.shortestSide >= 600;
+Widget _buildContentBasedOnStatus(BuildContext context, ConnectedRegionViewModel viewModel) {
+  final l10n = AppLocalizations.of(context)!;
+  final size = MediaQuery.of(context).size;
+  final isTablet = size.shortestSide >= 600;
 
-    switch (viewModel.status) {
-      case Status.LOADING:
-        return Center(
-          child: CircularProgressIndicator(
-            strokeWidth: isTablet ? 4.0 : 3.0,
+  // Get the HomeViewModel to check for noRegionsFound status
+  final homeViewModel = Provider.of<HomeViewModel>(context, listen: true);
+
+  switch (viewModel.status) {
+    case Status.LOADING:
+      return Center(
+        child: CircularProgressIndicator(
+          strokeWidth: isTablet ? 4.0 : 3.0,
+        ),
+      );
+    case Status.ERROR:
+      return Center(
+        child: Text(
+          viewModel.message ?? l10n.anErrorOccurred,
+          style: TextStyle(
+            fontSize: isTablet ? 16 : 14,
           ),
+        ),
+      );
+    case Status.COMPLETED:
+      final regions = viewModel.connectedRegions;
+      if (regions.isEmpty || homeViewModel.noRegionsFound) {
+        // Use the NoConnectedRegion component here
+        return NoConnectedRegion(
+          onTryAgain: () {
+            Provider.of<ConnectedRegionViewModel>(context, listen: false)
+              .fetchConnectedRegions(MyApp.userId);
+          },
         );
-      case Status.ERROR:
-        return Center(
-          child: Text(
-            viewModel.message ?? l10n.anErrorOccurred,
-            style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
-            ),
+      }
+      return LandRegionsGrid(
+        landId: widget.landId,
+        regions: regions,
+      );
+    case Status.INITIAL:
+      return Center(
+        child: Text(
+          l10n.tapToLoadRegions,
+          style: TextStyle(
+            fontSize: isTablet ? 16 : 14,
           ),
-        );
-      case Status.COMPLETED:
-        final regions = viewModel.connectedRegions;
-        if (regions.isEmpty) {
-          return Center(
-            child: Text(
-              l10n.noRegionsAvailable,
+        ),
+      );
+  }
+}
+  
+  
+Widget _buildRentLandsContent(BuildContext context, LandForRentViewModel viewModel) {
+  final l10n = AppLocalizations.of(context)!;
+  final size = MediaQuery.of(context).size;
+  final isTablet = size.shortestSide >= 600;
+  final isLandscape = size.width > size.height;
+
+  switch (viewModel.status) {
+    case Status.LOADING:
+      return Center(
+        child: CircularProgressIndicator(
+          strokeWidth: isTablet ? 4.0 : 3.0,
+        ),
+      );
+    case Status.ERROR:
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              viewModel.message ?? l10n.anErrorOccurred,
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
               ),
+              textAlign: TextAlign.center,
             ),
-          );
-        }
-        return LandRegionsGrid(
-          landId: widget.landId,
-          regions: regions,
-        );
-      case Status.INITIAL:
-      
-        return Center(
-          child: Text(
-            l10n.tapToLoadRegions,
-            style: TextStyle(
-              fontSize: isTablet ? 16 : 14,
-            ),
-          ),
-        );
-    }
-  }
-
-  Widget _buildRentLandsView(BuildContext context, LandForRentViewModel viewModel) {
-    final l10n = AppLocalizations.of(context)!;
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.shortestSide >= 600;
-
-    return Column(
-      key: const ValueKey('rent_lands'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () => setState(() {
-                _showRentLands = false;
-              }),
-              iconSize: isTablet ? 28 : 24,
-            ),
-            Text(
-              l10n.landsForRent,
-              style: TextStyle(
-                fontSize: isTablet ? 20 : 18,
-                fontWeight: FontWeight.bold,
-              ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => viewModel.fetchLandsForRent(),
+              child: Text(l10n.retry),
             ),
           ],
         ),
-        SizedBox(height: isTablet ? 20 : 16),
-        Expanded(
-          child: _buildRentLandsContent(context, viewModel),
+      );
+    case Status.COMPLETED:
+      final lands = viewModel.landsForRent;
+      // Check both if lands array is empty OR if the noLandsFound flag is true
+      if (lands.isEmpty || viewModel.noLandsFound) {
+        // Use the NoLandForRent component here
+        return NoLandForRent(
+          onTryAgain: () {
+            viewModel.fetchLandsForRent();
+          },
+        );
+      }
+      
+      // Responsive grid for tablets in landscape
+      if (isTablet && isLandscape) {
+        return GridView.builder(
+          padding: EdgeInsets.all(8),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, // Two columns for landscape tablets
+            childAspectRatio: 1.2, // Adjusted for better proportions
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: lands.length,
+          itemBuilder: (context, index) {
+            final land = lands[index];
+            return RentLandCard(land: land);
+          },
+        );
+      } else if (isTablet && !isLandscape) {
+        // Special grid for tablets in portrait
+        return GridView.builder(
+          padding: EdgeInsets.all(8),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 1, // Single column but with grid sizing for tablets portrait
+            childAspectRatio: 2.0,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: lands.length,
+          itemBuilder: (context, index) {
+            final land = lands[index];
+            return RentLandCard(land: land);
+          },
+        );
+      } else {
+        // Default list view for phones
+        return ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          itemCount: lands.length,
+          itemBuilder: (context, index) {
+            final land = lands[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: RentLandCard(land: land),
+            );
+          },
+        );
+      }
+    case Status.INITIAL:
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              l10n.tapToLoadLands,
+              style: TextStyle(
+                fontSize: isTablet ? 16 : 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => viewModel.fetchLandsForRent(),
+              child: Text(l10n.retry),
+            ),
+          ],
         ),
-      ],
-    );
+      );
   }
+}
 
-  Widget _buildRentLandsContent(BuildContext context, LandForRentViewModel viewModel) {
-    final l10n = AppLocalizations.of(context)!;
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.shortestSide >= 600;
-    final isLandscape = size.width > size.height;
-
-    switch (viewModel.status) {
-      case Status.LOADING:
-        return Center(
-          child: CircularProgressIndicator(
-            strokeWidth: isTablet ? 4.0 : 3.0,
-          ),
-        );
-      case Status.ERROR:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                viewModel.message ?? l10n.anErrorOccurred,
-                style: TextStyle(
-                  fontSize: isTablet ? 16 : 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => viewModel.fetchLandsForRent(),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
-        );
-      case Status.COMPLETED:
-        final lands = viewModel.landsForRent;
-        if (lands.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                l10n.noLandsForRent,
-                style: TextStyle(
-                  fontSize: isTablet ? 16 : 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          );
-        }
-        
-        // Responsive grid for tablets in landscape
-        if (isTablet && isLandscape) {
-          return GridView.builder(
-            padding: EdgeInsets.all(8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Two columns for landscape tablets
-              childAspectRatio: 1.2, // Adjusted for better proportions
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: lands.length,
-            itemBuilder: (context, index) {
-              final land = lands[index];
-              return RentLandCard(land: land);
-            },
-          );
-        } else if (isTablet && !isLandscape) {
-          // Special grid for tablets in portrait
-          return GridView.builder(
-            padding: EdgeInsets.all(8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 1, // Single column but with grid sizing for tablets portrait
-              childAspectRatio: 2.0,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: lands.length,
-            itemBuilder: (context, index) {
-              final land = lands[index];
-              return RentLandCard(land: land);
-            },
-          );
-        } else {
-          // Default list view for phones
-          return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            itemCount: lands.length,
-            itemBuilder: (context, index) {
-              final land = lands[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: RentLandCard(land: land),
-              );
-            },
-          );
-        }
-      case Status.INITIAL:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                l10n.tapToLoadLands,
-                style: TextStyle(
-                  fontSize: isTablet ? 16 : 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => viewModel.fetchLandsForRent(),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
-        );
-    }
-  }
 }
