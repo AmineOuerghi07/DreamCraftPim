@@ -106,12 +106,12 @@ class MarketProvider extends ChangeNotifier {
 
 class ApiService {
 
-  final String baseUrl = "http://localhost:3000";
+  final String baseUrl = "http://192.168.43.232:3000";
 
   Future<List<Product>> fetchProducts() async {
     final customerId = MyApp.userId.toString();
     final response = await http
-        .get(Uri.parse('http://localhost:8000/recommend/$customerId'));
+        .get(Uri.parse('http://192.168.43.232:8000/recommend/$customerId'));
 
     print("Response body: ${response.body}");
     if (response.statusCode == 200) {
@@ -128,8 +128,7 @@ class ApiService {
   }
 
   Future<List<Product>> fetchProductsfromDatabase() async {
-    final customerId = MyApp.userId.toString();
-    final response = await http.get(Uri.parse('http://localhost:3000/product'));
+    final response = await http.get(Uri.parse('http://192.168.43.232:3000/product'));
 
     print("Response body: ${response.body}");
     if (response.statusCode == 200) {

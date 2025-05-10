@@ -2,9 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/SmartRegionsProvider.dart';
 import 'package:pim_project/model/domain/highlight_level.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/SmartRegionCard.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
+import 'package:pim_project/view_model/sensor_data_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:pim_project/view/screens/Components/SmartRegionCard.dart';
 
 class SmartRegionsGrid extends StatelessWidget {
   const SmartRegionsGrid({super.key});
@@ -13,6 +14,7 @@ class SmartRegionsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<SmartRegionsProvider>(context);
     final irrigationViewModel = Provider.of<IrrigationViewModel>(context, listen: true);
+    final sensorDataViewModel = Provider.of<SensorDataViewModel>(context, listen: true);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;
 
@@ -114,6 +116,23 @@ class SmartRegionsGrid extends StatelessWidget {
             ),
           ),
           
+          // Last updated timestamp indicator (subtle)
+          if (sensorDataViewModel.lastUpdated != null)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? 16.0 : 8.0,
+              ),
+              child: Text(
+                'Data updated: ${sensorDataViewModel.lastUpdatedFormatted}',
+                style: TextStyle(
+                  fontSize: isTablet ? 12 : 10,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey[500],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          
           // Cards grid
           Expanded(
             child: Container(
@@ -131,27 +150,24 @@ class SmartRegionsGrid extends StatelessWidget {
                       mainAxisSpacing: isTablet ? 12 : 8,
                       childAspectRatio: isTablet ? 1.0 : 0.95,
                     ),
-                    itemCount: provider.cardsData.length,
+                    itemCount: sensorDataViewModel.allSensorData.length,
                     itemBuilder: (context, index) {
-                      final card = provider.cardsData[index];
-                      final title = card["title"] as String;
-                      final subtitle = card["subtitle"] as String;
+                      final sensor = sensorDataViewModel.allSensorData[index];
+                      final title = sensor.title;
+                      final subtitle = sensor.value;
                       HighlightLevel highlightLevel;
 
-                      // Extract numeric value from subtitle (if present)
                       final match = RegExp(r'\d+(\.\d+)?').firstMatch(subtitle);
                       final value = match != null ? double.tryParse(match.group(0)!) : null;
 
                       // Define thresholds based on sensor type (title)
                       switch (title) {
                         case "Lighting":
-                          highlightLevel = value == null
-                              ? HighlightLevel.normal
-                              : value < 15
-                                  ? HighlightLevel.normal
-                                  : value < 20
-                                      ? HighlightLevel.medium
-                                      : HighlightLevel.danger;
+                          highlightLevel = subtitle.contains("Not detected") && subtitle.contains("On")
+                              ? HighlightLevel.medium
+                              : subtitle.contains("Detected") && subtitle.contains("Off")
+                                  ? HighlightLevel.medium
+                                  : HighlightLevel.normal;
                           break;
                         case "Temperature":
                           highlightLevel = value == null
@@ -162,33 +178,57 @@ class SmartRegionsGrid extends StatelessWidget {
                                       ? HighlightLevel.medium
                                       : HighlightLevel.danger;
                           break;
-                        case "Irrigation":
+                        case "Humidity":
                           highlightLevel = value == null
                               ? HighlightLevel.normal
-                              : value < 150
-                                  ? HighlightLevel.normal
-                                  : value < 250
+                              : value < 40
+                                  ? HighlightLevel.medium
+                                  : value > 80
                                       ? HighlightLevel.medium
-                                      : HighlightLevel.danger;
+                                      : HighlightLevel.normal;
+                          break;
+                        case "Irrigation":
+                          highlightLevel = subtitle.contains("Active") && !subtitle.contains("AUTOMATIC")
+                              ? HighlightLevel.medium
+                              : HighlightLevel.normal;
+                          break;
+                        case "Soil":
+                          highlightLevel = subtitle.contains("Dry")
+                              ? HighlightLevel.medium
+                              : HighlightLevel.normal;
                           break;
                         case "Ventilator":
-                          highlightLevel = HighlightLevel.normal;
+                          highlightLevel = subtitle.contains("Active") && !subtitle.contains("Auto")
+                              ? HighlightLevel.medium
+                              : HighlightLevel.normal;
                           break;
                         default:
                           highlightLevel = HighlightLevel.normal;
                       }
 
-                      bool isDisabled = provider.isAutomaticMode && 
+                      // Find switch index for this sensor type
+                      int switchIndex = -1;
+                      for (int i = 0; i < provider.controlTitlesMap.length; i++) {
+                        if (provider.controlTitlesMap[i] == title) {
+                          switchIndex = i;
+                          break;
+                        }
+                      }
+
+                      bool isDisabled = switchIndex != -1 && 
+                          provider.isAutomaticMode && 
                           (title == "Temperature" || title == "Irrigation" || title == "Ventilator");
 
                       return SmartRegionCard(
-                        icon: card["icon"],
-                        iconColor: card["iconColor"],
-                        title: card["title"],
-                        subtitle: card["subtitle"],
-                        switchValue: provider.switches[index],
+                        icon: sensor.icon,
+                        iconColor: sensor.iconColor,
+                        title: title,
+                        subtitle: subtitle,
+                        switchValue: switchIndex != -1 ? provider.switches[switchIndex] : false,
                         onSwitchChanged: (newValue) {
-                          provider.toggleSwitch(index, newValue);
+                          if (switchIndex != -1) {
+                            provider.toggleSwitch(switchIndex, newValue);
+                          }
                         },
                         highlightLevel: highlightLevel,
                         isDisabled: isDisabled,

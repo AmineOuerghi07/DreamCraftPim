@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/highlight_level.dart';
 
+import 'package:pim_project/view/screens/region_details_screen/components/card_top_indicator.dart';
+
 class SmartRegionCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -28,7 +30,6 @@ class SmartRegionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;
-    final isLargeScreen = screenWidth >= 1200;
     
     // Base background color based on switchValue and isDisabled
     Color baseColor;
@@ -56,28 +57,6 @@ class SmartRegionCard extends StatelessWidget {
       // Removed box shadow
     );
 
-    // Determine subtitle color based on highlightLevel and title
-    Color getSubtitleColor() {
-      if (isDisabled) {
-        return Colors.white70; // Disabled text color
-      }
-      
-      switch (highlightLevel) {
-        case HighlightLevel.medium:
-          return const Color(0xFFEAA31F); // Warning color
-        case HighlightLevel.danger:
-          return const Color(0xFFCF2F2F); // Danger color
-        case HighlightLevel.normal:
-          if (title == "Irrigation") {
-            return const Color(0xFF4968FF); // Water safe color
-          } else if (title == "Soil") {
-            return const Color(0xFFB95C00); // Growth color
-          } else {
-            return const Color(0xFFB9A900); // Default safe color
-          }
-      }
-    }
-
     return Card(
       elevation: 0, // No additional elevation as we're using custom shadows
       margin: EdgeInsets.all(isTablet ? 6 : 4),
@@ -90,45 +69,14 @@ class SmartRegionCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Top row with value and icon
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Value Container (left side)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 12 : 10, 
-                      vertical: isTablet ? 8 : 6
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: isTablet ? 16 : 14,
-                        fontWeight: FontWeight.bold,
-                        color: getSubtitleColor(),
-                      ),
-                    ),
-                  ),
-                  
-                  // Icon Container (right side)
-                  Container(
-                    width: isTablet ? 42 : 38,
-                    height: isTablet ? 42 : 38,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      icon,
-                      size: isTablet ? 24 : 22,
-                      color: isDisabled ? Colors.white70 : iconColor,
-                    ),
-                  ),
-                ],
+              // Using the new CardTopIndicator component
+              CardTopIndicator(
+                icon: icon,
+                iconColor: iconColor,
+                subtitle: subtitle,
+                highlightLevel: highlightLevel,
+                title: title,
+                isDisabled: isDisabled,
               ),
               
               // Expanded space for center alignment
@@ -215,7 +163,7 @@ class SmartRegionCard extends StatelessWidget {
                             ? Icons.warning_amber_rounded 
                             : Icons.info_outline,
                         size: isTablet ? 14 : 12,
-                        color: getSubtitleColor(),
+                        color: _getStatusColor(),
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -224,7 +172,7 @@ class SmartRegionCard extends StatelessWidget {
                             : 'Check recommended',
                         style: TextStyle(
                           fontSize: isTablet ? 12 : 10,
-                          color: getSubtitleColor(),
+                          color: _getStatusColor(),
                         ),
                       ),
                     ],
@@ -235,5 +183,16 @@ class SmartRegionCard extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  // Helper method for status indicator color
+  Color _getStatusColor() {
+    if (isDisabled) {
+      return Colors.white70;
+    }
+    
+    return highlightLevel == HighlightLevel.danger
+        ? const Color(0xFFCF2F2F)  // Danger color
+        : const Color(0xFFEAA31F); // Warning color
   }
 }

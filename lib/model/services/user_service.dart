@@ -1,37 +1,19 @@
 // model/services/user_service.dart
 import 'dart:convert';
 import 'dart:io';
-import 'package:dio/dio.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:pim_project/main.dart';
 import 'package:pim_project/model/domain/user.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/model/services/api_client.dart';
-import 'package:pim_project/constants/constants.dart';
 
 class UserService {
   final ApiClient _apiClient;
   
   UserService({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  String? _extractUserIdFromToken(String token) {
-    try {
-      // Split the token into parts
-      final parts = token.split('.');
-      if (parts.length != 3) return null;
 
-      // Decode the payload (second part)
-      final payload = parts[1];
-      final normalized = base64Url.normalize(payload);
-      final decoded = utf8.decode(base64Url.decode(normalized));
-      final json = jsonDecode(decoded);
-
-      return json['id'] as String?;
-    } catch (e) {
-      print('Error extracting user ID from token: $e');
-      return null;
-    }
-  }
 
   // Login user
   Future<ApiResponse<User>> login(String email, String password) async {

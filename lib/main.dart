@@ -10,6 +10,7 @@ import 'package:pim_project/view_model/humidity_view_model.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:pim_project/view_model/land_view_model.dart';
+import 'package:pim_project/view_model/sensor_data_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/model/repositories/user_repository.dart';
 import 'package:pim_project/model/services/user_service.dart';
@@ -91,7 +92,6 @@ class MyApp extends StatelessWidget {
                 );
               }
 
-              final initialRoute = snapshot.data ?? RouteNames.login;
               
               return MultiProvider(
                 providers: [
@@ -133,6 +133,7 @@ class MyApp extends StatelessWidget {
                   ),
                   ChangeNotifierProvider(create: (context) => HumidityViewModel()),
                   ChangeNotifierProvider(create: (context) => IrrigationViewModel()),
+                  ChangeNotifierProvider(create: (context) => SensorDataViewModel()),
                   Provider(create: (context) => PredictionService()),
                   ChangeNotifierProvider<PredictionViewModel>(
                     create: (context) => PredictionViewModel(
@@ -153,7 +154,7 @@ class MyApp extends StatelessWidget {
                   title: 'DreamCraft PIM',
                   debugShowCheckedModeBanner: false,
                   theme: ThemeData(
-                    colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+                    colorScheme: ColorScheme.fromSeed(seedColor: AppConstants.primaryColor),
                     useMaterial3: true,
                   ),
                   localizationsDelegates: const [

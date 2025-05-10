@@ -13,16 +13,19 @@ class LandForRentViewModel extends ChangeNotifier {
   Status _status = Status.INITIAL;
   String? _message;
   Land? _selectedLand;
+  bool _noLandsFound = false; // New flag for 404 errors
 
   List<Land> get landsForRent => _landsForRent;
   Status get status => _status;
   String? get message => _message;
   Land? get selectedLand => _selectedLand;
+  bool get noLandsFound => _noLandsFound; // Getter for the new flag
 
   Future<void> fetchLandsForRent() async {
     try {
       _status = Status.LOADING;
       _message = 'Loading lands for rent...';
+      _noLandsFound = false; // Reset the flag
       notifyListeners();
 
       final response = await _landService.findLandsForRent();
@@ -53,6 +56,13 @@ class LandForRentViewModel extends ChangeNotifier {
           _landsForRent = [];
           _message = response.message ?? 'Failed to load lands for rent';
           _status = Status.ERROR;
+          
+          // Check if the error is 404 (No lands found)
+          if (response.message?.contains('No lands found') == true || 
+              response.statusCode == 404) {
+            _noLandsFound = true;
+            _status = Status.COMPLETED; // Change to COMPLETED to show empty state UI
+          }
           break;
         default:
           _message = 'Unexpected response status';
@@ -120,13 +130,11 @@ class LandForRentViewModel extends ChangeNotifier {
           (land) => land.id == landId,
         );
         
-        if (foundLand != null) {
-          _selectedLand = foundLand;
-          _status = Status.COMPLETED;
-          _message = null;
-          notifyListeners();
-          return;
-        }
+        _selectedLand = foundLand;
+        _status = Status.COMPLETED;
+        _message = null;
+        notifyListeners();
+        return;
       } catch (e) {
         print('Land not found in local list: $e');
       }
@@ -182,6 +190,12 @@ class LandForRentViewModel extends ChangeNotifier {
           _selectedLand = null;
           _message = response.message ?? 'Failed to load land details';
           _status = Status.ERROR;
+          
+          // Handle 404 case specifically
+          if (response.message?.contains('No land found') == true || 
+              response.statusCode == 404) {
+            _noLandsFound = true;
+          }
           break;
         default:
           _message = 'Unexpected response status';
@@ -202,6 +216,7 @@ class LandForRentViewModel extends ChangeNotifier {
     _message = null;
     _landsForRent = [];
     _selectedLand = null;
+    _noLandsFound = false;
     notifyListeners();
   }
 }

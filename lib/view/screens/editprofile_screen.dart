@@ -298,7 +298,7 @@ void initState() {
             ),
           ],
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: AppConstants.primaryColor,
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),

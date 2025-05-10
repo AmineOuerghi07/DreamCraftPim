@@ -421,7 +421,6 @@
   "sensors": "أجهزة استشعار",
   "plant": "نبات",
   "regions": "مناطق",
-  "addSensors": "إضافة أجهزة استشعار",
   "addRegion": "إضافة منطقة",
   "deleteFailed": "فشل الحذف",
   "readDetails": "عرض التفاصيل",
@@ -451,5 +450,65 @@
   "addYourFirstLand": "أضف أرضك الأولى",
   "addYourFirstRegion": "أضف منطقتك الأولى",
   "clickToAddLand": "انقر على زر + لإضافة أرض جديدة",
-  "clickToAddRegion": "انقر على زر + لإضافة منطقة جديدة"
+  "clickToAddRegion": "انقر على زر + لإضافة منطقة جديدة",
+  "aiAssistant":"المساعد الذكي",
+   "deviceDiscoveryTitle": "الاتصال بجهاز الري",
+  "discoverTab": "اكتشاف",
+  "manualEntryTab": "إدخال يدوي",
+  "availableDevices": "الأجهزة المتاحة",
+  "scanButton": "مسح",
+  "scanningText": "جاري البحث...",
+  "noDevicesFound": "لم يتم العثور على أجهزة",
+  "noDevicesMessage": "تأكد من تشغيل أجهزتك واتصالها بالشبكة",
+  "devicePrefix": "جهاز",
+  "ipAddressPrefix": "عنوان IP:",
+  "connectedStatus": "متصل",
+  "enterDeviceIpTitle": "أدخل عنوان IP للجهاز",
+  "enterDeviceIpSubtitle": "أدخل عنوان IP لجهاز الري الخاص بك",
+  "ipAddressHint": "مثال: 192.168.1.100",
+  "connectButton": "اتصال",
+  "invalidIpError": "الرجاء إدخال عنوان IP صالح",
+  "@@locale": "ar",
+  
+  "connectIrrigationTitle": "هل تريد توصيل نظام الري الخاص بك؟",
+  "@connectIrrigationTitle": {
+    "description": "Title for the irrigation system connection screen"
+  },
+  
+  "connectIrrigationDescription": "اكتشف واتصل بأجهزة الري المتاحة",
+  "@connectIrrigationDescription": {
+    "description": "Description text for the irrigation connection screen"
+  },
+  
+  "connectDeviceButton": "توصيل جهازك",
+  "@connectDeviceButton": {
+    "description": "Text for the button to connect devices"
+  },
+  
+  "deviceConnectedMessage": "تم الاتصال بالجهاز {deviceId}",
+  "@deviceConnectedMessage": {
+    "description": "Message shown when a device is successfully connected",
+    "placeholders": {
+      "deviceId": {
+        "type": "String",
+        "example": "ABC123"
+      }
+    }
+  },
+  
+  "deviceConnectedUpdateFailedMessage": "تم الاتصال بالجهاز ولكن فشل تحديث حالة المنطقة: {errorMessage}",
+  "@deviceConnectedUpdateFailedMessage": {
+    "description": "Message shown when a device is connected but region update failed",
+    "placeholders": {
+      "errorMessage": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "deviceConnectedNoRegionMessage": "تم الاتصال بالجهاز ولكن معلومات المنطقة مفقودة",
+  "@deviceConnectedNoRegionMessage": {
+    "description": "Message shown when a device is connected but region info is missing"
+  }
 }

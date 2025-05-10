@@ -1,6 +1,5 @@
 // model/domain/land.dart
 import 'package:pim_project/main.dart';
-import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/domain/user.dart';
 
 class Land {

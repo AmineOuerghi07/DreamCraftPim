@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
 import 'package:pim_project/view/screens/Components/category_grid.dart';
 import 'package:pim_project/view/screens/Components/category_seeAllButton.dart';
-import 'package:pim_project/view/screens/Components/header.dart';
 import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
 import 'package:pim_project/view/screens/Components/marketScreenSearchBar.dart' as custom;
 import 'package:pim_project/view/screens/Components/seeAllProductsWithSameCategory.dart';
+import 'package:pim_project/view/screens/components/marketHeader.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
@@ -90,10 +90,9 @@ class _MarketScreenState extends State<MarketScreen> {
                 : Consumer<MarketProvider>(
                   builder: (context, provider, _) => provider.isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : Header(
+                    : Marketheader(
                         greetingText: l10n.hello,
                         username: _username,
-                        userId: widget.userId,
                       ),
                 ),
               Padding(

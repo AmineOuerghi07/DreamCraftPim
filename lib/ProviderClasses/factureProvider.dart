@@ -44,7 +44,7 @@ class FactureProvider extends ChangeNotifier {
 
 
   Future<Product> fetchProductById(String productId) async {
-    final response = await http.get(Uri.parse('http://localhost:3000/product/$productId'));
+    final response = await http.get(Uri.parse('http://192.168.43.232:3000/product/$productId'));
 
     if (response.statusCode == 200) {
       return Product.fromJson(json.decode(response.body));
@@ -58,8 +58,7 @@ class FactureProvider extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> cart = prefs.getStringList('cart') ?? [];
     List<String> cartQte = prefs.getStringList('cartQte') ?? [];
-    var customerId = MyApp.userId;
-    String baseUrl = 'http://localhost:3000/order';
+    String baseUrl = 'http://192.168.43.232:3000/order';
 
     // Build orderItems using OrderItem class
     List<OrderItem> orderItems = [];
@@ -119,7 +118,7 @@ class FactureProvider extends ChangeNotifier {
 
     try {
       String baseUrl =
-          'http://localhost:3000/order'; // Change selon ton environnement
+          'http://192.168.43.232:3000/order'; // Change selon ton environnement
       final response = await http.get(Uri.parse(baseUrl));
 
       print("Response body: ${response.body}");

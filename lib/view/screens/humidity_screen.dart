@@ -293,7 +293,7 @@ class _HumidityScreenContentState extends State<_HumidityScreenContent> with Sin
   }
 
   Widget _buildAnimatedHumidityBox(Map<String, dynamic> data) {
-    final l10n = AppLocalizations.of(context)!;
+  //  final l10n = AppLocalizations.of(context)!;
     final condition = data['weather']?['condition']?.toLowerCase() ?? '';
     
     // Use passed colors if available, otherwise calculate based on condition

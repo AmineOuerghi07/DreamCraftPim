@@ -1,13 +1,15 @@
 // view/screens/region_details_screen.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/region.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
-import 'package:pim_project/view/screens/Components/region_info.dart';
-import 'package:pim_project/view/screens/Components/smart_regionsGrid.dart';
-import 'package:pim_project/view/screens/components/connect_to_bleutooth.dart';
-import 'package:pim_project/view/screens/components/region_detail_text.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/connect_to_bleutooth.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/region_detail_text.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/region_info.dart';
+import 'package:pim_project/view/screens/region_details_screen/components/smart_regionsGrid.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:pim_project/view_model/region_details_view_model.dart';
@@ -58,10 +60,12 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
   Widget build(BuildContext context) {
     // Get the screen width to determine if it's a phone or tablet
     final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600; // Common breakpoint for tablet layouts
     
+    final isTablet = screenWidth > 600; // Common breakpoint for tablet layouts
+        final l10n = AppLocalizations.of(context)!;
+
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
-    final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
+    //final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
     final landVM = widget.landDetailsViewModel ?? context.read<LandDetailsViewModel>();
     
     if (viewModel.region == null || viewModel.region!.id != widget.id) {
@@ -83,7 +87,9 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
         }
 
         final region = viewModel.region!;
+        
         return Scaffold(
+          
     //      backgroundColor: Colors.white, // Set background color for the entire scaffold
           appBar: AppBar(
             elevation: 0,
@@ -97,19 +103,19 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                 icon: const Icon(Icons.more_vert, color: Colors.black),
                 onSelected: (value) => _handleMenuSelection(value, context, viewModel),
                 itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem<String>(
+                   PopupMenuItem<String>(
                     value: 'update',
                     child: ListTile(
                       leading: Icon(Icons.edit),
-                      title: Text('Update Region'),
+                      title: Text(l10n.updateRegion),
                       contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                     ),
                   ),
-                  const PopupMenuItem<String>(
+                   PopupMenuItem<String>(
                     value: 'delete',
                     child: ListTile(
                       leading: Icon(Icons.delete),
-                      title: Text('Delete Region'),
+                      title: Text(l10n.deleteRegion),
                       contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                     ),
                   ),
@@ -118,7 +124,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
             ],
           ),
           body: Container(
-            color: Colors.white, // Set background color for the body container
+         //   color: Colors.white, // Set background color for the body container
             child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.symmetric(
@@ -141,7 +147,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                             viewModel,
                             landVM,
                           ),
-                          buttonText: "Add Plant",
+                          buttonText: l10n.addPlant,
                           showRegionCount: false,
                           onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
                         );
@@ -362,42 +368,54 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, RegionDetailsViewModel viewModel) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
-    final l10n = AppLocalizations.of(context)!;
-    
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(l10n.confirmDelete),
-        content: Text(l10n.confirmDeleteMessage),
-        insetPadding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 20.0 : 40.0,
-          vertical: 24.0,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              final response = await viewModel.deleteRegion(viewModel.region!.id);
-              Navigator.of(context).pop();
-              if (response.status == Status.COMPLETED && context.mounted) {
-                context.go(RouteNames.land);
-              } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(response.message ?? l10n.deleteFailed), backgroundColor: Colors.red),
-                );
-              }
-            },
-            child: Text(l10n.delete, style: TextStyle(color: Colors.red)),
-          ),
-        ],
+ void _showDeleteConfirmationDialog(BuildContext context, RegionDetailsViewModel viewModel) {
+  final isSmallScreen = MediaQuery.of(context).size.width < 600;
+  final l10n = AppLocalizations.of(context)!;
+  final landId = viewModel.region?.land.id;
+  final landViewModel = widget.landDetailsViewModel ?? Provider.of<LandDetailsViewModel>(context, listen: false);
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Text(l10n.confirmDelete),
+      content: Text(l10n.confirmDeleteMessage),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 20.0 : 40.0,
+        vertical: 24.0,
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          onPressed: () async {
+            final response = await viewModel.deleteRegion(viewModel.region!.id);
+            Navigator.of(context).pop();
+            
+            if (response.status == Status.COMPLETED && context.mounted) {
+              // Important: Refresh the land details data before navigation
+              if (landId != null) {
+                // Refresh regions for the parent land
+                landViewModel.fetchRegionsForLand(landId);
+                // Also refresh plants if needed
+                landViewModel.fetchPlantsForLand(landId);
+              }
+              
+              // Navigate back to land details
+              context.go("${RouteNames.landDetails}/$landId");
+            } else if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(response.message ?? l10n.deleteFailed), backgroundColor: Colors.red),
+              );
+            }
+          },
+          child: Text(l10n.delete, style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+}
 
   void _showAddSensorsDialog(BuildContext context, Region region, RegionDetailsViewModel viewModel) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;

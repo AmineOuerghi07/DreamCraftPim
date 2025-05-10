@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/constants/constants.dart';
-import 'package:pim_project/model/product.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
@@ -74,7 +73,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           if (product.stockQuantity > 0)
                             Text(
                               AppLocalizations.of(context)!.available,
-                              style: const TextStyle(color: Colors.green),
+                              style: const TextStyle(color: AppConstants.primaryColor),
                             )
                           else
                             Text(

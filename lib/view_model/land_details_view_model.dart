@@ -135,6 +135,7 @@ LandDetailsViewModel(String landId) {
     } finally {
       notifyListeners();
     }
+    
     return _landResponse;
   }
 
