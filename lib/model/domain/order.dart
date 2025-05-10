@@ -34,6 +34,8 @@ class Order {
   final double totalAmount;
   final List<OrderItem>? orderItems; 
   final DateTime createdAt;
+  final String? referenceId;
+
 
   Order({
     required this.customerId,
@@ -41,6 +43,7 @@ class Order {
     required this.totalAmount,
     this.orderItems, 
     required this.createdAt,
+    this.referenceId,
   });
 
   // Factory constructor to create Order from JSON
@@ -55,6 +58,7 @@ class Order {
               .toList()
           : null, // Parse orderItems if present
       createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()), // Parse createdAt or use current time
+      referenceId: json['referenceId'], // Optional field
     );
   }
 
@@ -66,6 +70,7 @@ class Order {
       'totalAmount': totalAmount,
       'orderItems': orderItems?.map((item) => item.toJson()).toList() ?? [],
       'createdAt': createdAt.toIso8601String(),
+      'referenceId': referenceId, // Optional field
     };
   }
 }

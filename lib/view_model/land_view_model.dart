@@ -10,20 +10,18 @@ class LandViewModel extends ChangeNotifier {
   final LandService _landService = LandService();
   ApiResponse<List<Land>> _landsResponse = ApiResponse.initial('Fetching lands...');
   List<Land> _lands = [];
-  List<Land> _filteredLands = []; // New: Filtered list for search
-  String _searchQuery = ''; // New: Store the search query
+  List<Land> _filteredLands = []; // Filtered list for search
+  String _searchQuery = ''; // Store the search query
 
   ApiResponse<List<Land>> get landsResponse => _landsResponse;
   List<Land> get lands => _lands;
-  List<Land> get filteredLands => _filteredLands; // New getter for filtered lands
+  List<Land> get filteredLands => _filteredLands; // Getter for filtered lands
 
   ApiResponse<Land> _landResponse = ApiResponse.initial('');
   ApiResponse<Land> get landResponse => _landResponse;
 
   ApiResponse<Land> _addLandResponse = ApiResponse.initial('');
   ApiResponse<Land> get addLandResponse => _addLandResponse;
-
-
 
   Future<ApiResponse<List<Land>>> fetchLands() async {
     _landsResponse = ApiResponse.loading('Fetching lands...');
@@ -33,14 +31,22 @@ class LandViewModel extends ChangeNotifier {
 
     try {
       final response = await _landService.getLands();
-      print('Service Response: ${response.status} - ${response.data}');
+      print('Service Response: ${response.status} - ${response.data?.length ?? 0} lands');
 
-      if (response.status == Status.COMPLETED && response.data != null) {
-        _lands = response.data!;
+      if (response.status == Status.COMPLETED) {
+        _lands = response.data ?? [];
         _filteredLands = _lands; // Initially, filtered lands = all lands
         _landsResponse = ApiResponse.completed(_lands);
       } else {
-        _landsResponse = ApiResponse.error(response.message ?? 'Unknown error');
+        // Check if it's specifically a 404 (No lands found)
+        if (response.statusCode == 404) {
+          // Treat no lands as a success case with empty list
+          _lands = [];
+          _filteredLands = [];
+          _landsResponse = ApiResponse.completed(_lands);
+        } else {
+          _landsResponse = ApiResponse.error(response.message ?? 'Unknown error');
+        }
       }
     } catch (e, stack) {
       print('Fetch Error: $e\n$stack');
@@ -92,7 +98,7 @@ class LandViewModel extends ChangeNotifier {
     return _addLandResponse;
   }
 
-  // New: Method to update search query and filter lands
+  // Method to update search query and filter lands
   void searchLands(String query) {
     _searchQuery = query.toLowerCase();
     if (_searchQuery.isEmpty) {
@@ -107,25 +113,47 @@ class LandViewModel extends ChangeNotifier {
   }
 
   Future<void> fetchLandsByUserId(String userId) async {
-  print('📤 Sending request with userId: $userId');
-
-
-  try {
-    final response = await _landService.getLandsByUserId(userId);
-    print('📥 Response: ${response.status} - ${response.data}');
-
-    if (response.status == Status.COMPLETED && response.data != null) {
-      _lands = response.data!;
-      _filteredLands = _lands; // Initially, filtered lands = all lands
-      _landsResponse = ApiResponse.completed(_lands);
-    } else {
-      _landsResponse = ApiResponse.error(response.message ?? 'Unknown error');
-    }
-  } catch (e, stack) {
-    print('Fetch Error: $e\n$stack');
-    _landsResponse = ApiResponse.error('Failed to fetch lands: ${e.toString()}');
-  } finally {
+    _landsResponse = ApiResponse.loading('Fetching lands...');
+    _lands = [];
+    _filteredLands = []; // Reset filtered lands
     notifyListeners();
+    
+    print('📤 Sending request with userId: $userId');
+
+    try {
+      final response = await _landService.getLandsByUserId(userId);
+      print('📥 Response: ${response.status} - ${response.statusCode} - ${response.data?.length ?? 0} lands');
+
+      if (response.status == Status.COMPLETED) {
+        // For completed responses, use the data even if it's an empty list
+        _lands = response.data ?? [];
+        _filteredLands = _lands;
+        _landsResponse = ApiResponse.completed(_lands);
+        
+        // Print info about the response
+        if (_lands.isEmpty) {
+          print('No lands found for this user - empty list');
+        } else {
+          print('Found ${_lands.length} lands for this user');
+        }
+      } else {
+        // If there's an error but it's a 404, treat as empty list
+        if (response.statusCode == 404) {
+          print('404 response - treating as empty list');
+          _lands = [];
+          _filteredLands = [];
+          _landsResponse = ApiResponse.completed(_lands);
+        } else {
+          // Other errors
+          print('Error response: ${response.message}');
+          _landsResponse = ApiResponse.error(response.message ?? 'Unknown error');
+        }
+      }
+    } catch (e, stack) {
+      print('Fetch Error: $e\n$stack');
+      _landsResponse = ApiResponse.error('Failed to fetch lands: ${e.toString()}');
+    } finally {
+      notifyListeners();
+    }
   }
-}
 }

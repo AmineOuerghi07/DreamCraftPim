@@ -18,7 +18,6 @@ class RentLandCard extends StatelessWidget {
     // Get screen dimensions for responsive design
     final size = MediaQuery.of(context).size;
     final isTablet = size.shortestSide >= 600;
-    final isLandscape = size.width > size.height;
     final l10n = AppLocalizations.of(context)!;
     
     // Calculate dynamic sizes based on screen width

@@ -120,7 +120,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> with SingleTi
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.signUpSuccess),
-            backgroundColor: Colors.green,
+            backgroundColor: AppConstants.primaryColor,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -225,7 +225,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> with SingleTi
     final double buttonFontSize = isTablet ? 18.0 : 16.0;
     
     // Responsive spacing
-    final double topSpacing = screenHeight * 0.08;
     final double widgetSpacing = screenHeight * 0.025;
     
     return Scaffold(

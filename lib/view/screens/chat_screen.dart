@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/view_model/chat_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
@@ -177,7 +178,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.green[700],
+                color: AppConstants.primaryColor,
               ),
               child: const Center(
                 child: Text(
@@ -191,7 +192,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.add, color: Colors.green),
+              leading: const Icon(Icons.add, color: AppConstants.primaryColor),
               title: const Text('Start a New Conversation With Uncle Hsaan'),
               onTap: () {
                 chatViewModel.startNewConversation();
@@ -248,7 +249,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         if (!message.isUser) ...[
-                          const Icon(Icons.spa, color: Colors.green, size: 28),
+                          const Icon(Icons.spa, color: AppConstants.primaryColor, size: 28),
                           const SizedBox(width: 8),
                         ],
                         Flexible(
@@ -272,7 +273,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                             child: MarkdownBody(
                               data: message.text,
                               styleSheet: MarkdownStyleSheet(
-                                h2: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: message.isUser ? Colors.white : Colors.green),
+                                h2: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: message.isUser ? Colors.white : AppConstants.primaryColor),
                                 h3: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: message.isUser ? Colors.white : Colors.blue),
                                 strong: TextStyle(fontWeight: FontWeight.bold, color: message.isUser ? Colors.white : Colors.black),
                                 p: TextStyle(fontSize: 16, color: message.isUser ? Colors.white : Colors.black),
@@ -313,7 +314,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.eco, color: Colors.green, size: 20),
+                  const Icon(Icons.eco, color: AppConstants.primaryColor, size: 20),
                   const SizedBox(width: 8),
                   const Text(
                     'Aam Hssan is writing a message',

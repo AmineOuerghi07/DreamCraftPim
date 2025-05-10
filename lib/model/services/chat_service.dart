@@ -79,7 +79,7 @@ class ChatService {
 
   Future<ApiResponse<List<ChatConversation>>> getConversations() async {
     try {
-      final userId = MyApp.userId ?? 'default_user';
+      final userId = MyApp.userId ;
       final response = await _apiClient.get(
         'api/v1/conversations/$userId',
         (json) => (json as List<dynamic>).map((item) => ChatConversation.fromJson(item as Map<String, dynamic>)).toList(),

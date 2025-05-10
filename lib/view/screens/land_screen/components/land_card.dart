@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pim_project/constants/constants.dart';
 
-class HomeCart extends StatelessWidget {
+class LandCard extends StatelessWidget {
   final String title;
   final String location;
   final String description;
@@ -9,7 +10,7 @@ class HomeCart extends StatelessWidget {
   final String id;
   final VoidCallback onDetailsTap;
 
-  const HomeCart({
+  const LandCard({
     required this.title,
     required this.location,
     required this.description,
@@ -114,7 +115,7 @@ class HomeCart extends StatelessWidget {
                     ElevatedButton(
                       onPressed: onDetailsTap,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppConstants.primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),

@@ -122,7 +122,7 @@ class _HeaderState extends State<Header> {
                                     return const Icon(
                                       Icons.person,
                                       size: 25,
-                                      color: Colors.green,
+                                      color: AppConstants.primaryColor,
                                     );
                                   },
                                 ),
@@ -130,7 +130,7 @@ class _HeaderState extends State<Header> {
                             : const Icon(
                                 Icons.person,
                                 size: 25,
-                                color: Colors.green,
+                                color: AppConstants.primaryColor,
                               ),
                   ),
                 ),

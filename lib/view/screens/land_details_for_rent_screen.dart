@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/land.dart';
-import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -171,7 +170,7 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    final size = MediaQuery.of(context).size;
+  //  final size = MediaQuery.of(context).size;
     
     // Get owner information
     final phoneNumber = _land!.getPhoneNumber();

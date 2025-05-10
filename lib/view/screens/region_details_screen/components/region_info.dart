@@ -1,5 +1,6 @@
 // view/screens/components/region_info.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegionInfo extends StatelessWidget {
   final String regionCount;
@@ -27,6 +28,7 @@ class RegionInfo extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
     final isSmallPhone = screenWidth < 360;
+    final l10n = AppLocalizations.of(context)!;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -69,7 +71,7 @@ class RegionInfo extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          "Add Sensors",
+                          l10n.addSensors,
                           style: TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,

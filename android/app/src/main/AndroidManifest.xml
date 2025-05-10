@@ -5,9 +5,9 @@
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
-        android:label="pim_project"
+        android:label="Smart Farming"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_luancher">
 
         <activity
             android:name=".MainActivity"

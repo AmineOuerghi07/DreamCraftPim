@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pim_project/constants/constants.dart';
 
 class SearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -49,7 +50,7 @@ class SearchBar extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.green,
+              color: AppConstants.primaryColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(Icons.filter_list, color: Colors.white),

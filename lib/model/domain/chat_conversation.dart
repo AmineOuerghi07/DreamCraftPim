@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 
 class ChatConversation {
   final String question;

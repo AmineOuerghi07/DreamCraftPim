@@ -1,6 +1,7 @@
 // view/screens/add_plant_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/plant.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/add_plant_view_model.dart';
@@ -41,7 +42,7 @@ class AddPlantScreen extends StatelessWidget {
                       child: Text(
                         AppLocalizations.of(context)!.save,
                         style: const TextStyle(
-                          color: Colors.green,
+                          color: AppConstants.primaryColor,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -146,7 +147,7 @@ class PlantCard extends StatelessWidget {
                     child: quantity == 0
                         ? IconButton(
                             key: ValueKey('plus_${plant.id}'),
-                            icon: const Icon(Icons.add, color: Colors.green),
+                            icon: const Icon(Icons.add, color: AppConstants.primaryColor),
                             onPressed: () => viewModel.incrementQuantity(plant.id),
                           )
                         : Row(
@@ -161,7 +162,7 @@ class PlantCard extends StatelessWidget {
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.add, color: Colors.green),
+                                icon: const Icon(Icons.add, color: AppConstants.primaryColor),
                                 onPressed: () => viewModel.incrementQuantity(plant.id),
                               ),
                             ],
