@@ -122,7 +122,7 @@ class PlantCard extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: plant.imageUrl.isNotEmpty
                       ? Image.network(
-                          plant.imageUrl,
+                          AppConstants.imagesbaseURL + plant.imageUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => const Icon(Icons.local_florist, size: 50),
                         )

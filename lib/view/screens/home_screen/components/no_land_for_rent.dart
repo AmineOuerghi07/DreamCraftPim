@@ -41,7 +41,7 @@ class NoLandForRent extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                l10n.noLandsForRent ?? 'No lands are currently available for rent',
+                l10n.noLandsForRent ,
                 style: TextStyle(
                   fontSize: isTablet ? 16 : 14,
                   color: Colors.grey[600],

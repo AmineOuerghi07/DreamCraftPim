@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/plant-with-quantity.dart';
 import 'package:pim_project/model/domain/region.dart';
-import 'package:pim_project/model/domain/plant.dart';
 import 'package:pim_project/model/services/land_service.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/model/services/region_service.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/cartProvider.dart';
-import 'package:pim_project/view/screens/components/factureDialog.dart';
+import 'package:pim_project/view/screens/market_screen/components/factureDialog.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

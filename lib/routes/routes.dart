@@ -23,7 +23,7 @@ import 'package:pim_project/view/screens/loading_screen.dart';
 import 'package:pim_project/view/screens/login_screen.dart';
 import 'package:pim_project/view/screens/main_screen.dart';
 import 'package:pim_project/view/screens/map_screen.dart';
-import 'package:pim_project/view/screens/market_screen.dart';
+import 'package:pim_project/view/screens/market_screen/market_screen.dart';
 import 'package:pim_project/view/screens/on_boarding_screen.dart';
 import 'package:pim_project/view/screens/product_details_screen.dart';
 import 'package:pim_project/view/screens/region_details_screen/region_details_screen.dart';

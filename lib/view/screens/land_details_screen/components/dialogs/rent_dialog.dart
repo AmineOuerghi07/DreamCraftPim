@@ -14,7 +14,7 @@ void showSetForRentDialog(BuildContext context, LandDetailsViewModel viewModel, 
   // Text controller for the price input
   final TextEditingController priceController = TextEditingController();
   // Add the current price if already set
-  if (land.rentPrice != null && land.rentPrice! > 0) {
+  if (land.rentPrice > 0) {
     priceController.text = land.rentPrice.toString();
   }
   

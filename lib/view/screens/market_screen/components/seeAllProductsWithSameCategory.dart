@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
-import 'package:pim_project/view/screens/Components/plants_for_sell.dart';
+import 'package:pim_project/view/screens/market_screen/Components/plants_for_sell.dart';
 import 'package:provider/provider.dart';
 
 class SeeAllProductsWithSameCategory extends StatelessWidget {
