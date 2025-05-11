@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/plant.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/view_model/add_plant_view_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -73,7 +74,12 @@ class AddPlantScreen extends StatelessWidget {
                   // Plant Grid
                   Expanded(
                     child: viewModel.isLoading
-                        ? const Center(child: CircularProgressIndicator())
+                        ? const Center(child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),)
                         : viewModel.filteredPlants.isEmpty
                             ? Center(child: Text(AppLocalizations.of(context)!.noPlantsFound))
                             : GridView.builder(

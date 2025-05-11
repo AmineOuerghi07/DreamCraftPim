@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({Key? key}) : super(key: key);
@@ -239,10 +240,12 @@ class _ContactForm extends StatelessWidget {
                       ? const SizedBox(
                           height: 24,
                           width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
+                          child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),
                         )
                       : Text(
                           l10n.sendMessage,

@@ -6,6 +6,7 @@ import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:pim_project/view_model/prediction_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -266,7 +267,12 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),);
     }
 
     return Scaffold(

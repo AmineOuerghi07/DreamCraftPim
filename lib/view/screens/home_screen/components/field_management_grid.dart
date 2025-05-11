@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:pim_project/main.dart';
 import 'package:pim_project/routes/routes.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
 import 'package:pim_project/view/screens/home_screen/components/no_connected_region.dart'; // Import the new component
 import 'package:pim_project/view/screens/home_screen/components/no_land_for_rent.dart'; // Import the new component
@@ -274,9 +275,12 @@ Widget _buildContentBasedOnStatus(BuildContext context, ConnectedRegionViewModel
   switch (viewModel.status) {
     case Status.LOADING:
       return Center(
-        child: CircularProgressIndicator(
-          strokeWidth: isTablet ? 4.0 : 3.0,
-        ),
+        child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),
       );
     case Status.ERROR:
       return Center(
@@ -357,9 +361,12 @@ Widget _buildRentLandsContentBasedOnStatus(BuildContext context, LandForRentView
   switch (viewModel.status) {
     case Status.LOADING:
       return Center(
-        child: CircularProgressIndicator(
-          strokeWidth: isTablet ? 4.0 : 3.0,
-        ),
+        child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),
       );
     case Status.ERROR:
       return Center(
