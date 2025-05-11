@@ -141,11 +141,7 @@ class RegionInfo extends StatelessWidget {
                 ),
               ),
               SizedBox(height: isTablet ? 12 : 8),
-              Image(
-                image: const AssetImage("assets/images/google_maps_location_picker.png"),
-                width: isTablet ? 120 : (isSmallPhone ? 80 : 100),
-                height: isTablet ? 120 : (isSmallPhone ? 80 : 100),
-              ),
+              
             ],
           ),
         ),

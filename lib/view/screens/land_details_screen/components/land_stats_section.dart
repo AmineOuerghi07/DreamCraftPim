@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pim_project/view_model/land_details_view_model.dart';
+import 'package:provider/provider.dart';
 import 'info_card.dart';
 
 class LandStatsSection extends StatelessWidget {
@@ -16,7 +18,10 @@ class LandStatsSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
-
+final viewModel = Provider.of<LandDetailsViewModel>(context);
+    
+    // Get the plant count from the view model
+    final plantCount = viewModel.totalPlantCount;
     return SizedBox(
       height: isTablet ? 400 : 150, // Taller for tablet's column layout
       child: Card(
@@ -37,14 +42,10 @@ class LandStatsSection extends StatelessWidget {
                     value: "${land.surface}m²",
                     imageName: "square_foot.png",
                   ),
-                  InfoCard(
-                    title: l10n.humidity,
-                    value: "${land.surface}%",
-                    imageName: "humidity.png",
-                  ),
+               
                   InfoCard(
                     title: l10n.plants,
-                    value: "${land.surface}",
+                    value: "${plantCount}",
                     imageName: "plant.png",
                   ),
                 ],
@@ -58,14 +59,10 @@ class LandStatsSection extends StatelessWidget {
                     value: "${land.surface}m²",
                     imageName: "square_foot.png",
                   ),
-                  InfoCard(
-                    title: l10n.humidity,
-                    value: "${land.surface}%",
-                    imageName: "humidity.png",
-                  ),
+             
                   InfoCard(
                     title: l10n.plants,
-                    value: "${land.surface}",
+                    value: "${plantCount}",
                     imageName: "plant.png",
                   ),
                 ],

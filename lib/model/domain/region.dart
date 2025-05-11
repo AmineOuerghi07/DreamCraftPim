@@ -1,12 +1,10 @@
-// model/domain/region.dart
-
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/plant-with-quantity.dart';
 
 class Region {
   final String id;
   final String name;
-
+  final String? description;
   final Land land;
   final double surface;
   final List<String> sensors;
@@ -18,18 +16,20 @@ class Region {
     required this.name,
     required this.land,
     required this.surface,  
+    required this.description,
     List<String>? sensors,
-    
     List<PlantWithQuantity>? plants,
     required this.isConnected,
   })  : sensors = sensors ?? [],
         plants = plants ?? [];
 
   factory Region.fromJson(Map<String, dynamic> json) {
+     print("Raw Region JSON: $json");
     try {
       return Region(
         id: json['_id'] as String? ?? '',
         name: json['name'] as String? ?? '',
+        description: json['description'] as String?,
         land: json['land'] is String
             ? Land(
                 id: json['land'] as String,
@@ -52,7 +52,7 @@ class Region {
                 ?.map((p) => PlantWithQuantity.fromJson(p is String ? {'plant': p} : p))
                 .toList() ??
             [],
-            isConnected: json['isConnected'] as bool? ?? false,
+        isConnected: json['isConnected'] as bool? ?? false,
       );
     } catch (e, stack) {
       print('Error parsing Region: $e\n$stack');
@@ -61,8 +61,8 @@ class Region {
   }
 
   Map<String, dynamic> toJson() => {
-  
         'name': name,
+        'description': description,
         'land': land.toJson(),
         'surface': surface,
         'sensors': sensors,
@@ -73,16 +73,17 @@ class Region {
   Region copyWith({
     String? id,
     String? name,
+    String? description,
     Land? land,
     double? surface,
     List<String>? sensors,
-    List<PlantWithQuantity>? plants, // Fixed type
+    List<PlantWithQuantity>? plants,
     bool? isConnected,
-    
   }) {
     return Region(
       id: id ?? this.id,
       name: name ?? this.name,
+      description: description ?? this.description,
       land: land ?? this.land,
       surface: surface ?? this.surface,
       sensors: sensors ?? this.sensors,

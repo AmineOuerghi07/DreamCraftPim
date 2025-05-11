@@ -101,7 +101,8 @@ class ConnectToBluetooth extends StatelessWidget {
               land: regionViewModel.region!.land,
               sensors: regionViewModel.region!.sensors,
               plants: regionViewModel.region!.plants,
-              isConnected: true, // Set to true when a device is connected
+              isConnected: true,
+              description: regionViewModel.region!.description, // Set to true when a device is connected
             );
             
             // Update the region in the database and view model
