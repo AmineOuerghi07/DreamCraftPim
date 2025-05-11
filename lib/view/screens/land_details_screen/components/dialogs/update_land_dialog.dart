@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void showUpdateLandDialog(BuildContext parentContext, Land land) {
-  final l10n = AppLocalizations.of(parentContext)!;
+  //final l10n = AppLocalizations.of(parentContext)!;
   File? _selectedImage;
   
   TextEditingController locationController = TextEditingController(text: land.cordonate);
