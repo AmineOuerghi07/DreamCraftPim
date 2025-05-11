@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
@@ -18,7 +19,12 @@ class ProductDetailsScreen extends StatelessWidget {
         builder: (context, provider, _) {
           if (provider.isLoading) {
             return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+              body: Center(child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),),
             );
           }
 

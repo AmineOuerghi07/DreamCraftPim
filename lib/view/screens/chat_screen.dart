@@ -31,43 +31,59 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   late AnimationController _loadingController;
 
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
-    _loadingController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
+@override
+void initState() {
+  super.initState();
+  _animationController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1000),
+  );
+  _loadingController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
+  );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom();
-      if (widget.initialData != null) {
-        final image = widget.initialData!['image'] as File?;
-        final prediction = widget.initialData!['prediction'] as String?;
-        if (image != null && prediction != null) {
-          setState(() => _selectedImage = image);
-          _controller.text = "How do I treat $prediction?";
-          _sendInitialMessage();
-        }
-      }
-    });
-  }
-
-  void _sendInitialMessage() {
-    final chatViewModel = Provider.of<ChatViewModel>(context, listen: false);
-    chatViewModel.sendMessage(
-      _controller.text,
-      imageFile: _selectedImage,
-      detectedDisease: widget.initialData!['prediction'] as String?,
-    );
-    _controller.clear();
-    setState(() => _selectedImage = null);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
     _scrollToBottom();
+    
+    // Check if we have initial data from plant disease detection
+    if (widget.initialData != null && 
+        widget.initialData!['image'] != null && 
+        widget.initialData!['prediction'] != null) {
+      
+      setState(() => _selectedImage = widget.initialData!['image'] as File);
+      
+      // Only set the controller text if it's empty (first initialization)
+      if (_controller.text.isEmpty) {
+        _controller.text = "How do I treat ${widget.initialData!['prediction']}?";
+      }
+      
+      // Send message after a short delay to ensure the UI is fully built
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _sendInitialMessage();
+      });
+    }
+  });
+}
+
+ void _sendInitialMessage() {
+  // Only send if there's text in the controller
+  if (_controller.text.isNotEmpty) {
+    final chatViewModel = Provider.of<ChatViewModel>(context, listen: false);
+    
+    // Check if we have a conversation history already
+    if (chatViewModel.messages.isEmpty) {
+      chatViewModel.sendMessage(
+        _controller.text,
+        imageFile: _selectedImage,
+        detectedDisease: widget.initialData?['prediction'] as String?,
+      );
+      _controller.clear();
+      setState(() => _selectedImage = null);
+      _scrollToBottom();
+    }
   }
+}
 
   @override
   void dispose() {

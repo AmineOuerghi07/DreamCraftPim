@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/factureProvider.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/order.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -46,7 +47,12 @@ class _BillHistoryScreenState extends State<BillHistoryScreen> {
             return Consumer<FactureProvider>(
               builder: (context, factureProvider, child) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),);
                 }
                 if (factureProvider.orders.isEmpty) {
                   return const Center(child: Text("No bills available"));

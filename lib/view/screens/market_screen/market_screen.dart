@@ -1,6 +1,7 @@
 // view/screens/market_screen.dart
 import 'package:flutter/material.dart';
 import 'package:pim_project/ProviderClasses/market_provider.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:pim_project/view/screens/market_screen/components/category_grid.dart';
 import 'package:pim_project/view/screens/market_screen/components/category_seeAllButton.dart';
 import 'package:pim_project/view/screens/market_screen/components/plants_for_sell.dart';
@@ -129,7 +130,12 @@ class _MarketScreenState extends State<MarketScreen> {
                 child: Consumer<MarketProvider>(
                   builder: (context, provider, _) {
                     if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 100, // Controls the overall size
+),);
                     }
 
                     if (provider.categories.isEmpty) {

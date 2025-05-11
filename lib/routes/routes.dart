@@ -9,6 +9,7 @@ import 'package:pim_project/view/screens/add_plant_screen.dart';
 import 'package:pim_project/view/screens/billing_Screen.dart';
 import 'package:pim_project/view/screens/camera_screen.dart';
 import 'package:pim_project/view/screens/chat_screen.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:pim_project/view/screens/contact_screen.dart';
 import 'package:pim_project/view/screens/editprofile_screen.dart';
 import 'package:pim_project/view/screens/email_verification_screen.dart';
@@ -316,7 +317,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),
       ),
     );
   }

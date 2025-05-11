@@ -1,10 +1,12 @@
 // view/screens/land_screen/land_screen.dart
 import 'package:flutter/material.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/view/screens/Components/header.dart';
+import 'package:pim_project/view/screens/components/internal_server_error.dart';
 import 'package:pim_project/view/screens/Components/search_bar.dart' as custom;
 import 'package:pim_project/view_model/land_view_model.dart';
 import 'package:pim_project/view/screens/land_screen/components/land_filter_dialog.dart';
@@ -12,6 +14,7 @@ import 'package:pim_project/view/screens/land_screen/components/add_land_dialog.
 import 'package:pim_project/view/screens/land_screen/components/land_list_view.dart';
 import 'package:pim_project/view/screens/land_screen/components/land_header_section.dart';
 import 'package:pim_project/view/screens/land_screen/components/no_land_component.dart';
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -135,9 +138,18 @@ class _LandScreenState extends State<LandScreen> {
                       child: Consumer<LandViewModel>(
                         builder: (context, viewModel, child) {
                           if (viewModel.landsResponse.status == Status.LOADING) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(child: AppProgressIndicator(
+          loadingText: 'Growing data...',
+          // You can customize colors to match your app theme
+          primaryColor: const Color(0xFF4CAF50), // Green
+          secondaryColor: const Color(0xFF8BC34A), // Light Green
+          size: 150, // Adjust size as needed
+        ),);
                           } else if (viewModel.landsResponse.status == Status.ERROR) {
-                            return Center(child: Text("${l10n.error}: ${viewModel.landsResponse.message}"));
+                            return InternalServerError(
+                              message: null,
+                              onRetry: () {viewModel.fetchLandsByUserId(widget.userId);},
+                            );
                           } else if (viewModel.filteredLands.isEmpty && viewModel.lands.isEmpty) {
                             return NoLandsComponent(
                               onAddLandPressed: _showAddLandDialog,
