@@ -319,6 +319,39 @@ Widget _buildRentLandsContent(BuildContext context, LandForRentViewModel viewMod
   final l10n = AppLocalizations.of(context)!;
   final size = MediaQuery.of(context).size;
   final isTablet = size.shortestSide >= 600;
+
+  return Column(
+    key: const ValueKey('rentLands'),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () => setState(() => _showRentLands = false),
+            iconSize: isTablet ? 28 : 24,
+          ),
+          Text(
+            l10n.rentLands,
+            style: TextStyle(
+              fontSize: isTablet ? 20 : 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      SizedBox(height: isTablet ? 20 : 16),
+      Expanded(
+        child: _buildRentLandsContentBasedOnStatus(context, viewModel),
+      ),
+    ],
+  );
+}
+
+Widget _buildRentLandsContentBasedOnStatus(BuildContext context, LandForRentViewModel viewModel) {
+  final l10n = AppLocalizations.of(context)!;
+  final size = MediaQuery.of(context).size;
+  final isTablet = size.shortestSide >= 600;
   final isLandscape = size.width > size.height;
 
   switch (viewModel.status) {

@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/model/domain/region.dart';
-import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/model/services/weather_service.dart';
 
 class HomeViewModel with ChangeNotifier {
@@ -20,7 +19,7 @@ class HomeViewModel with ChangeNotifier {
   bool _noLandsFound = false;
 
   final WeatherApiService _weatherService = WeatherApiService();
-  final ApiClient _apiClient = ApiClient(baseUrl: AppConstants.baseUrl);
+  //final ApiClient _apiClient = ApiClient(baseUrl: AppConstants.baseUrl);
 
   List get rentedLands => _rentedLands;
   List get connectedRegions => _connectedRegions;
