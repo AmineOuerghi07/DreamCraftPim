@@ -36,27 +36,29 @@ class _HeaderState extends State<Header> {
 
   Future<void> _loadUserPhoto() async {
     if (_isLoading) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
-      final url = Uri.parse('${AppConstants.baseUrl}/account/get-account/${widget.userId}');
+      final url = Uri.parse(
+          '${AppConstants.baseUrl}/account/get-account/${widget.userId}');
       final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw TimeoutException('La requête a expiré'),
-      );
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('La requête a expiré'),
+          );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         if (mounted && data['image'] != null) {
           final imageUrl = '${AppConstants.imagesbaseURL}${data['image']}';
-          
+
           try {
             final testResponse = await http.head(Uri.parse(imageUrl)).timeout(
-              const Duration(seconds: 5),
-              onTimeout: () => throw TimeoutException('La vérification de l\'image a expiré'),
-            );
-            
+                  const Duration(seconds: 5),
+                  onTimeout: () => throw TimeoutException(
+                      'La vérification de l\'image a expiré'),
+                );
+
             if (testResponse.statusCode == 200 && mounted) {
               setState(() => _photoUrl = imageUrl);
             }
@@ -85,8 +87,8 @@ class _HeaderState extends State<Header> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-   // final isRTL = Directionality.of(context) == TextDirection.rtl;
-    
+    // final isRTL = Directionality.of(context) == TextDirection.rtl;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -111,14 +113,17 @@ class _HeaderState extends State<Header> {
                                   width: 40,
                                   height: 40,
                                   fit: BoxFit.cover,
-                                  loadingBuilder: (context, child, loadingProgress) {
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
                                     return const Center(
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
                                     );
                                   },
                                   errorBuilder: (context, error, stackTrace) {
-                                    debugPrint('Erreur de chargement de l\'image: $error');
+                                    debugPrint(
+                                        'Erreur de chargement de l\'image: $error');
                                     return const Icon(
                                       Icons.person,
                                       size: 25,
@@ -171,6 +176,7 @@ class _HeaderState extends State<Header> {
             icon: const Icon(Icons.notifications_none),
             onPressed: () {
               // TODO: Implémenter la gestion des notifications
+              context.push(RouteNames.landRequestScreen);
             },
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
