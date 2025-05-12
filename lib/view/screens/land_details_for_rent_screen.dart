@@ -4,6 +4,7 @@ import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/land.dart';
 import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
+import 'package:pim_project/view_model/land_request_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -17,7 +18,8 @@ class LandDetailsForRentScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<LandDetailsForRentScreen> createState() => _LandDetailsForRentScreenState();
+  State<LandDetailsForRentScreen> createState() =>
+      _LandDetailsForRentScreenState();
 }
 
 class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
@@ -38,8 +40,11 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
     });
 
     try {
-      final viewModel = Provider.of<LandForRentViewModel>(context, listen: false);
-      
+      final viewModel =
+          Provider.of<LandForRentViewModel>(context, listen: false);
+      final landRequestViewModel =
+          Provider.of<LandForRentViewModel>(context, listen: false);
+
       // If we already have lands in the view model, try to find this one
       if (viewModel.landsForRent.isNotEmpty) {
         try {
@@ -55,11 +60,11 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
           print('Land not found in local list, fetching from server');
         }
       }
-      
+
       // Fetch explicitly from server
       await viewModel.fetchLandDetails(widget.landId);
       _land = viewModel.selectedLand;
-      
+
       if (_land == null) {
         throw Exception('Failed to load land details');
       }
@@ -75,9 +80,10 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
 
   Future<void> _sendRequest() async {
     if (_land == null) return;
-    
+
     final l10n = AppLocalizations.of(context)!;
-    
+    final landRequestViewModel =
+        Provider.of<LandRequestViewModel>(context, listen: false);
     // Show a confirmation dialog
     bool? confirmed = await showDialog<bool>(
       context: context,
@@ -90,7 +96,10 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
             child: Text(l10n.cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => {
+              landRequestViewModel.addLandRequest(_land!.id),
+              Navigator.of(context).pop(true)
+            },
             child: Text(l10n.confirm),
           ),
         ],
@@ -100,14 +109,14 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
     if (confirmed == true) {
       // Get the phone number from the land
       final phoneNumber = _land!.getPhoneNumber();
-      
+
       // Only attempt to launch if phone number is available
-      if (phoneNumber.isNotEmpty) {
+      /*if (phoneNumber.isNotEmpty) {
         final Uri phoneUri = Uri(
           scheme: 'tel',
           path: phoneNumber,
         );
-        
+
         try {
           if (await canLaunchUrl(phoneUri)) {
             await launchUrl(phoneUri);
@@ -119,19 +128,17 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
         }
       } else {
         _showErrorSnackBar(l10n.contactNotAvailable);
-      }
+      }*/
     }
   }
-  
+
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      )
-    );
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+    ));
   }
 
   @override
@@ -146,12 +153,14 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child:  AppProgressIndicator(
-  loadingText: 'Growing data...',
-  primaryColor: const Color(0xFF4CAF50), // Green
-  secondaryColor: const Color(0xFF8BC34A), // Light Green
-  size: 75, // Controls the overall size
-),)
+          ? const Center(
+              child: AppProgressIndicator(
+                loadingText: 'Growing data...',
+                primaryColor: const Color(0xFF4CAF50), // Green
+                secondaryColor: const Color(0xFF8BC34A), // Light Green
+                size: 75, // Controls the overall size
+              ),
+            )
           : _errorMessage != null
               ? Center(child: Text(_errorMessage!))
               : _buildContent(context, isTablet),
@@ -176,12 +185,12 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
     }
 
     final l10n = AppLocalizations.of(context)!;
-  //  final size = MediaQuery.of(context).size;
-    
+    //  final size = MediaQuery.of(context).size;
+
     // Get owner information
     final phoneNumber = _land!.getPhoneNumber();
     final ownerName = _land!.owner?.fullname ?? '';
-    
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
       child: Column(
@@ -202,16 +211,17 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
                   return Container(
                     color: Colors.grey[300],
                     child: Center(
-                      child: Icon(Icons.error, size: 48, color: Colors.grey[700]),
+                      child:
+                          Icon(Icons.error, size: 48, color: Colors.grey[700]),
                     ),
                   );
                 },
               ),
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 24 : 16),
-          
+
           // Land Name and Price
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,9 +238,7 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
               ),
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 16 : 12, 
-                  vertical: isTablet ? 8 : 6
-                ),
+                    horizontal: isTablet ? 16 : 12, vertical: isTablet ? 8 : 6),
                 decoration: BoxDecoration(
                   color: Colors.green[100],
                   borderRadius: BorderRadius.circular(8),
@@ -246,9 +254,9 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
               ),
             ],
           ),
-          
+
           SizedBox(height: isTablet ? 16 : 12),
-          
+
           // Location
           Row(
             children: [
@@ -265,9 +273,9 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
               ),
             ],
           ),
-          
+
           Divider(height: isTablet ? 40 : 32),
-          
+
           // Details Section
           Text(
             l10n.details,
@@ -276,9 +284,9 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 16 : 12),
-          
+
           // Surface
           _buildDetailRow(
             context,
@@ -287,9 +295,9 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
             '${_land!.surface.toStringAsFixed(0)} m²',
             isTablet,
           ),
-          
+
           SizedBox(height: isTablet ? 12 : 8),
-          
+
           // Owner name if available
           if (ownerName.isNotEmpty) ...[
             _buildDetailRow(
@@ -301,7 +309,7 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
             ),
             SizedBox(height: isTablet ? 12 : 8),
           ],
-          
+
           // Owner Contact
           _buildDetailRow(
             context,
@@ -310,7 +318,7 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
             phoneNumber.isEmpty ? l10n.contactNotAvailable : phoneNumber,
             isTablet,
           ),
-          
+
           if (_land!.regions.isNotEmpty) ...[
             SizedBox(height: isTablet ? 12 : 8),
             _buildDetailRow(
@@ -321,9 +329,9 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
               isTablet,
             ),
           ],
-          
+
           Divider(height: isTablet ? 40 : 32),
-          
+
           // Description Section (if available)
           Text(
             l10n.description,
@@ -332,9 +340,9 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 16 : 12),
-          
+
           // Since description might not exist on the Land model, show a placeholder
           Text(
             l10n.noDescriptionAvailable,
@@ -345,9 +353,9 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
               color: Colors.grey[600],
             ),
           ),
-          
+
           SizedBox(height: isTablet ? 32 : 24),
-          
+
           // Request Button
           SizedBox(
             width: double.infinity,
@@ -375,13 +383,8 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
     );
   }
 
-  Widget _buildDetailRow(
-    BuildContext context, 
-    IconData icon, 
-    String label, 
-    String value, 
-    bool isTablet
-  ) {
+  Widget _buildDetailRow(BuildContext context, IconData icon, String label,
+      String value, bool isTablet) {
     return Row(
       children: [
         Icon(icon, size: isTablet ? 24 : 20, color: Colors.grey[600]),
@@ -404,4 +407,4 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
       ],
     );
   }
-} 
+}
