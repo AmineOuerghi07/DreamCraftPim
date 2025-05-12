@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/model/domain/region.dart';
@@ -22,7 +23,7 @@ class RegionDetailsScreen extends StatefulWidget {
   State<RegionDetailsScreen> createState() => _RegionDetailsScreenState();
 }
 
-class _RegionDetailsScreenState extends State<RegionDetailsScreen> with WidgetsBindingObserver {
+class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
   // This flag will override the database isConnected status
   bool _isDeviceVerified = false;
   // Add loading state to prevent UI flashing during connection
@@ -33,57 +34,6 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> with WidgetsB
     super.initState();
     // Clear any previous connections and reset state
     _resetConnectionState();
-    
-    // Add observer to detect app lifecycle changes
-    WidgetsBinding.instance.addObserver(this);
-    
-    // Load data initially
-    _loadRegionData();
-  }
-  
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // This can catch some navigation events when returning to the screen
-    _loadRegionData();
-  }
-  
-  @override
-  void dispose() {
-    // Remove the observer when disposing
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-  
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    // If app comes to the foreground, refresh data
-    if (state == AppLifecycleState.resumed) {
-      _loadRegionData();
-    }
-  }
-  
-  // Method to load region data
-  void _loadRegionData() {
-    final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
-    
-    // Reset local connection state if needed
-    if (viewModel.region?.isConnected == false) {
-      _resetConnectionState();
-    }
-    
-    // Always refresh data when this method is called
-    viewModel.getRegionById(widget.id);
-    
-    // If we have a land ID, also refresh land data
-    if (viewModel.region?.land.id != null) {
-      final landVM = widget.landDetailsViewModel ?? 
-          Provider.of<LandDetailsViewModel>(context, listen: false);
-          
-      landVM.fetchRegionsForLand(viewModel.region!.land.id);
-      landVM.fetchPlantsForLand(viewModel.region!.land.id);
-    }
   }
 
   // Completely reset the connection state
@@ -97,7 +47,6 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> with WidgetsB
     // Schedule a microtask to reset the IrrigationViewModel
     // This is done after the build to avoid errors during widget initialization
     Future.microtask(() {
-      if (!mounted) return;
       final irrigationViewModel = Provider.of<IrrigationViewModel>(context, listen: false);
       
       // Clear any existing selected device
@@ -111,12 +60,12 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> with WidgetsB
     final screenWidth = MediaQuery.of(context).size.width;
     
     final isTablet = screenWidth > 600; // Common breakpoint for tablet layouts
-    final l10n = AppLocalizations.of(context)!;
+        final l10n = AppLocalizations.of(context)!;
 
     final viewModel = Provider.of<RegionDetailsViewModel>(context, listen: false);
+    //final irrigationViewModel = Provider.of<IrrigationViewModel>(context);
     final landVM = widget.landDetailsViewModel ?? context.read<LandDetailsViewModel>();
     
-    // This ensures initial data load if needed
     if (viewModel.region == null || viewModel.region!.id != widget.id) {
       Future.microtask(() {
         viewModel.getRegionById(widget.id);
@@ -137,158 +86,141 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> with WidgetsB
 
         final region = viewModel.region!;
         
-        return PopScope(
-          // Add this to refresh data when returning via system back button
-          onPopInvoked: (didPop) {
-            if (didPop) return;
-            _loadRegionData();
-          },
-          child: Scaffold(
-            appBar: AppBar(
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () {
-                  // Refresh the land details before popping
-                  if (region.land.id.isNotEmpty) {
-                    landVM.fetchRegionsForLand(region.land.id);
-                    landVM.fetchPlantsForLand(region.land.id);
-                  }
-                  context.pop();
-                },
-              ),
-              actions: [
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Colors.black),
-                  onSelected: (value) => _handleMenuSelection(value, context, viewModel),
-                  itemBuilder: (BuildContext context) => [
-                     PopupMenuItem<String>(
-                      value: 'update',
-                      child: ListTile(
-                        leading: Icon(Icons.edit),
-                        title: Text(l10n.updateRegion),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                      ),
-                    ),
-                     PopupMenuItem<String>(
-                      value: 'delete',
-                      child: ListTile(
-                        leading: Icon(Icons.delete),
-                        title: Text(l10n.deleteRegion),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+        return Scaffold(
+          
+    //      backgroundColor: Colors.white, // Set background color for the entire scaffold
+          appBar: AppBar(
+            elevation: 0,
+      //      backgroundColor: Colors.white, // Set AppBar background to white
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => context.pop(),
             ),
-            
-            body: Container(
-              child: SafeArea(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    // Pull-to-refresh functionality
-                    _loadRegionData();
-                    // Need to return a Future that completes when the refresh is done
-                    await Future.delayed(Duration(milliseconds: 500));
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 24.0 : 16.0,
-                      vertical: 8.0,
-                    ),
-                    
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Responsive RegionInfo widget with adaptive layout
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            return RegionInfo(
-                              regionCount: region.plants.length.toString(),
-                              cultivationType: region.name,
-                              location: viewModel.land?.cordonate ?? "Loading...",
-                              onAddRegion: () => _navigateToAddPlantScreen(
-                                contextRegionDetailsViewModel,
-                                region,
-                                viewModel,
-                                landVM,
-                              ),
-                              buttonText: l10n.addPlant,
-                              showRegionCount: false,
-                              onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
-                            );
-                          },
-                        ),
-                        
-                        // Information section without scroll
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: RegionInformationSection(
-                            description: region.description?.isNotEmpty == true
-                              ? region.description!
-                              : "No description available",),
-                        ),
-                        
-                        // Conditional content based on verified device connection
-                        Expanded(
-                          child: _isDeviceVerified
-                            ? const SmartRegionsGrid()
-                            : _isConnecting 
-                              ? const Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CircularProgressIndicator(color: Color(0xFF204D4F)),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        "Connecting to device...",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF204D4F),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : ConnectToBluetooth(
-                                  onDeviceConnected: () {
-                                    // Set connecting state first to avoid flashing content
-                                    setState(() {
-                                      _isConnecting = true;
-                                    });
-                                    
-                                    // Use a slight delay to ensure smooth transition
-                                    Future.delayed(const Duration(milliseconds: 300), () {
-                                      if (mounted) {
-                                        setState(() {
-                                          _isDeviceVerified = true;
-                                          _isConnecting = false;
-                                          
-                                          // Also update the region.isConnected in the database
-                                          if (viewModel.region != null) {
-                                            final updatedRegion = Region(
-                                              id: viewModel.region!.id,
-                                              name: viewModel.region!.name,
-                                              surface: viewModel.region!.surface,
-                                              land: viewModel.region!.land,
-                                              sensors: viewModel.region!.sensors,
-                                              plants: viewModel.region!.plants,
-                                              description: viewModel.region!.description,
-                                              isConnected: true,
-                                            );
-                                            viewModel.updateRegion(updatedRegion);
-                                          }
-                                        });
-                                      }
-                                    });
-                                  },
-                                ),
-                        ),
-                      ],
+            actions: [
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, color: Colors.black),
+                onSelected: (value) => _handleMenuSelection(value, context, viewModel),
+                itemBuilder: (BuildContext context) => [
+                   PopupMenuItem<String>(
+                    value: 'update',
+                    child: ListTile(
+                      leading: Icon(Icons.edit),
+                      title: Text(l10n.updateRegion),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                     ),
                   ),
+                   PopupMenuItem<String>(
+                    value: 'delete',
+                    child: ListTile(
+                      leading: Icon(Icons.delete),
+                      title: Text(l10n.deleteRegion),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          
+          body: Container(
+         //   color: Colors.white, // Set background color for the body container
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 24.0 : 16.0,
+                  vertical: 8.0,
+                ),
+                
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Responsive RegionInfo widget with adaptive layout
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return RegionInfo(
+                          regionCount: region.plants.length.toString(),
+                          cultivationType: region.name,
+                          location: viewModel.land?.cordonate ?? "Loading...",
+                          onAddRegion: () => _navigateToAddPlantScreen(
+                            contextRegionDetailsViewModel,
+                            region,
+                            viewModel,
+                            landVM,
+                          ),
+                          buttonText: l10n.addPlant,
+                          showRegionCount: false,
+                          onAddSensors: () => _showAddSensorsDialog(context, region, viewModel),
+                        );
+                      },
+                    ),
+                    
+                    // Information section without scroll
+                 //   print("Region description: ${region.description}"),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: RegionInformationSection(
+                        description: region.description?.isNotEmpty == true
+                          ? region.description!
+                          : "No description available",),
+                    ),
+                    
+                    // Conditional content based on verified device connection
+                    Expanded(
+                      child: _isDeviceVerified
+                        ? const SmartRegionsGrid()
+                        : _isConnecting 
+                          ? const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(color: Color(0xFF204D4F)),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    "Connecting to device...",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF204D4F),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ConnectToBluetooth(
+                              onDeviceConnected: () {
+                                // Set connecting state first to avoid flashing content
+                                setState(() {
+                                  _isConnecting = true;
+                                });
+                                
+                                // Use a slight delay to ensure smooth transition
+                                Future.delayed(const Duration(milliseconds: 300), () {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isDeviceVerified = true;
+                                      _isConnecting = false;
+                                      
+                                      // Also update the region.isConnected in the database
+                                      if (viewModel.region != null) {
+                                        final updatedRegion = Region(
+                                          id: viewModel.region!.id,
+                                          name: viewModel.region!.name,
+                                          surface: viewModel.region!.surface,
+                                          land: viewModel.region!.land,
+                                          sensors: viewModel.region!.sensors,
+                                          plants: viewModel.region!.plants,
+                                          description: viewModel.region!.description,
+                                          isConnected: true,
+                                        );
+                                        viewModel.updateRegion(updatedRegion);
+                                      }
+                                    });
+                                  }
+                                });
+                              },
+                            ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -321,9 +253,6 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> with WidgetsB
         print('Navigation ViewModel instance: $landVM, hash: ${landVM.hashCode}');
         
         await landVM.fetchPlantsForLand(region.land.id);
-        
-        // Also refresh the region data to reflect new plants
-        await regionVM.getRegionById(region.id);
         
         print('Fetch completed for landId: ${region.land.id}, quantity: ${landVM.plants.isNotEmpty ? landVM.plants.first.totalQuantity : "none"}');
       }
@@ -416,9 +345,6 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> with WidgetsB
 
                           if (response.status == Status.COMPLETED) {
                             Navigator.of(dialogContext).pop();
-                            
-                            // Refresh data after update
-                            viewModel.getRegionById(region.id);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(response.message ?? l10n.updateFailed), backgroundColor: Colors.red),
