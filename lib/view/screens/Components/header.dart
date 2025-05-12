@@ -103,7 +103,7 @@ class _HeaderState extends State<Header> {
                     radius: 20,
                     backgroundColor: Colors.green.shade100,
                     child: _isLoading
-                        ? const CircularProgressIndicator(strokeWidth: 2)
+                        ? const CircularProgressIndicator(strokeWidth: 0)
                         : _photoUrl != null
                             ? ClipOval(
                                 child: Image.network(

@@ -113,11 +113,7 @@ class LandHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Image(
-                  image: AssetImage("assets/images/google_maps_location_picker.png"),
-                  width: 140,
-                  height: 140,
-                ),
+            
               ],
             ),
           ),
@@ -182,7 +178,7 @@ class LandHeader extends StatelessWidget {
             GestureDetector(
               onTap: onAddRegion,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
@@ -197,11 +193,7 @@ class LandHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Image(
-              image: AssetImage("assets/images/google_maps_location_picker.png"),
-              width: 100,
-              height: 100,
-            ),
+       
           ],
         ),
       ],

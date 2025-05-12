@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/factureProvider.dart';
-import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/order.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -172,8 +171,8 @@ class _BillCardState extends State<BillCard> {
     final order = widget.order;
     final date = DateFormat('yyyy-MM-dd').format(order.createdAt);
     final amount = '\$${order.totalAmount.toStringAsFixed(2)}';
-    final statusColor = order.orderStatus == 'Paid' ? AppConstants.primaryColor : Colors.orange;
-    final billId = order.referenceId ?? 'Unknown';
+    final statusColor = order.orderStatus == 'Paid' ? Colors.green : Colors.orange;
+    final billId = '# ${order.referenceId}' ?? '# Unknown';
 
     return GestureDetector(
       onTap: () {

@@ -1,5 +1,6 @@
 // view/screens/components/plants_grid.dart
 import 'package:flutter/material.dart';
+import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/services/api_client.dart';
 import 'package:pim_project/view_model/land_details_view_model.dart';
 import 'package:provider/provider.dart';
@@ -65,7 +66,7 @@ class PlantsGrid extends StatelessWidget {
                   children: [
                     plant.imageUrl.isNotEmpty
                         ? Image.network(
-                            plant.imageUrl,
+                           AppConstants.imagesbaseURL +  plant.imageUrl,
                             width: 100,
                             height: 100,
                             errorBuilder: (context, error, stackTrace) =>

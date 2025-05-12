@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/land.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:pim_project/view_model/land_for_rent_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -145,7 +146,12 @@ class _LandDetailsForRentScreenState extends State<LandDetailsForRentScreen> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child:  AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 75, // Controls the overall size
+),)
           : _errorMessage != null
               ? Center(child: Text(_errorMessage!))
               : _buildContent(context, isTablet),

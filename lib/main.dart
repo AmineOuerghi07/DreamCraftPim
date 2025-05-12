@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pim_project/ProviderClasses/SeeAllProductsProvider.dart';
 import 'package:pim_project/model/services/UserPreferences.dart';
 import 'package:pim_project/model/services/language_service.dart';
+import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:pim_project/view_model/connected_region_view_model.dart';
 import 'package:pim_project/view_model/humidity_view_model.dart';
 import 'package:pim_project/view_model/irrigation_view_model.dart';
@@ -86,7 +87,12 @@ class MyApp extends StatelessWidget {
                 return MaterialApp(
                   home: Scaffold(
                     body: Center(
-                      child: CircularProgressIndicator(),
+                      child: AppProgressIndicator(
+  loadingText: 'Growing data...',
+  primaryColor: const Color(0xFF4CAF50), // Green
+  secondaryColor: const Color(0xFF8BC34A), // Light Green
+  size: 150, // Controls the overall size
+),
                     ),
                   ),
                 );

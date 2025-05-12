@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pim_project/constants/constants.dart';
+import 'package:pim_project/model/product.dart';
 import 'package:provider/provider.dart';
 import 'package:pim_project/ProviderClasses/product_details_provider.dart';
 import 'package:pim_project/view/screens/Components/region_detail_InfoCard.dart';
@@ -73,7 +74,7 @@ class ProductDetailsScreen extends StatelessWidget {
                           if (product.stockQuantity > 0)
                             Text(
                               AppLocalizations.of(context)!.available,
-                              style: const TextStyle(color: AppConstants.primaryColor),
+                              style: const TextStyle(color: Colors.green),
                             )
                           else
                             Text(
@@ -123,15 +124,17 @@ class ProductDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     AppLocalizations.of(context)!.description,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
-                  Text(product.description ?? AppLocalizations.of(context)!.description),
+                  Text(product.description ??
+                      AppLocalizations.of(context)!.description),
                   const SizedBox(height: 16),
                   Text(
                     AppLocalizations.of(context)!.features,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Card(
@@ -143,20 +146,27 @@ class ProductDetailsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             RegionDetailInfocard(
-                                title: AppLocalizations.of(context)!.expanse, value: "3000m²", imageName: "square_foot.png"),
+                                title: AppLocalizations.of(context)!.expanse,
+                                value: "3000m²",
+                                imageName: "square_foot.png"),
                             RegionDetailInfocard(
-                                title: AppLocalizations.of(context)!.temperature, value: "25°C", imageName: "thermostat_arrow_up.png"),
-
+                                title:
+                                    AppLocalizations.of(context)!.temperature,
+                                value: "25°C",
+                                imageName: "thermostat_arrow_up.png"),
                           ],
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             RegionDetailInfocard(
-                                title: AppLocalizations.of(context)!.humidity, value: "20%", imageName: "humidity.png"),
+                                title: AppLocalizations.of(context)!.humidity,
+                                value: "20%",
+                                imageName: "humidity.png"),
                             RegionDetailInfocard(
-                                title: AppLocalizations.of(context)!.irrigation, value: "50%", imageName: "humidity_high.png"),
-
+                                title: AppLocalizations.of(context)!.irrigation,
+                                value: "50%",
+                                imageName: "humidity_high.png"),
                           ],
                         ),
                       ],
@@ -165,7 +175,8 @@ class ProductDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     AppLocalizations.of(context)!.seeAll,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
@@ -218,9 +229,9 @@ class ProductDetailsScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 16),
                       ),
-                      child: Text(
-                        AppLocalizations.of(context)!.addRegion,
-                        style: const TextStyle(fontSize: 18, color: Colors.white),
+                      child: const Text(
+                        "add to cart",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),

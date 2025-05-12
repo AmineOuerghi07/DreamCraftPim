@@ -39,13 +39,14 @@ class RegionInformationSection extends StatelessWidget {
               ),
             ),
             child: Row(
-              children: [
-                const Icon(
+              children: const [
+                Icon(
                   Icons.info_outline,
                   size: 18,
                   color: Colors.green,
                 ),
-                const Text(
+                SizedBox(width: 8), // Add spacing between icon and text
+                Text(
                   'Information',
                   style: TextStyle(
                     fontSize: 16,
@@ -59,7 +60,7 @@ class RegionInformationSection extends StatelessWidget {
           
           // Description text with proper padding and styling
           Padding(
-            padding: const EdgeInsets.only(bottom: 8, left: 16, right: 16, top: 0),
+            padding: const EdgeInsets.all(16),
             child: Text(
               description,
               style: const TextStyle(

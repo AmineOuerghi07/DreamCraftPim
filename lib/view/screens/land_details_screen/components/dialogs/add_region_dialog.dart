@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 void showAddRegionDialog(BuildContext context, Land land) {
   TextEditingController nameController = TextEditingController();
   TextEditingController surfaceController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
   final l10n = AppLocalizations.of(context)!;
 
   // Get screen dimensions for better responsiveness
@@ -70,6 +71,18 @@ void showAddRegionDialog(BuildContext context, Land land) {
                         border: UnderlineInputBorder(),
                       ),
                     ),
+                    SizedBox(height: isTablet ? 16 : 12),
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: l10n.description,
+                        alignLabelWithHint: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
                     SizedBox(height: isTablet ? 32 : 20),
                     Center(
                       child: ElevatedButton(
@@ -100,13 +113,14 @@ void showAddRegionDialog(BuildContext context, Land land) {
                               context,
                               listen: false);
 
-                          // Create Region object
+                          // Create Region object with description
                           final newRegion = Region(
                             id: "",
                             name: nameController.text,
                             surface: surface,
                             land: land,
                             isConnected: false,
+                            description: descriptionController.text.isEmpty ? null : descriptionController.text,
                           );
 
                           final response =

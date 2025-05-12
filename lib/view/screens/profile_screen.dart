@@ -383,7 +383,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             _buildListItem(
                               icon: Icons.receipt_long,
                               title: l10n.myBillings,
-                              onTap: () {},
+                              onTap: () {GoRouter.of(context).go(RouteNames.billingScreen);},
                               isTablet: isTablet,
                               iconSize: iconSize,
                             ),
