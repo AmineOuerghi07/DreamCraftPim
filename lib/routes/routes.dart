@@ -18,6 +18,7 @@ import 'package:pim_project/view/screens/home_screen/home_screen.dart';
 import 'package:pim_project/view/screens/humidity_screen.dart';
 import 'package:pim_project/view/screens/land_details_for_rent_screen.dart';
 import 'package:pim_project/view/screens/land_details_screen/land_details_screen.dart';
+import 'package:pim_project/view/screens/land_request/land_request_screen.dart';
 import 'package:pim_project/view/screens/land_screen/land_screen.dart';
 import 'package:pim_project/view/screens/language_screen.dart';
 import 'package:pim_project/view/screens/loading_screen.dart';
@@ -67,7 +68,8 @@ class RouteNames {
   static const String languageScreen = '/language_screen';
   static const String settings = '/loading_screen';
   static const String onboarding = '/onboarding';
-   static const String billingScreen = '/billing_screen';
+  static const String billingScreen = '/billing_screen';
+  static const String landRequestScreen = '/land_request_screen';
 }
 
 final GoRouter router = GoRouter(
@@ -134,7 +136,7 @@ final GoRouter router = GoRouter(
             return ProfileScreen(userId: userId);
           },
         ),
-         GoRoute(
+        GoRoute(
           path: RouteNames.billingScreen,
           builder: (context, state) => const BillHistoryScreen(),
         ),
@@ -164,7 +166,6 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
-   
     GoRoute(
       path: RouteNames.login,
       builder: (context, state) => const LoginScreen(),
@@ -195,7 +196,6 @@ final GoRouter router = GoRouter(
       path: RouteNames.emailVerification,
       builder: (context, state) => const EmailVerificationScreen(),
     ),
-    
     GoRoute(
       path: '${RouteNames.landDetails}/:id',
       builder: (context, state) {
@@ -266,6 +266,10 @@ final GoRouter router = GoRouter(
         return RouteNames.home;
       }),
     ),
+    GoRoute(
+      path: RouteNames.landRequestScreen,
+      builder: (context, state) => const LandRequestScreen(),
+    )
   ],
   redirect: (context, state) {
     if (state.uri.toString() == RouteNames.loadingScreen) {
@@ -318,11 +322,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return const Scaffold(
       body: Center(
         child: AppProgressIndicator(
-  loadingText: 'Growing data...',
-  primaryColor: const Color(0xFF4CAF50), // Green
-  secondaryColor: const Color(0xFF8BC34A), // Light Green
-  size: 75, // Controls the overall size
-),
+          loadingText: 'Growing data...',
+          primaryColor: const Color(0xFF4CAF50), // Green
+          secondaryColor: const Color(0xFF8BC34A), // Light Green
+          size: 75, // Controls the overall size
+        ),
       ),
     );
   }
