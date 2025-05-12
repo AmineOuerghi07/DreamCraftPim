@@ -121,6 +121,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
               ),
             ],
           ),
+          
           body: Container(
          //   color: Colors.white, // Set background color for the body container
             child: SafeArea(
@@ -129,6 +130,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                   horizontal: isTablet ? 24.0 : 16.0,
                   vertical: 8.0,
                 ),
+                
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -153,11 +155,13 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                     ),
                     
                     // Information section without scroll
+                 //   print("Region description: ${region.description}"),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: RegionInformationSection(
-                        description: "On This Region we find a lot of Plants that dependes on a lot of sensors like the tempreatrue and the lighting including the lighting, soil and we can customie the irragation for the needed thin!",
-                      ),
+                        description: region.description?.isNotEmpty == true
+                          ? region.description!
+                          : "No description available",),
                     ),
                     
                     // Conditional content based on verified device connection
@@ -205,6 +209,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                                           land: viewModel.region!.land,
                                           sensors: viewModel.region!.sensors,
                                           plants: viewModel.region!.plants,
+                                          description: viewModel.region!.description,
                                           isConnected: true,
                                         );
                                         viewModel.updateRegion(updatedRegion);
@@ -331,7 +336,7 @@ class _RegionDetailsScreenState extends State<RegionDetailsScreen> {
                             land: region.land,
                             sensors: region.sensors,
                             plants: region.plants,
-                            isConnected: region.isConnected,
+                            isConnected: region.isConnected, description: region.description,
                           );
                           print('Sending update payload: ${updatedRegion.toJson()}');
                           final response = await viewModel.updateRegion(updatedRegion);

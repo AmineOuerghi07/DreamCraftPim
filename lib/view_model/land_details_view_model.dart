@@ -29,7 +29,11 @@ class LandDetailsViewModel with ChangeNotifier {
   List<PlantWithQuantity> _plants = [];
   List<PlantWithQuantity> get plants => _plants;
 
-LandDetailsViewModel(String landId) {
+  // New property to store total plant count
+  int _totalPlantCount = 0;
+  int get totalPlantCount => _totalPlantCount;
+
+  LandDetailsViewModel(String landId) {
     _initialize(landId);
   }
 
@@ -40,11 +44,38 @@ LandDetailsViewModel(String landId) {
       fetchRegionsForLand(landId),
       fetchPlantsForLand(landId),
     ]);
+    
+    // Calculate total plant count after all data is fetched
+    _calculateTotalPlantCount();
   }
+
+ 
+  
   // Reset plant data when switching lands
   void resetPlants() {
     _plants = [];
     _plantsResponse = ApiResponse.initial('Fetching plants...');
+    _totalPlantCount = 0;
+    notifyListeners();
+  }
+
+  // Calculate total plants across all regions and the land
+  void _calculateTotalPlantCount() {
+    int count = 0;
+    
+    // Count plants from direct land plants
+    for (var plant in _plants) {
+      count += plant.totalQuantity;
+    }
+    
+    // Count plants from regions
+    for (var region in _regions) {
+      for (var plant in region.plants) {
+        count += plant.totalQuantity;
+      }
+    }
+    
+    _totalPlantCount = count;
     notifyListeners();
   }
 
@@ -71,6 +102,9 @@ LandDetailsViewModel(String landId) {
 
       _regions = fetchedRegions;
       _regionsResponse = ApiResponse.completed(_regions);
+      
+      // Recalculate total plant count when regions are updated
+      _calculateTotalPlantCount();
     } catch (e) {
       _regionsResponse = ApiResponse.error('Failed to fetch regions: ${e.toString()}');
     } finally {
@@ -145,6 +179,8 @@ LandDetailsViewModel(String landId) {
       print('Response: ${response.status} - ${response.message}');
       if (response.status == Status.COMPLETED) {
         await fetchLandById(region.land.id);
+        await fetchRegionsForLand(region.land.id);
+        _calculateTotalPlantCount();
       }
       return response;
     } catch (e) {
@@ -164,6 +200,7 @@ LandDetailsViewModel(String landId) {
       if (response.status == Status.COMPLETED) {
         _regions = response.data!;
         _regionsResponse = ApiResponse.completed(_regions);
+        _calculateTotalPlantCount();
       } else {
         _regionsResponse = ApiResponse.error(response.message ?? 'Error fetching regions');
       }
@@ -176,26 +213,27 @@ LandDetailsViewModel(String landId) {
   }
 
   Future<void> fetchPlantsForLand(String landId) async {
-  _plantsResponse = ApiResponse.loading('Loading plants...');
-  _plants = [];
-  print('Fetching plants for landId: $landId, plants cleared');
-  notifyListeners();
-
-  try {
-    final response = await _landService.getPlantsByLandId(landId);
-    print('API response: ${response.status}, data: ${response.data}');
-    if (response.status == Status.COMPLETED && response.data != null) {
-      _plants = response.data!;
-      _plantsResponse = ApiResponse.completed(_plants);
-      print('Plants updated: ${_plants.length} items');
-    } else {
-      _plantsResponse = ApiResponse.error(response.message ?? 'Failed to fetch plants');
-    }
-  } catch (e) {
-    _plantsResponse = ApiResponse.error('Failed to fetch plants: ${e.toString()}');
-  } finally {
-    print('Notifying listeners, plants: ${_plants.length}');
+    _plantsResponse = ApiResponse.loading('Loading plants...');
+    _plants = [];
+    print('Fetching plants for landId: $landId, plants cleared');
     notifyListeners();
+
+    try {
+      final response = await _landService.getPlantsByLandId(landId);
+      print('API response: ${response.status}, data: ${response.data}');
+      if (response.status == Status.COMPLETED && response.data != null) {
+        _plants = response.data!;
+        _plantsResponse = ApiResponse.completed(_plants);
+        print('Plants updated: ${_plants.length} items');
+        _calculateTotalPlantCount();
+      } else {
+        _plantsResponse = ApiResponse.error(response.message ?? 'Failed to fetch plants');
+      }
+    } catch (e) {
+      _plantsResponse = ApiResponse.error('Failed to fetch plants: ${e.toString()}');
+    } finally {
+      print('Notifying listeners, plants: ${_plants.length}');
+      notifyListeners();
+    }
   }
-}
 }

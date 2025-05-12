@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pim_project/main.dart';
 import 'package:pim_project/routes/routes.dart';
 import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
+import 'package:pim_project/view/screens/components/internal_server_error.dart';
 import 'package:pim_project/view/screens/components/land_regionsGrid.dart';
 import 'package:pim_project/view/screens/home_screen/components/no_connected_region.dart'; // Import the new component
 import 'package:pim_project/view/screens/home_screen/components/no_land_for_rent.dart'; // Import the new component
@@ -283,13 +284,12 @@ Widget _buildContentBasedOnStatus(BuildContext context, ConnectedRegionViewModel
 ),
       );
     case Status.ERROR:
-      return Center(
-        child: Text(
-          viewModel.message ?? l10n.anErrorOccurred,
-          style: TextStyle(
-            fontSize: isTablet ? 16 : 14,
-          ),
-        ),
+      return InternalServerError(
+        message: l10n.noRegionsFound,
+        onRetry: () {
+          Provider.of<ConnectedRegionViewModel>(context, listen: false)
+            .fetchConnectedRegions(MyApp.userId);
+        },
       );
     case Status.COMPLETED:
       final regions = viewModel.connectedRegions;
@@ -369,25 +369,8 @@ Widget _buildRentLandsContentBasedOnStatus(BuildContext context, LandForRentView
 ),
       );
     case Status.ERROR:
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              viewModel.message ?? l10n.anErrorOccurred,
-              style: TextStyle(
-                fontSize: isTablet ? 16 : 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => viewModel.fetchLandsForRent(),
-              child: Text(l10n.retry),
-            ),
-          ],
-        ),
-      );
+      return InternalServerError(message: l10n.noRentLands,onRetry: viewModel.fetchLandsForRent,);
+   
     case Status.COMPLETED:
       final lands = viewModel.landsForRent;
       // Check both if lands array is empty OR if the noLandsFound flag is true

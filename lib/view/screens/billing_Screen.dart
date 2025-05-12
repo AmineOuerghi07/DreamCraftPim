@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pim_project/ProviderClasses/factureProvider.dart';
-import 'package:pim_project/constants/constants.dart';
 import 'package:pim_project/model/domain/order.dart';
-import 'package:pim_project/view/screens/components/app_progress_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -47,12 +45,7 @@ class _BillHistoryScreenState extends State<BillHistoryScreen> {
             return Consumer<FactureProvider>(
               builder: (context, factureProvider, child) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: AppProgressIndicator(
-  loadingText: 'Growing data...',
-  primaryColor: const Color(0xFF4CAF50), // Green
-  secondaryColor: const Color(0xFF8BC34A), // Light Green
-  size: 75, // Controls the overall size
-),);
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (factureProvider.orders.isEmpty) {
                   return const Center(child: Text("No bills available"));
@@ -178,8 +171,8 @@ class _BillCardState extends State<BillCard> {
     final order = widget.order;
     final date = DateFormat('yyyy-MM-dd').format(order.createdAt);
     final amount = '\$${order.totalAmount.toStringAsFixed(2)}';
-    final statusColor = order.orderStatus == 'Paid' ? AppConstants.primaryColor : Colors.orange;
-    final billId = order.referenceId ?? 'Unknown';
+    final statusColor = order.orderStatus == 'Paid' ? Colors.green : Colors.orange;
+    final billId = '# ${order.referenceId}' ?? '# Unknown';
 
     return GestureDetector(
       onTap: () {
